@@ -37,4 +37,14 @@ out/
 .vscode/
 
 ### src ###
-src/main/resources/application.properties
+src/main/resources/application.propertie
+
+### ubuntu ###
+.bash_history
+.bash_logout
+.bashrc
+.cache/
+.profile
+.ssh/
+.sudo_as_admin_successful
+.viminfo
