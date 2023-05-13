@@ -1,6 +1,9 @@
 package com.matdori.matdori.domain;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 public class TermAgreement {
@@ -18,5 +21,6 @@ public class TermAgreement {
     private TermsOfService termsOfService;
 
     @Column(name = "created_at")
-    private String createdAt;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 }
