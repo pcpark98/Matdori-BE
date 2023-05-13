@@ -4,10 +4,7 @@ import com.sun.istack.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class Store {
@@ -17,16 +14,12 @@ public class Store {
     private Long id;
     private String name;
     private String category;
-    private String phone_number;
+    @Column(name = "phone_number")
+    private String phoneNumber;
     private String address;
     private String comment;
+    @Embedded
+    private OpenHours openHours;
     private String img_url;
-    private String monday;
-    private String tuesday;
-    private String wednesday;
-    private String thursday;
-    private String friday;
-    private String saturday;
-    private String sunday;
     private String created_at;
 }
