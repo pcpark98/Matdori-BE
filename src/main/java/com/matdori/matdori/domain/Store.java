@@ -3,8 +3,10 @@ package com.matdori.matdori.domain;
 import com.sun.istack.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 public class Store {
@@ -21,5 +23,6 @@ public class Store {
     @Embedded
     private OpenHours openHours;
     private String img_url;
-    private String created_at;
+    @CreationTimestamp
+    private LocalDateTime created_at;
 }
