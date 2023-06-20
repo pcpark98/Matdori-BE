@@ -1,5 +1,7 @@
 package com.matdori.matdori.service;
 
+import com.matdori.matdori.domain.Category;
+import com.matdori.matdori.domain.Menu;
 import com.matdori.matdori.domain.Store;
 import com.matdori.matdori.repositoy.StoreRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,5 +18,7 @@ public class StoreService {
     private final StoreRepository storeRepository;
     public List<Store> findAll() { return storeRepository.findAll(); }
     public Store findOne(Long id) {return storeRepository.findOne(id); }
+
+    public List<Category> findAllCategoryWithMenu (Long id) { return storeRepository.findAllCategoryWithMenu(id);}
 
 }
