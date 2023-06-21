@@ -30,19 +30,20 @@ public class StoreApiController {
     //@GetMapping("/stores/{storeIndex}/info-header")
     //public
 
+    // 정보 탭 조회하기
     @GetMapping("/stores/{storeIndex}/information")
     public StoreInformationResponse readStoreInformation(@PathVariable("storeIndex") Long id){
         Store store = storeService.findOne(id);
         return new StoreInformationResponse(store.getOpenHours(), store.getPhoneNumber(), store.getAddress(), store.getComment());
     }
 
+    // 메뉴 탭 조회하기
     @GetMapping("/stores/{storeIndex}/menu")
     public List<StoreMenuResponse> readStoreMenu(@PathVariable("storeIndex") Long id){
         List<Category> Categories = storeService.findAllCategoryWithMenu(id);
-        System.out.println(Categories.size());
-        List<StoreMenuResponse> collect = Categories.stream().map(c -> new StoreMenuResponse(c))
+
+        return Categories.stream().map(c -> new StoreMenuResponse(c))
                 .collect(Collectors.toList());
-        return collect;
     }
 
     @Data
