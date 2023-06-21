@@ -1,5 +1,6 @@
 package com.matdori.matdori.repositoy;
 
+import com.matdori.matdori.domain.Category;
 import com.matdori.matdori.domain.Menu;
 import com.matdori.matdori.domain.Store;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,12 @@ public class StoreRepository {
                 .getResultList();
     }
 
-    public List<Menu> findAllMenuWithCategory(){
+    public List<Category> findAllCategoryWithMenu(Long id){
         return em.createQuery(
-                "SELECT m FROM Menu m " +
-                        "JOIN FETCH m.Category c " +
-                        "JOIN FETCH c.Store s" +
-                        " WHERE s.store_index = :id", Menu.class
-        ).getResultList();
+                "SELECT c FROM Category c " +
+                        "JOIN FETCH c.store s " +
+                        "WHERE s.id =: id", Category.class
+        ).setParameter("id", id).getResultList();
     }
 
 
