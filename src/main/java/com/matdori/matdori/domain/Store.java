@@ -9,7 +9,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
+@Getter @Setter
 public class Store {
 
     @Id @GeneratedValue
