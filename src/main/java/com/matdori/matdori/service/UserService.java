@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Member;
 import java.util.List;
 
 @Service
@@ -22,6 +23,7 @@ public class UserService {
     private final StoreRepository storeRepository;
 
     public User findOne(Long userId) { return userRepository.findOne(userId); }
+    public void signUp(User user){ userRepository.save(user);}
     public List<StoreFavorite> findAllFavoriteStore(Long userId) { return storeFavoriteRepository.findAllFavoriteStore(userId);}
     @Transactional
     public void deleteFavoriteStore(Long favoriteStoreId) { storeFavoriteRepository.deleteStoreFavorite(favoriteStoreId);}
