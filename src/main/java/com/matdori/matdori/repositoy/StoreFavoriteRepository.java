@@ -17,8 +17,8 @@ public class StoreFavoriteRepository {
     public List<Store> findAllFavoriteStore(Long id) {
         return em.createQuery(
                 "SELECT s FROM User u " +
-                        "JOIN FETCH u.storeFavorites f " +
-                        "JOIN FETCH f.store s " +
+                        "JOIN u.storeFavorites f " +
+                        "JOIN f.store s " +
                         "WHERE u.id =: id", Store.class
         ).setParameter("id",id).getResultList();
     }
