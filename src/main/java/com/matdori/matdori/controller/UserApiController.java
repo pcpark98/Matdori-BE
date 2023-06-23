@@ -31,10 +31,18 @@ public class UserApiController {
     @GetMapping("/users/{userIndex}/favorite-stores")
     public List<readFavoriteStoresResponse> readFavoriteStores(@PathVariable("userIndex") Long id,
                                    @RequestParam Long pageCount){
-        List<Store> FavoriteStores = userService.findAllFavoriteStore(id);
+        List<StoreFavorite> FavoriteStores = userService.findAllFavoriteStore(id);
         return FavoriteStores.stream()
-                .map(s -> new readFavoriteStoresResponse(s.getId(), s.getName(), s.getImg_url()))
+                .map(s -> new readFavoriteStoresResponse(s.getId(), s.getStore().getId(), s.getStore().getName(), s.getStore().getImg_url()))
                 .collect(Collectors.toList());
+    }
+
+    @DeleteMapping("/users/{userIndex}/favorite-stores/{favoriteStoreIndex}")
+    public void deleteFavoriteStore(@PathVariable("userIndex") Long userId,
+                                    @PathVariable("favoriteStoreIndex") Long storeId){
+        // TODO
+        // 유저 과정 인증 필요
+        userService.deleteFavoriteStore(storeId);
     }
 
     @Data
@@ -46,7 +54,8 @@ public class UserApiController {
     @Data
     @AllArgsConstructor
     static class readFavoriteStoresResponse{
-        private Long StoreId;
+        private Long favoriteStoreId;
+        private Long storeId;
         private String name;
         private String imgUrl;
     }
