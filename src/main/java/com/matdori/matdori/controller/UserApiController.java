@@ -4,14 +4,20 @@ import com.matdori.matdori.domain.Store;
 import com.matdori.matdori.domain.StoreFavorite;
 import com.matdori.matdori.domain.User;
 import com.matdori.matdori.service.UserService;
+import com.matdori.matdori.service.UserSha256;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import javax.validation.constraints.Null;
 import java.lang.reflect.Member;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -19,15 +25,14 @@ import java.util.stream.Collectors;
 public class UserApiController {
 
     private final UserService userService;
-
     // 회원 가입
     @PostMapping("/sign-up")
-    public void createUser(@RequestBody @Valid CreateUserRequest request){
+        public void createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
         User user = new User();
+        // email 형식 체크하는 로직 필요
         user.setEmail(request.email);
         user.setDepartment("학과 parsing 필요");
-        // sha256으로 encrypt 필요
-        user.setPassword(request.password);
+        user.setPassword(UserSha256.encrypt(request.password));
         user.setNickname("맛도리1234");
         // 약관 동의 추가하는 로직 필요
         userService.signUp(user);
@@ -59,6 +64,40 @@ public class UserApiController {
         userService.deleteFavoriteStore(storeId);
     }
 
+    // 로그인
+    @PostMapping("/login")
+    public LoginResponse login(@RequestBody LoginRequest request, HttpSession session) throws NoSuchAlgorithmException {
+        String email = request.email;
+        String password = UserSha256.encrypt(request.password);
+        User user = userService.login(email, password).orElse(null);
+
+        if(user == null){
+            return new LoginResponse("로그인 실패");
+        }
+        else{
+            session.setAttribute("users", user);
+            return new LoginResponse(new LoginResult(user.getId(), user.getNickname(), user.getDepartment()));
+        }
+    }
+
+    @Data
+    static class LoginRequest{
+        private String email;
+        private String password;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class LoginResponse<T>{
+        private T data;
+    }
+    @Data
+    @AllArgsConstructor
+    static class LoginResult{
+        private Long userId;
+        private String nickname;
+        private String department;
+    }
     @Data
     @AllArgsConstructor
     static class CreateFavoriteStoreRequest{
@@ -75,10 +114,9 @@ public class UserApiController {
     }
 
     @Data
-    @AllArgsConstructor
     static class CreateUserRequest{
         private String email;
         private String password;
-        private int[] termIndex;
+        //private int[] termIndex;
     }
 }
