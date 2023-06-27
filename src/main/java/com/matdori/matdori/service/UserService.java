@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Member;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,6 +24,7 @@ public class UserService {
     private final StoreRepository storeRepository;
 
     public User findOne(Long userId) { return userRepository.findOne(userId); }
+    @Transactional
     public void signUp(User user){ userRepository.save(user);}
     public List<StoreFavorite> findAllFavoriteStore(Long userId) { return storeFavoriteRepository.findAllFavoriteStore(userId);}
     @Transactional
@@ -35,4 +37,6 @@ public class UserService {
         StoreFavorite storeFavorite = StoreFavorite.createStoreFavorite(user, store);
         storeFavoriteRepository.saveStoreFavorite(storeFavorite);
     }
+
+    public Optional<User> login(String email, String password){ return userRepository.login(email, password);}
 }
