@@ -1,5 +1,6 @@
 package com.matdori.matdori.controller;
 
+import com.matdori.matdori.domain.Response;
 import com.matdori.matdori.domain.Store;
 import com.matdori.matdori.domain.StoreFavorite;
 import com.matdori.matdori.domain.User;
@@ -7,6 +8,7 @@ import com.matdori.matdori.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -42,12 +44,14 @@ public class UserApiController {
 
     // 내가 좋아요한 가게 리스트 조회
     @GetMapping("/users/{userIndex}/favorite-stores")
-    public List<readFavoriteStoresResponse> readFavoriteStores(@PathVariable("userIndex") Long id,
-                                   @RequestParam Long pageCount){
+    public ResponseEntity<Response<List<readFavoriteStoresResponse>>> readFavoriteStores(@PathVariable("userIndex") Long id,
+                                                                                        @RequestParam Long pageCount){
         List<StoreFavorite> FavoriteStores = userService.findAllFavoriteStore(id);
-        return FavoriteStores.stream()
+        return ResponseEntity.ok().body(
+                Response.success(
+                FavoriteStores.stream()
                 .map(s -> new readFavoriteStoresResponse(s.getId(), s.getStore().getId(), s.getStore().getName(), s.getStore().getImg_url()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())));
     }
 
     // 내가 좋아요한 가게 삭제
