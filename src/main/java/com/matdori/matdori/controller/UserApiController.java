@@ -13,10 +13,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -28,6 +30,7 @@ public class UserApiController {
     @PostMapping("/sign-up")
     public void createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
         User user = new User();
+        // email 형식 체크하는 로직 필요
         user.setEmail(request.email);
         user.setDepartment("학과 parsing 필요");
         user.setPassword(UserSha256.encrypt(request.password));
@@ -70,7 +73,6 @@ public class UserApiController {
         User user = userService.login(email, password);
         session.setAttribute("users", user);
         return ResponseEntity.ok().body(Response.success(new LoginResponse(new LoginResult(user.getId(), user.getNickname(), user.getDepartment()))));
-
     }
 
     @Data
@@ -111,6 +113,9 @@ public class UserApiController {
         private String email;
         private String password;
         //private int[] termIndex;
+<<<<<<< feature/230705/UserApi
 
+=======
+>>>>>>> develop
     }
 }

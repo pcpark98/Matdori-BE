@@ -20,6 +20,7 @@ public class UserRepository {
     public User findOne(Long id){ return em.find(User.class, id); }
     public void save(User user) { em.persist(user);}
 
+
     public Optional<User> findByEmail(String email){
         return em.createQuery(
                         "SELECT u FROM User u " +
@@ -40,4 +41,5 @@ public class UserRepository {
                 .stream()
                 .findAny();
     }
+
 }
