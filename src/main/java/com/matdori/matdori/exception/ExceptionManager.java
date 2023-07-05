@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@RestControllerAdvice
 public class ExceptionManager {
 
     @ExceptionHandler(RuntimeException.class)
@@ -16,4 +16,22 @@ public class ExceptionManager {
                 .body(Response.error(e.getMessage()));
     }
 
+
+    @ExceptionHandler(InvalidEmailException.class)
+    public ResponseEntity<?> invalidEmailExceptionHandler(InvalidEmailException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name())); // Error code 이름. ex) INVALID_EMAIL_FORMAT
+    }
+
+    @ExceptionHandler(DuplicatedUserException.class)
+    public ResponseEntity<?> duplicatedExceptionHandler(DuplicatedUserException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(NotExistUserException.class)
+    public ResponseEntity<?> notExistExceptionHandler(NotExistUserException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
 }

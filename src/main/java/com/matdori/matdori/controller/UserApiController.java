@@ -1,20 +1,21 @@
 package com.matdori.matdori.controller;
 
-import com.matdori.matdori.domain.Store;
+
+import com.matdori.matdori.domain.Response;
 import com.matdori.matdori.domain.StoreFavorite;
 import com.matdori.matdori.domain.User;
+import com.matdori.matdori.exception.InvalidEmailException;
 import com.matdori.matdori.service.UserService;
 import com.matdori.matdori.service.UserSha256;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import javax.validation.constraints.Null;
-import java.lang.reflect.Member;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +28,7 @@ public class UserApiController {
     private final UserService userService;
     // 회원 가입
     @PostMapping("/sign-up")
-        public void createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
+    public void createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
         User user = new User();
         // email 형식 체크하는 로직 필요
         user.setEmail(request.email);
@@ -47,12 +48,12 @@ public class UserApiController {
 
     // 내가 좋아요한 가게 리스트 조회
     @GetMapping("/users/{userIndex}/favorite-stores")
-    public List<readFavoriteStoresResponse> readFavoriteStores(@PathVariable("userIndex") Long id,
-                                   @RequestParam Long pageCount){
+    public ResponseEntity<Response<List<readFavoriteStoresResponse>>> readFavoriteStores(@PathVariable("userIndex") Long id,
+                                                                                        @RequestParam Long pageCount){
         List<StoreFavorite> FavoriteStores = userService.findAllFavoriteStore(id);
-        return FavoriteStores.stream()
+        return ResponseEntity.ok().body(Response.success(FavoriteStores.stream()
                 .map(s -> new readFavoriteStoresResponse(s.getId(), s.getStore().getId(), s.getStore().getName(), s.getStore().getImg_url()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())));
     }
 
     // 내가 좋아요한 가게 삭제
@@ -66,18 +67,12 @@ public class UserApiController {
 
     // 로그인
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest request, HttpSession session) throws NoSuchAlgorithmException {
+    public ResponseEntity<Response<LoginResponse>> login(@RequestBody LoginRequest request, HttpSession session) throws NoSuchAlgorithmException {
         String email = request.email;
         String password = UserSha256.encrypt(request.password);
-        User user = userService.login(email, password).orElse(null);
-
-        if(user == null){
-            return new LoginResponse("로그인 실패");
-        }
-        else{
-            session.setAttribute("users", user);
-            return new LoginResponse(new LoginResult(user.getId(), user.getNickname(), user.getDepartment()));
-        }
+        User user = userService.login(email, password);
+        session.setAttribute("users", user);
+        return ResponseEntity.ok().body(Response.success(new LoginResponse(new LoginResult(user.getId(), user.getNickname(), user.getDepartment()))));
     }
 
     @Data
@@ -118,5 +113,9 @@ public class UserApiController {
         private String email;
         private String password;
         //private int[] termIndex;
+<<<<<<< feature/230705/UserApi
+
+=======
+>>>>>>> develop
     }
 }
