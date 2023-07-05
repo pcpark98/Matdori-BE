@@ -4,6 +4,7 @@ package com.matdori.matdori.controller;
 import com.matdori.matdori.domain.Response;
 import com.matdori.matdori.domain.StoreFavorite;
 import com.matdori.matdori.domain.User;
+import com.matdori.matdori.exception.InvalidEmailException;
 import com.matdori.matdori.service.UserService;
 import com.matdori.matdori.service.UserSha256;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,6 @@ public class UserApiController {
     @PostMapping("/sign-up")
     public void createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
         User user = new User();
-        // email 형식 체크하는 로직 필요
         user.setEmail(request.email);
         user.setDepartment("학과 parsing 필요");
         user.setPassword(UserSha256.encrypt(request.password));
@@ -67,18 +67,10 @@ public class UserApiController {
     public ResponseEntity<Response<LoginResponse>> login(@RequestBody LoginRequest request, HttpSession session) throws NoSuchAlgorithmException {
         String email = request.email;
         String password = UserSha256.encrypt(request.password);
-        User user = userService.login(email, password).orElse(null);
+        User user = userService.login(email, password);
+        session.setAttribute("users", user);
+        return ResponseEntity.ok().body(Response.success(new LoginResponse(new LoginResult(user.getId(), user.getNickname(), user.getDepartment()))));
 
-        if(user == null){
-            /***
-             에러 처리 로직 추가해야됨
-             */
-            return ResponseEntity.ok().body(Response.success(new LoginResponse("로그인 실패")));
-        }
-        else{
-            session.setAttribute("users", user);
-            return ResponseEntity.ok().body(Response.success(new LoginResponse(new LoginResult(user.getId(), user.getNickname(), user.getDepartment()))));
-        }
     }
 
     @Data
@@ -119,5 +111,6 @@ public class UserApiController {
         private String email;
         private String password;
         //private int[] termIndex;
+
     }
 }

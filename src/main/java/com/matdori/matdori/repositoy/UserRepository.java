@@ -20,6 +20,15 @@ public class UserRepository {
     public User findOne(Long id){ return em.find(User.class, id); }
     public void save(User user) { em.persist(user);}
 
+    public Optional<User> findByEmail(String email){
+        return em.createQuery(
+                        "SELECT u FROM User u " +
+                                "WHERE u.email =: email ", User.class)
+                .setParameter("email", email)
+                .getResultList()
+                .stream()
+                .findAny();
+    }
     public Optional<User> login(String email, String password){
         return em.createQuery(
                         "SELECT u FROM User u " +
