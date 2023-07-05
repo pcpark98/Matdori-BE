@@ -52,14 +52,6 @@ public class UserService {
         storeFavoriteRepository.saveStoreFavorite(storeFavorite);
     }
 
-    public User login(String email, String password) {
-        Optional<User> user = userRepository.login(email, password);
-        // 로그인 가능 여부 체크
-        if (!user.isPresent())
-            throw new NotExistUserException(ErrorCode.NOT_EXISTED_USER);
-
-        return user.get();
-    }
 
 }
 
