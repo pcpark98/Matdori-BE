@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -18,4 +20,15 @@ public class UserRepository {
     public User findOne(Long id){ return em.find(User.class, id); }
     public void save(User user) { em.persist(user);}
 
+    public Optional<User> login(String email, String password){
+        return em.createQuery(
+                        "SELECT u FROM User u " +
+                                "WHERE u.email =: email " +
+                                "AND u.password =: password", User.class)
+                .setParameter("email", email)
+                .setParameter("password", password)
+                .getResultList()
+                .stream()
+                .findAny();
+    }
 }
