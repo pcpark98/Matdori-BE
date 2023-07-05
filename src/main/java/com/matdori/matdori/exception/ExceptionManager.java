@@ -33,4 +33,16 @@ public class ExceptionManager {
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(Response.error(e.getErrorCode().name()));
     }
+
+    @ExceptionHandler(ExpiredSessionException.class)
+    public ResponseEntity<?> expiredSessionException(ExpiredSessionException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(InsufficientPrivilegesException.class)
+    public ResponseEntity<?> insufficientPrivilegesException(InsufficientPrivilegesException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
 }
