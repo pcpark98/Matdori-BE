@@ -13,6 +13,6 @@ public class Response<T> {
     }
 
     public static <T> Response<T> success(T result){
-        return new Response("200", result);
+        return new Response("Success", result);
     }
 }
