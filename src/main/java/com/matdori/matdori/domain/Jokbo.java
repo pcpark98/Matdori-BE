@@ -2,8 +2,14 @@ package com.matdori.matdori.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static javax.persistence.FetchType.*;
 
@@ -25,17 +31,22 @@ public class Jokbo {
     private String title;
     private String contents;
     @Column(name = "total_rating")
-    private Long totalRating;
+    private int totalRating;
 
     @Column(name = "flavor_rating")
-    private Long flavorRating;
+    private int flavorRating;
 
     @Column(name = "under_priced_rating")
-    private Long underPricedRating;
+    private int underPricedRating;
 
     @Column(name = "clean_rating")
-    private Long cleanRating;
+    private int cleanRating;
 
+    @CreationTimestamp
     @Column(name = "created_at")
-    private String createdAt;
+    private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "jokbo")
+    private List<JokboImg> jokboImgs = new ArrayList<>();
+
 }
