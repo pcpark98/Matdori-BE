@@ -32,8 +32,8 @@ public class JokboApiController {
      * 족보 작성하기.
      */
     @PostMapping("/users/{userIndex}/jokbo")
-    public void createJobko(@PathVariable("userIndex") Long userIndex,
-                            @Valid CreateJokboRequest request) throws IOException {
+    public void createJokbo(@PathVariable("userIndex") Long userIndex,
+                            @RequestBody @Valid CreateJokboRequest request) throws IOException {
         Jokbo jokbo = new Jokbo();
         User user = userService.findOne(userIndex);
         jokbo.setUser(user);
