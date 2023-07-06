@@ -22,7 +22,7 @@ public class MailService{
         message.setTo(toAddress);
         message.setFrom(FROM_ADDRESS);
         message.setSubject("맛도리 인증메일입니다.");
-        session.setAttribute(toAddress,uuid);
+        session.setAttribute(uuid,toAddress);
         message.setText("\n 다음 인증번호를 입력해주세요.\n" + uuid);
         mailSender.send(message);
     }

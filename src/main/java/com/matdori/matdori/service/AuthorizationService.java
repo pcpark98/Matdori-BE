@@ -1,10 +1,7 @@
 package com.matdori.matdori.service;
 
 import com.matdori.matdori.domain.User;
-import com.matdori.matdori.exception.ErrorCode;
-import com.matdori.matdori.exception.ExpiredSessionException;
-import com.matdori.matdori.exception.InsufficientPrivilegesException;
-import com.matdori.matdori.exception.NotExistUserException;
+import com.matdori.matdori.exception.*;
 import com.matdori.matdori.repositoy.UserRepository;
 import com.matdori.matdori.util.SessionUtil;
 import lombok.RequiredArgsConstructor;
@@ -45,5 +42,14 @@ public class AuthorizationService {
 
     public static void logout(HttpSession session){
         session.invalidate();
+    }
+
+    public static void checkAuthorizationNumber(String number){
+        if(number == null) // 인증번호를 보내지 않은 경우
+            throw new InvalidRequiredParamException(ErrorCode.INVALID_REQUIRED_PARAM);
+        else if(SessionUtil.getAttribute(number) == null) // 인증 가능 시간이 끝났거나 유효하지 않은 번호일 경우
+            throw new ExpiredSessionException(ErrorCode.EXPIRED_SESSION);
+
+        SessionUtil.getSession().removeAttribute(number); // 인증완료 세션 삭제
     }
 }
