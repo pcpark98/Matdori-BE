@@ -2,6 +2,7 @@ package com.matdori.matdori.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.matdori.matdori.domain.JokboImg;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -66,17 +67,19 @@ public class S3UploadService {
                 imageUrls.add(amazonS3.getUrl(bucket, uniqueFileName).toString());
             }
         }
-        else {
-
-        }
         return imageUrls;
     }
 
     /**
      * AWS S3 버킷에서 originalFileName의 파일명을 갖는 파일을 삭제.
      */
-    public void deleteFile(String originalFileName) {
-        amazonS3.deleteObject(bucket, originalFileName);
+    public void deleteFile(List<String> imgUrls) {
+        if(!CollectionUtils.isEmpty(imgUrls)) {
+            List<String> uniqueFileNames = getS3DeleteKey(imgUrls);
+            for(String uniqueFileName : uniqueFileNames) {
+                amazonS3.deleteObject(bucket, uniqueFileName);
+            }
+        }
     }
 
     /**
@@ -85,5 +88,20 @@ public class S3UploadService {
     private String changeFileName(String originalFileName) {
         String uniqueFileName = UUID.randomUUID().toString() + originalFileName;
         return uniqueFileName;
+    }
+
+    /**
+     * 이미지 url을 파싱해서 이미지의 UniqueFileName을 얻어옴.
+     */
+    private List<String> getS3DeleteKey(List<String> imgUrls) {
+
+        List<String> uniuqeFileNames = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(imgUrls)) {
+            for(String imgUrl : imgUrls) {
+                String[] splitedUrl = imgUrl.split("/");
+                uniuqeFileNames.add(splitedUrl[splitedUrl.length-1]);
+            }
+        }
+        return uniuqeFileNames;
     }
 }

@@ -2,6 +2,8 @@ package com.matdori.matdori.service;
 
 import com.matdori.matdori.domain.Jokbo;
 import com.matdori.matdori.domain.JokboImg;
+import com.matdori.matdori.exception.ErrorCode;
+import com.matdori.matdori.exception.InsufficientPrivilegesException;
 import com.matdori.matdori.repositoy.JokboImgRepository;
 import com.matdori.matdori.repositoy.JokboRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,9 @@ public class JokboService {
      * id로 족보 조회하기
      */
     public Jokbo findOne(Long id) {
+
+        // 존재하지 않는 족보의 id로 조회하려고 하는 경우에 대한 예외 처리 필요.
+
         return jokboRepository.findOne(id);
     }
 
@@ -62,6 +67,26 @@ public class JokboService {
         return imgUrls;
     }
 
+    /**
+     * 족보 삭제하기
+     */
+    @Transactional
+    public void deleteJokbo(Jokbo jokbo, Long userId, List<JokboImg> jokboImgs) {
+        if(jokbo.getUser().getId() != userId) {
+            // 다른 사람이 작성한 족보를 삭제하려고 하는 경우.
+            throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
+        }
+
+        if(!CollectionUtils.isEmpty(jokboImgs)) {
+            for(JokboImg jokboImg : jokboImgs) {
+                // 족보에 첨부된 이미지들 삭제.
+                jokboImgRepository.delete(jokboImg.getId());
+            }
+        }
+
+        // 족보 삭제.
+        jokboRepository.delete(jokbo.getId());
+    }
 
     public int countAll() {return jokboRepository.countAll();}
 }
