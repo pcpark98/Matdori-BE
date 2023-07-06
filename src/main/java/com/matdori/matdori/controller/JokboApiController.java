@@ -99,12 +99,11 @@ public class JokboApiController {
         AuthorizationService.checkSession(userId);
 
         Jokbo jokbo = jokboService.findOne(jokboId);
-        List<String> imgUrls = jokboService.getImageUrls(jokbo.getJokboImgs());
+        List<JokboImg> jokboImgs = jokbo.getJokboImgs();
+        List<String> imgUrls = jokboService.getImageUrls(jokboImgs);
 
+        jokboService.deleteJokbo(jokbo, userId, jokboImgs);
         s3UploadService.deleteFile(imgUrls);
-        jokboService.deleteJokbo(jokbo, userId);
-
-
 
         return ResponseEntity.ok().body(
                 Response.success(null)
