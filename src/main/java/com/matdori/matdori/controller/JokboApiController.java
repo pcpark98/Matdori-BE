@@ -92,7 +92,7 @@ public class JokboApiController {
      * 내가 쓴 족보 삭제하기
      */
     @DeleteMapping("/users/{userIndex}/jokbos/{jokboIndex}")
-    public ResponseEntity<Response<Void>> deleteJokbo(
+    public ResponseEntity<Response<Void>> deleteJokbo (
             @PathVariable("userIndex") Long userId,
             @PathVariable("jokboIndex") Long jokboId) {
 
@@ -111,6 +111,34 @@ public class JokboApiController {
     }
 
     /**
+     * 족보에 댓글 등록하기.
+     */
+    @PostMapping("/jokbos/{jokboIndex}/comment")
+    public ResponseEntity<Response<Void>> createJokboComment(
+            @PathVariable("jokboIndex") Long jokboId,
+            @RequestBody @Valid CreateJokboCommentRequest request) {
+
+        AuthorizationService.checkSession(request.getUser_index());
+
+        JokboComment jokboComment = new JokboComment();
+
+        Jokbo jokbo = jokboService.findOne(jokboId);
+        jokboComment.setJokbo(jokbo);
+
+        User user = userService.findOne(request.getUser_index());
+        jokboComment.setUser(user);
+
+        jokboComment.setContents(request.getContents());
+        jokboComment.setIsDeleted(false);
+
+        jokboService.createJokboComment(jokboComment);
+
+        return ResponseEntity.ok().body(
+                Response.success(null)
+        );
+    }
+
+    /**
      * 총 족보 개수 조회하기.
      */
     @GetMapping("/jokbo-count")
@@ -120,7 +148,7 @@ public class JokboApiController {
     }
 
     /**
-     * 족보 생성을 위한 Dto
+     * 족보 생성을 위한 DTO
      */
     @Data
     static class CreateJokboRequest {
@@ -152,5 +180,14 @@ public class JokboApiController {
         String contents;
 
         List<String> jokbo_img_url_list;
+    }
+
+    /**
+     * 족보 댓글 작성을 위한 DTO
+     */
+    @Data
+    static class CreateJokboCommentRequest {
+        private Long user_index;
+        private String contents;
     }
 }
