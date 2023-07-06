@@ -2,8 +2,12 @@ package com.matdori.matdori.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
+
+import java.time.LocalDateTime;
 
 import static javax.persistence.FetchType.*;
 
@@ -27,6 +31,7 @@ public class JokboComment {
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
+    @CreationTimestamp
     @Column(name = "created_at")
-    private String createdAt;
+    private LocalDateTime createdAt;
 }
