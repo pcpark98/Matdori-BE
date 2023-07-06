@@ -5,8 +5,10 @@ import com.matdori.matdori.domain.Response;
 import com.matdori.matdori.domain.StoreFavorite;
 import com.matdori.matdori.domain.User;
 import com.matdori.matdori.service.AuthorizationService;
+import com.matdori.matdori.service.MailService;
 import com.matdori.matdori.service.UserService;
 import com.matdori.matdori.service.UserSha256;
+import com.matdori.matdori.util.SessionUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -28,40 +30,40 @@ public class UserApiController {
 
     private final UserService userService;
     private final AuthorizationService authorizationService;
+    private final MailService mailService;
     // 회원 가입
     @PostMapping("/sign-up")
-    public void createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
+    public ResponseEntity<Response<Void>> createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
         User user = new User();
-        // email 형식 체크하는 로직 필요
         user.setEmail(request.email);
         user.setDepartment("학과 parsing 필요");
         user.setPassword(UserSha256.encrypt(request.password));
         user.setNickname("맛도리1234");
         // 약관 동의 추가하는 로직 필요
         userService.signUp(user);
+        return ResponseEntity.ok()
+                .body(Response.success(null));
     }
 
     // 가게 좋아요 누르기
     @PostMapping("/users/{userIndex}/favorite-store")
-    public void createFavoriteStore(@PathVariable("userIndex") Long userId,
-                                    @RequestBody @Valid CreateFavoriteStoreRequest requestDto,
-                                    @CookieValue("sessionId") String sessionId,
-                                    HttpServletRequest request){
+    public ResponseEntity<Response<Void>> createFavoriteStore(@PathVariable("userIndex") Long userId,
+                                    @RequestBody @Valid CreateFavoriteStoreRequest requestDto){
 
-        AuthorizationService.checkSession(request.getSession(), sessionId, userId);
+        AuthorizationService.checkSession(userId);
         userService.createFavoriteStore(requestDto.storeId, userId);
+        return ResponseEntity.ok()
+                .body(Response.success(null));
     }
 
     // 내가 좋아요한 가게 리스트 조회
     @GetMapping("/users/{userIndex}/favorite-stores")
     public ResponseEntity<Response<List<readFavoriteStoresResponse>>> readFavoriteStores(
-            @PathVariable("userIndex") Long id,
-            @RequestParam Long pageCount,
-            @CookieValue("sessionId") String sessionId,
-            HttpServletRequest request){
+            @PathVariable("userIndex") Long userId,
+            @RequestParam Long pageCount){
 
-        AuthorizationService.checkSession(request.getSession(), sessionId, id);
-        List<StoreFavorite> FavoriteStores = userService.findAllFavoriteStore(id);
+        AuthorizationService.checkSession(userId);
+        List<StoreFavorite> FavoriteStores = userService.findAllFavoriteStore(userId);
         return ResponseEntity.ok().body(Response.success(FavoriteStores.stream()
                 .map(s -> new readFavoriteStoresResponse(s.getId(), s.getStore().getId(), s.getStore().getName(), s.getStore().getImg_url()))
                 .collect(Collectors.toList())));
@@ -69,24 +71,23 @@ public class UserApiController {
 
     // 내가 좋아요한 가게 삭제
     @DeleteMapping("/users/{userIndex}/favorite-stores/{favoriteStoreIndex}")
-    public void deleteFavoriteStore(
+    public ResponseEntity<Response<Void>> deleteFavoriteStore(
             @PathVariable("userIndex") Long userId,
-            @PathVariable("favoriteStoreIndex") Long storeId,
-            @CookieValue("sessionId") String sessionId,
-            HttpServletRequest request){
+            @PathVariable("favoriteStoreIndex") Long storeId){
 
-        AuthorizationService.checkSession(request.getSession(), sessionId, userId);
+        AuthorizationService.checkSession(userId);
         userService.deleteFavoriteStore(storeId);
+        return ResponseEntity.ok()
+                .body(Response.success(null));
     }
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<Response<LoginResponse>> login(@RequestBody LoginRequest request, HttpSession session) throws NoSuchAlgorithmException {
-        String email = request.email;
-        String password = UserSha256.encrypt(request.password);
-        User user = authorizationService.login(email, password);
+    public ResponseEntity<Response<LoginResponse>> login(@RequestBody LoginRequest request) throws NoSuchAlgorithmException {
+        User user = authorizationService.login(request.email, UserSha256.encrypt(request.password));
         String uuid = UUID.randomUUID().toString();
-        session.setAttribute(uuid, user.getId());
+
+        SessionUtil.setAttribute(uuid, String.valueOf(user.getId()));
         return ResponseEntity.ok()
                 .header("set-cookie","sessionId="+uuid)
                 .body(Response.success(new LoginResponse(new LoginResult(user.getId(), user.getNickname(), user.getDepartment()))));
@@ -94,8 +95,16 @@ public class UserApiController {
 
     // 로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<Response<LoginResponse>> login(HttpServletRequest request) {
+    public ResponseEntity<Response<Void>> login(HttpServletRequest request) {
         AuthorizationService.logout(request.getSession());
+        return ResponseEntity.ok()
+                .body(Response.success(null));
+    }
+
+    @PostMapping("/email-authentication")
+    public ResponseEntity<Response<Void>> authenticateEmail(){
+
+        mailService.sendAuthorizationMail("mim0107@naver.com");
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
