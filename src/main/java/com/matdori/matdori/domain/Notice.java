@@ -2,11 +2,14 @@ package com.matdori.matdori.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
@@ -20,6 +23,7 @@ public class Notice {
     @Column(name = "img_url")
     private String imgUrl;
 
+    @CreationTimestamp
     @Column(name = "created_at")
-    private String createdAt;
+    private LocalDateTime createdAt;
 }

@@ -38,6 +38,8 @@ out/
 
 ### src ###
 src/main/resources/application.properties
+src/main/java/com/matdori/matdori/config/S3Config.java
+
 
 ### ubuntu ###
 .bash_history
