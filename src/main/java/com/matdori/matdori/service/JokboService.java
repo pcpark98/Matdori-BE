@@ -62,6 +62,13 @@ public class JokboService {
         return imgUrls;
     }
 
+    /**
+     * 족보 삭제하기
+     */
+    @Transactional
+    public void deleteJokbo(Long id) {
+        jokboRepository.delete(id);
+    }
 
     public int countAll() {return jokboRepository.countAll();}
 }

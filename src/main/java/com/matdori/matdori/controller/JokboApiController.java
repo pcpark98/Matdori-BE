@@ -92,6 +92,24 @@ public class JokboApiController {
     }
 
     /**
+     * 족보 삭제하기
+     */
+    @DeleteMapping("/users/{userIndex}/jokbos/{jokboIndex}")
+    public ResponseEntity<Response<Void>> deleteJokbo(
+            @PathVariable("userIndex") Long userId,
+            @PathVariable("jokboIndex") Long jokboId) {
+
+        Jokbo jokbo = jokboService.findOne(jokboId);
+
+        // 현재 로그인한 유저와 족보의 작성자가 같은지 인증하는 로직 필요.
+
+        jokboService.deleteJokbo(jokboId);
+        return ResponseEntity.ok().body(
+                Response.success(null)
+        );
+    }
+
+    /**
      * 총 족보 개수 조회하기.
      */
     @GetMapping("/jokbo-count")
