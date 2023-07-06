@@ -1,15 +1,14 @@
 package com.matdori.matdori.controller;
 
-import com.matdori.matdori.domain.Jokbo;
-import com.matdori.matdori.domain.JokboImg;
-import com.matdori.matdori.domain.Store;
-import com.matdori.matdori.domain.User;
+import com.matdori.matdori.domain.*;
 import com.matdori.matdori.service.JokboService;
 import com.matdori.matdori.service.S3UploadService;
 import com.matdori.matdori.service.StoreService;
 import com.matdori.matdori.service.UserService;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -69,6 +68,30 @@ public class JokboApiController {
     }
 
     /**
+     * 족보 내용 조회하기
+     */
+    @GetMapping("/jokbos/{jokboIndex}")
+    public ResponseEntity<Response<JokboContentsResponse>>
+            readJokbo(@PathVariable("jokboIndex") Long id) {
+        Jokbo jokbo = jokboService.findOne(id);
+        List<String> jokboImgUrls = jokboService.getImageUrls(jokbo.getJokboImgs());
+
+        return ResponseEntity.ok().body(
+                Response.success(
+                        new JokboContentsResponse(
+                                jokbo.getStore().getId(),
+                                jokbo.getStore().getName(),
+                                jokbo.getStore().getImg_url(),
+                                jokbo.getTitle(),
+                                jokbo.getUser().getNickname(),
+                                jokbo.getContents(),
+                                jokboImgUrls
+                        )
+                )
+        );
+    }
+
+    /**
      * 총 족보 개수 조회하기.
      */
     @GetMapping("/jokbo-count")
@@ -93,5 +116,22 @@ public class JokboApiController {
         private String contents;
 
         private List<MultipartFile> images;
+    }
+
+    /**
+     * 족보 조회하기의 응답을 위한 DTO
+     */
+    @Data
+    @AllArgsConstructor
+    static class JokboContentsResponse {
+        Long store_index;
+        String store_name;
+        String store_img_url;
+
+        String title;
+        String nickname;
+        String contents;
+
+        List<String> jokbo_img_url_list;
     }
 }
