@@ -1,10 +1,7 @@
 package com.matdori.matdori.controller;
 
 import com.matdori.matdori.domain.*;
-import com.matdori.matdori.service.JokboService;
-import com.matdori.matdori.service.S3UploadService;
-import com.matdori.matdori.service.StoreService;
-import com.matdori.matdori.service.UserService;
+import com.matdori.matdori.service.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +29,7 @@ public class JokboApiController {
      */
     @PostMapping("/users/{userIndex}/jokbo")
     public void createJokbo(@PathVariable("userIndex") Long userIndex,
-                            @RequestBody @Valid CreateJokboRequest request) throws IOException {
+                            @Valid CreateJokboRequest request) throws IOException {
         Jokbo jokbo = new Jokbo();
         User user = userService.findOne(userIndex);
         jokbo.setUser(user);
@@ -92,18 +89,23 @@ public class JokboApiController {
     }
 
     /**
-     * 족보 삭제하기
+     * 내가 쓴 족보 삭제하기
      */
     @DeleteMapping("/users/{userIndex}/jokbos/{jokboIndex}")
     public ResponseEntity<Response<Void>> deleteJokbo(
             @PathVariable("userIndex") Long userId,
             @PathVariable("jokboIndex") Long jokboId) {
 
+        AuthorizationService.checkSession(userId);
+
         Jokbo jokbo = jokboService.findOne(jokboId);
+        List<String> imgUrls = jokboService.getImageUrls(jokbo.getJokboImgs());
 
-        // 현재 로그인한 유저와 족보의 작성자가 같은지 인증하는 로직 필요.
+        s3UploadService.deleteFile(imgUrls);
+        jokboService.deleteJokbo(jokbo, userId);
 
-        jokboService.deleteJokbo(jokboId);
+
+
         return ResponseEntity.ok().body(
                 Response.success(null)
         );
