@@ -101,10 +101,38 @@ public class UserApiController {
                 .body(Response.success(null));
     }
 
+    // 이메일 인증
     @PostMapping("/email-authentication")
-    public ResponseEntity<Response<Void>> authenticateEmail(){
+    public ResponseEntity<Response<Void>> authenticateEmail(@RequestBody @Valid AuthenticateEmailRequest request){
 
-        mailService.sendAuthorizationMail("mim0107@naver.com");
+        mailService.sendAuthorizationMail(request.email);
+        return ResponseEntity.ok()
+                .body(Response.success(null));
+    }
+    // 인증번호 체크
+    @PostMapping("/authentication-number")
+    public ResponseEntity<Response<Void>> authenticateNumber(@RequestBody @Valid AuthenticateNumberRequest request){
+        // 인증하고 최종 회원 가입 시까지 인증여부를 남겨둬야될 듯
+        AuthorizationService.checkAuthorizationNumber(request.number);
+        return ResponseEntity.ok()
+                .body(Response.success(null));
+    }
+
+    /* 좋아하는 족보 테이블 완성되면 작업
+    @PostMapping("/users/{userIndex}/favorite-jokbo")
+    public ResponseEntity<Response<Void>> createFavoriteJokbo(@RequestBody @Valid CreateFavoriteJokboRequest request,
+                                                              @PathVariable("userIndex") Long userId){
+        AuthorizationService.checkSession(userId);
+        return ResponseEntity.ok()
+                .body(Response.success(null));
+    }   
+    */
+
+    @PutMapping("/users/{userIndex}/password")
+    public ResponseEntity<Response<Void>> updatePassword(@RequestBody @Valid UpdatePasswordRequest request,
+                                                         @PathVariable("userIndex") Long userId) throws NoSuchAlgorithmException{
+        AuthorizationService.checkSession(userId);
+        userService.updatePassword(userId,request.password);
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
@@ -147,5 +175,24 @@ public class UserApiController {
         private String email;
         private String password;
         //private int[] termIndex;
+    }
+
+    @Data
+    static class AuthenticateEmailRequest{
+        private String email;
+    }
+    @Data
+    static class AuthenticateNumberRequest{
+        private String number;
+    }
+
+    @Data
+    static class CreateFavoriteJokboRequest{
+        private Long storeId;
+    }
+
+    @Data
+    static class UpdatePasswordRequest{
+        private String password;
     }
 }
