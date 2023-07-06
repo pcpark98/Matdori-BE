@@ -1,9 +1,11 @@
 package com.matdori.matdori.service;
 
 import com.matdori.matdori.domain.Jokbo;
+import com.matdori.matdori.domain.JokboComment;
 import com.matdori.matdori.domain.JokboImg;
 import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.exception.InsufficientPrivilegesException;
+import com.matdori.matdori.repositoy.JokboCommentRepository;
 import com.matdori.matdori.repositoy.JokboImgRepository;
 import com.matdori.matdori.repositoy.JokboRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class JokboService {
 
     private final JokboRepository jokboRepository;
     private final JokboImgRepository jokboImgRepository;
+    private final JokboCommentRepository jokboCommentRepository;
 
     /**
      * 족보 작성하기.
@@ -86,6 +89,16 @@ public class JokboService {
 
         // 족보 삭제.
         jokboRepository.delete(jokbo.getId());
+    }
+
+    /**
+     * 족보에 댓글 등록하기.
+     */
+    @Transactional
+    public void createJokboComment(JokboComment jokboComment) {
+
+        // 족보 댓글에 대한 검증이 필요할까?
+        jokboCommentRepository.save(jokboComment);
     }
 
     public int countAll() {return jokboRepository.countAll();}
