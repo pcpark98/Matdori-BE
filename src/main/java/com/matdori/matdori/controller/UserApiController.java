@@ -1,23 +1,25 @@
 package com.matdori.matdori.controller;
 
-import com.matdori.matdori.domain.Store;
+
+import com.matdori.matdori.domain.Response;
 import com.matdori.matdori.domain.StoreFavorite;
 import com.matdori.matdori.domain.User;
+import com.matdori.matdori.service.AuthorizationService;
 import com.matdori.matdori.service.UserService;
 import com.matdori.matdori.service.UserSha256;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import javax.validation.constraints.Null;
-import java.lang.reflect.Member;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,9 +27,10 @@ import java.util.stream.Collectors;
 public class UserApiController {
 
     private final UserService userService;
+    private final AuthorizationService authorizationService;
     // 회원 가입
     @PostMapping("/sign-up")
-        public void createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
+    public void createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
         User user = new User();
         // email 형식 체크하는 로직 필요
         user.setEmail(request.email);
@@ -41,43 +44,60 @@ public class UserApiController {
     // 가게 좋아요 누르기
     @PostMapping("/users/{userIndex}/favorite-store")
     public void createFavoriteStore(@PathVariable("userIndex") Long userId,
-                                    @RequestBody @Valid CreateFavoriteStoreRequest request){
-        userService.createFavoriteStore(request.storeId, userId);
+                                    @RequestBody @Valid CreateFavoriteStoreRequest requestDto,
+                                    @CookieValue("sessionId") String sessionId,
+                                    HttpServletRequest request){
+
+        AuthorizationService.checkSession(request.getSession(), sessionId, userId);
+        userService.createFavoriteStore(requestDto.storeId, userId);
     }
 
     // 내가 좋아요한 가게 리스트 조회
     @GetMapping("/users/{userIndex}/favorite-stores")
-    public List<readFavoriteStoresResponse> readFavoriteStores(@PathVariable("userIndex") Long id,
-                                   @RequestParam Long pageCount){
+    public ResponseEntity<Response<List<readFavoriteStoresResponse>>> readFavoriteStores(
+            @PathVariable("userIndex") Long id,
+            @RequestParam Long pageCount,
+            @CookieValue("sessionId") String sessionId,
+            HttpServletRequest request){
+
+        AuthorizationService.checkSession(request.getSession(), sessionId, id);
         List<StoreFavorite> FavoriteStores = userService.findAllFavoriteStore(id);
-        return FavoriteStores.stream()
+        return ResponseEntity.ok().body(Response.success(FavoriteStores.stream()
                 .map(s -> new readFavoriteStoresResponse(s.getId(), s.getStore().getId(), s.getStore().getName(), s.getStore().getImg_url()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())));
     }
 
     // 내가 좋아요한 가게 삭제
     @DeleteMapping("/users/{userIndex}/favorite-stores/{favoriteStoreIndex}")
-    public void deleteFavoriteStore(@PathVariable("userIndex") Long userId,
-                                    @PathVariable("favoriteStoreIndex") Long storeId){
-        // TODO
-        // 유저 과정 인증 필요
+    public void deleteFavoriteStore(
+            @PathVariable("userIndex") Long userId,
+            @PathVariable("favoriteStoreIndex") Long storeId,
+            @CookieValue("sessionId") String sessionId,
+            HttpServletRequest request){
+
+        AuthorizationService.checkSession(request.getSession(), sessionId, userId);
         userService.deleteFavoriteStore(storeId);
     }
 
     // 로그인
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest request, HttpSession session) throws NoSuchAlgorithmException {
+    public ResponseEntity<Response<LoginResponse>> login(@RequestBody LoginRequest request, HttpSession session) throws NoSuchAlgorithmException {
         String email = request.email;
         String password = UserSha256.encrypt(request.password);
-        User user = userService.login(email, password).orElse(null);
+        User user = authorizationService.login(email, password);
+        String uuid = UUID.randomUUID().toString();
+        session.setAttribute(uuid, user.getId());
+        return ResponseEntity.ok()
+                .header("set-cookie","sessionId="+uuid)
+                .body(Response.success(new LoginResponse(new LoginResult(user.getId(), user.getNickname(), user.getDepartment()))));
+    }
 
-        if(user == null){
-            return new LoginResponse("로그인 실패");
-        }
-        else{
-            session.setAttribute("users", user);
-            return new LoginResponse(new LoginResult(user.getId(), user.getNickname(), user.getDepartment()));
-        }
+    // 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<Response<LoginResponse>> login(HttpServletRequest request) {
+        AuthorizationService.logout(request.getSession());
+        return ResponseEntity.ok()
+                .body(Response.success(null));
     }
 
     @Data

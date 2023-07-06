@@ -1,13 +1,11 @@
 package com.matdori.matdori.controller;
 
-import com.matdori.matdori.domain.Category;
-import com.matdori.matdori.domain.Menu;
-import com.matdori.matdori.domain.OpenHours;
-import com.matdori.matdori.domain.Store;
+import com.matdori.matdori.domain.*;
 import com.matdori.matdori.service.StoreService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,18 +30,18 @@ public class StoreApiController {
 
     // 정보 탭 조회하기
     @GetMapping("/stores/{storeIndex}/information")
-    public StoreInformationResponse readStoreInformation(@PathVariable("storeIndex") Long id){
+    public ResponseEntity<Response<StoreInformationResponse>> readStoreInformation(@PathVariable("storeIndex") Long id){
         Store store = storeService.findOne(id);
-        return new StoreInformationResponse(store.getOpenHours(), store.getPhoneNumber(), store.getAddress(), store.getComment());
+        return ResponseEntity.ok().body(Response.success(new StoreInformationResponse(store.getOpenHours(), store.getPhoneNumber(), store.getAddress(), store.getComment())));
     }
 
     // 메뉴 탭 조회하기
     @GetMapping("/stores/{storeIndex}/menu")
-    public List<StoreMenuResponse> readStoreMenu(@PathVariable("storeIndex") Long id){
+    public ResponseEntity<Response<List<StoreMenuResponse>>> readStoreMenu(@PathVariable("storeIndex") Long id){
         List<Category> Categories = storeService.findAllCategoryWithMenu(id);
 
-        return Categories.stream().map(c -> new StoreMenuResponse(c))
-                .collect(Collectors.toList());
+        return ResponseEntity.ok().body(Response.success(Categories.stream().map(c -> new StoreMenuResponse(c))
+                .collect(Collectors.toList())));
     }
 
     @Data

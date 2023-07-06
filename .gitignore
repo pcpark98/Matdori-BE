@@ -40,6 +40,7 @@ out/
 src/main/resources/application.properties
 src/main/java/com/matdori/matdori/config/S3Config.java
 
+
 ### ubuntu ###
 .bash_history
 .bash_logout
@@ -49,3 +50,4 @@ src/main/java/com/matdori/matdori/config/S3Config.java
 .ssh/
 .sudo_as_admin_successful
 .viminfo
+*.pem
