@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Member;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,6 +53,11 @@ public class UserService {
         storeFavoriteRepository.saveStoreFavorite(storeFavorite);
     }
 
+    @Transactional
+    public void updatePassword(Long userId, String password) throws NoSuchAlgorithmException {
+        User user = userRepository.findOne(userId);
+        user.setPassword(UserSha256.encrypt(password));
+    }
 
 }
 
