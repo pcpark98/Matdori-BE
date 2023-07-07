@@ -101,5 +101,12 @@ public class JokboService {
         jokboCommentRepository.save(jokboComment);
     }
 
+    /**
+     * 족보에 달린 댓글 조회하기.
+     */
+    public List<JokboComment> getAllJokboComments(Long jokboId) {
+        return jokboCommentRepository.findAllJokboComments(jokboId);
+    }
+
     public int countAll() {return jokboRepository.countAll();}
 }

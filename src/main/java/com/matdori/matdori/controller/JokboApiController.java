@@ -12,8 +12,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -139,6 +141,32 @@ public class JokboApiController {
     }
 
     /**
+     * 족보 글에 달린 모든 댓글 조회하기.
+     * 페이징 처리 및 정렬 처리 구현 필요
+     */
+    @GetMapping("/jokbos/{jokboIndex}/comments")
+    public ResponseEntity<Response<List<JokboCommentResponse>>> getAllJokboComments (
+            @PathVariable("jokboIndex") Long jokboId,
+            @RequestParam(value = "order", required = false) String order,
+            @RequestParam(value = "pageCount", required = false) Long pageCount) {
+
+        // jokboId가 존재하는 족보의 id인지 유효성 체크 필요.
+        // 페이징 처리 및 정렬 처리 구현 필요.
+
+        List<JokboComment> jokboComments = jokboService.getAllJokboComments(jokboId);
+        return ResponseEntity.ok().body(
+                Response.success(jokboComments.stream()
+                        .map(c -> new JokboCommentResponse(
+                                c.getId(),
+                                c.getCreatedAt(),
+                                c.getContents(),
+                                c.getIsDeleted(),
+                                c.getUser().getId(),
+                                c.getUser().getNickname()))
+                        .collect(Collectors.toList())));
+    }
+
+    /**
      * 총 족보 개수 조회하기.
      */
     @GetMapping("/jokbo-count")
@@ -189,5 +217,20 @@ public class JokboApiController {
     static class CreateJokboCommentRequest {
         private Long user_index;
         private String contents;
+    }
+
+    /**
+     * 족보에 달린 모든 댓글 조회하기의 응답을 위한 DTO
+     */
+    @Data
+    @AllArgsConstructor
+    static class JokboCommentResponse {
+        Long comment_index;
+        LocalDateTime created_at;
+        String contents;
+        boolean check_deleted;
+
+        Long user_index;
+        String nickname;
     }
 }
