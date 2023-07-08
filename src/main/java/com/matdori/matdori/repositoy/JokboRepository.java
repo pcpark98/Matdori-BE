@@ -44,9 +44,21 @@ public class JokboRepository {
     }
 
 
-
-
-
+    // FETCH JOIN
+    // ToOne은 여러 개 사용 가능하지만
+    // ToMany는 여러 개 사용 불가능
+    // @OneToMany, @ManyToMany와 같이 N 관계의 자식 엔티티에 관해서는 가장 데이터가 많은 자식쪽에 Fetch Join을 사용한다.
+    // https://jojoldu.tistory.com/457
+    public List<Jokbo> findByUserIndex(Long userId){
+        return em.createQuery(
+                        "SELECT j FROM Jokbo j " +
+                                "JOIN FETCH j.user u " +
+                                "LEFT JOIN j.jokboImgs " +
+                                "LEFT JOIN FETCH j.jokboComments c " +
+                                "WHERE u.id =: userId", Jokbo.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
 
 
 }

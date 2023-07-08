@@ -1,9 +1,7 @@
 package com.matdori.matdori.controller;
 
 
-import com.matdori.matdori.domain.Response;
-import com.matdori.matdori.domain.StoreFavorite;
-import com.matdori.matdori.domain.User;
+import com.matdori.matdori.domain.*;
 import com.matdori.matdori.service.AuthorizationService;
 import com.matdori.matdori.service.MailService;
 import com.matdori.matdori.service.UserService;
@@ -20,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -128,6 +127,7 @@ public class UserApiController {
     }   
     */
 
+    // 비밀번호 변경하기
     @PutMapping("/users/{userIndex}/password")
     public ResponseEntity<Response<Void>> updatePassword(@RequestBody @Valid UpdatePasswordRequest request,
                                                          @PathVariable("userIndex") Long userId) throws NoSuchAlgorithmException{
@@ -135,6 +135,37 @@ public class UserApiController {
         userService.updatePassword(userId,request.password);
         return ResponseEntity.ok()
                 .body(Response.success(null));
+    }
+    // 닉네임 변경하기
+    @PutMapping("/users/{userIndex}/nickname")
+    public ResponseEntity<Response<Void>> updateNickname(@RequestBody @Valid UpdateNicknameRequest request,
+                                                         @PathVariable("userIndex") Long userId){
+        AuthorizationService.checkSession(userId);
+        userService.updateNickname(userId, request.nickname);
+        // 예외처리 필요
+        return ResponseEntity.ok()
+                .body(Response.success(null));
+    }
+
+    @GetMapping("/users/{userIndex}/jokbos")
+    //pageCount 넣어야됨
+    // favoriteCnt 넣어야됨
+    public ResponseEntity<Response<List<AllMyJokboResponse>>> readAllMyJokbo(@PathVariable("userIndex") Long userId){
+        AuthorizationService.checkSession(userId);
+        List<Jokbo> jokbos = userService.readAllMyJokbo(userId);
+        return ResponseEntity.ok().body(Response.success(jokbos.stream()
+                .map(j -> new AllMyJokboResponse(j.getId(), j.getTitle(), j.getContents(),j.getJokboImgs(), j.getJokboComments().size()))
+                .collect(Collectors.toList())));
+    }
+
+    @GetMapping("/users/{userIndex}/comments")
+    //pageCount 넣어야됨
+    public ResponseEntity<Response<List<AllMyJokboCommentResponse>>> readAllMyJokboComment(@PathVariable("userIndex") Long userId){
+        AuthorizationService.checkSession(userId);
+        List<JokboComment> comments = userService.readAllMyJokboComment(userId);
+        return ResponseEntity.ok().body(Response.success(comments.stream()
+                .map(c -> new AllMyJokboCommentResponse(c.getJokbo().getId(), c.getJokbo().getStore().getName(), c.getContents(), c.getCreatedAt()))
+                .collect(Collectors.toList())));
     }
 
     @Data
@@ -194,5 +225,37 @@ public class UserApiController {
     @Data
     static class UpdatePasswordRequest{
         private String password;
+    }
+
+    @Data
+    static class UpdateNicknameRequest{
+        private String nickname;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class AllMyJokboResponse{
+        private Long jokboId;
+        private String title;
+        private String contents;
+        private String imgUrl;
+        private int commentCnt;
+
+        public AllMyJokboResponse(Long jokboId, String title, String contents, List<JokboImg> imgUrl, int commentCnt) {
+            this.jokboId = jokboId;
+            this.title = title;
+            this.contents = contents;
+            if(imgUrl.size() != 0)
+                this.imgUrl = imgUrl.get(0).getImgUrl();
+            this.commentCnt = commentCnt;
+        }
+    }
+    @Data
+    @AllArgsConstructor
+    static class AllMyJokboCommentResponse{
+        private Long jokboId;
+        private String storeName;
+        private String contents;
+        private LocalDateTime writtenAt;
     }
 }

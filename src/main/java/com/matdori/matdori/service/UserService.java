@@ -1,15 +1,8 @@
 package com.matdori.matdori.service;
 
-import com.matdori.matdori.domain.Store;
-import com.matdori.matdori.domain.StoreFavorite;
-import com.matdori.matdori.domain.User;
-import com.matdori.matdori.exception.DuplicatedUserException;
-import com.matdori.matdori.exception.ErrorCode;
-import com.matdori.matdori.exception.InvalidEmailException;
-import com.matdori.matdori.exception.NotExistUserException;
-import com.matdori.matdori.repositoy.StoreFavoriteRepository;
-import com.matdori.matdori.repositoy.StoreRepository;
-import com.matdori.matdori.repositoy.UserRepository;
+import com.matdori.matdori.domain.*;
+import com.matdori.matdori.exception.*;
+import com.matdori.matdori.repositoy.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +20,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final StoreFavoriteRepository storeFavoriteRepository;
     private final StoreRepository storeRepository;
+    private final JokboRepository jokboRepository;
+    private final JokboCommentRepository jokboCommentRepository;
 
     public User findOne(Long userId) { return userRepository.findOne(userId); }
     @Transactional
@@ -59,5 +54,14 @@ public class UserService {
         user.setPassword(UserSha256.encrypt(password));
     }
 
+    @Transactional
+    public void updateNickname(Long userId, String nickname){
+        // 중복 닉네임 예외처리 필요
+        User user = userRepository.findOne(userId);
+        user.setNickname(nickname);
+    }
+
+    public List<Jokbo> readAllMyJokbo(Long userId){ return jokboRepository.findByUserIndex(userId);}
+    public List<JokboComment> readAllMyJokboComment(Long userId){ return jokboCommentRepository.findByUserIndex(userId);}
 }
 
