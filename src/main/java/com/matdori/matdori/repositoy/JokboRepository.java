@@ -14,13 +14,25 @@ public class JokboRepository {
 
     private final EntityManager em;
 
+    /**
+     * 족보 저장하기.
+     */
     public void save(Jokbo jokbo) {
         em.persist(jokbo);
     }
 
-
+    /**
+     * id로 단일 족보 검색하기.
+     */
     public Jokbo findOne(Long id) {
         return em.find(Jokbo.class, id);
+    }
+
+    /**
+     * 족보 삭제하기
+     */
+    public void delete(Long id) {
+        em.remove(em.find(Jokbo.class, id));
     }
 
     /**

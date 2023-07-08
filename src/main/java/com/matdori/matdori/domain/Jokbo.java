@@ -49,4 +49,6 @@ public class Jokbo {
     @OneToMany(mappedBy = "jokbo")
     private List<JokboImg> jokboImgs = new ArrayList<>();
 
+    @OneToMany(mappedBy = "jokbo")
+    private List<JokboComment> jokboComments = new ArrayList<>();
 }
