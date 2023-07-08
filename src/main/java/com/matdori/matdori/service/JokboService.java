@@ -130,5 +130,8 @@ public class JokboService {
         jokboCommentRepository.delete(jokboComment.getId());
     }
 
+    /**
+     * 족보의 총 개수 조회하기.
+     */
     public int countAll() {return jokboRepository.countAll();}
 }
