@@ -53,7 +53,11 @@ public class ExceptionManager {
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(Response.error(e.getErrorCode().name()));
     }
-
+    @ExceptionHandler(InvalidRequiredParamException.class)
+    public ResponseEntity<?> nvalidRequiredParamException(InvalidRequiredParamException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
     // --------------------------------------------------------
 
 

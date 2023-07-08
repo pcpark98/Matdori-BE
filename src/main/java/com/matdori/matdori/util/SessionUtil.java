@@ -33,10 +33,13 @@ public class SessionUtil {
         HttpServletRequest req = sra.getRequest();
         Cookie[] cookies = req.getCookies();
 
-        for(Cookie c : cookies){
-            if(c.getName().equals("sessionId"))
-                return c.getValue();
+        if(cookies != null) {
+            for (Cookie c : cookies) {
+                if (c.getName().equals("sessionId"))
+                    return c.getValue();
+            }
         }
+
         return null;
     }
 }

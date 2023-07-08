@@ -1,5 +1,6 @@
 package com.matdori.matdori.repositoy;
 
+import com.matdori.matdori.domain.Jokbo;
 import com.matdori.matdori.domain.JokboComment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -28,6 +29,17 @@ public class JokboCommentRepository {
                 "SELECT c FROM JokboComment c "+
                         "WHERE c.jokbo.id = :id", JokboComment.class)
                 .setParameter("id", id)
+                .getResultList();
+    }
+
+    public List<JokboComment> findByUserIndex(Long userId){
+        return em.createQuery(
+                        "SELECT c FROM JokboComment c " +
+                                "JOIN c.user u ON u.id =: userId AND u.id = c.user.id " +
+                                "JOIN FETCH c.jokbo j " +
+                                "JOIN FETCH j.store " +
+                                "WHERE c.isDeleted = true ", JokboComment.class)
+                .setParameter("userId", userId)
                 .getResultList();
     }
 }
