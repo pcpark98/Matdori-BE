@@ -172,6 +172,27 @@ public class JokboApiController {
     }
 
     /**
+     * 내가 쓴 댓글 삭제하기.
+     */
+    @DeleteMapping("/jokbos/{jokboIndex}/comments/{commentIndex}")
+    public ResponseEntity<Response<Void>> deleteJokboComment (
+            @PathVariable("jokboIndex") Long jokboId,
+            @PathVariable("commentIndex") Long commentId,
+            @RequestBody @Valid DeleteJokboCommentRequest request) {
+
+        // commentId가 존재하는 족보 댓글을 가리키는지 확인 필요.
+
+        AuthorizationService.checkSession(request.getUser_index());
+
+        JokboComment jokboComment = jokboService.getAJokboComment(commentId);
+        jokboService.deleteJokboComment(jokboComment, request.getUser_index());
+
+        return ResponseEntity.ok().body(
+                Response.success(null)
+        );
+    }
+
+    /**
      * 총 족보 개수 조회하기.
      */
     @GetMapping("/jokbo-count")
@@ -247,5 +268,13 @@ public class JokboApiController {
     static class ReadJokboCommentResponse {
         List<JokboCommentResponse> comment_list;
         int comment_cnt;
+    }
+
+    /**
+     * 족보에 달린 댓글을 삭제하기 위한 정보를 받을 DTO
+     */
+    @Data
+    static class DeleteJokboCommentRequest {
+        private Long user_index;
     }
 }
