@@ -196,9 +196,12 @@ public class JokboApiController {
      * 총 족보 개수 조회하기.
      */
     @GetMapping("/jokbo-count")
-    public int countAllJokbos() {
+    public ResponseEntity<Response<CountAllJokboResponse>> countAllJokbos() {
         int count = jokboService.countAll();
-        return count;
+
+        return ResponseEntity.ok()
+                .body(Response.success(
+                        new CountAllJokboResponse(count)));
     }
 
     /**
@@ -276,5 +279,14 @@ public class JokboApiController {
     @Data
     static class DeleteJokboCommentRequest {
         private Long user_index;
+    }
+
+    /**
+     * 족보의 총 개수 조회하기의 응답을 위한 DTO
+     */
+    @Data
+    @AllArgsConstructor
+    static class CountAllJokboResponse {
+        private int count;
     }
 }
