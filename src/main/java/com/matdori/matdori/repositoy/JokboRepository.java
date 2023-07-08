@@ -29,7 +29,7 @@ public class JokboRepository {
     }
 
     /**
-     * 족보 삭제하기
+     * 족보 삭제하기.
      */
     public void delete(Long id) {
         em.remove(em.find(Jokbo.class, id));

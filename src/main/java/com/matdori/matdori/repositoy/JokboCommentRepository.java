@@ -32,14 +32,31 @@ public class JokboCommentRepository {
                 .getResultList();
     }
 
+    /**
+     * 내가 쓴 모든 댓글 조회하기.
+     */
     public List<JokboComment> findByUserIndex(Long userId){
         return em.createQuery(
                         "SELECT c FROM JokboComment c " +
                                 "JOIN c.user u ON u.id =: userId AND u.id = c.user.id " +
                                 "JOIN FETCH c.jokbo j " +
                                 "JOIN FETCH j.store " +
-                                "WHERE c.isDeleted = true ", JokboComment.class)
+                                "WHERE c.isDeleted = false ", JokboComment.class)
                 .setParameter("userId", userId)
                 .getResultList();
+    }
+
+    /**
+     * 족보 댓글 id로 족보 댓글 하나 조회하기.
+     */
+    public JokboComment findOne (Long id) {
+        return em.find(JokboComment.class, id);
+    }
+
+    /**
+     * 족보 댓글 삭제하기.
+     */
+    public void delete(Long id) {
+        em.remove(em.find(JokboComment.class, id));
     }
 }

@@ -102,10 +102,32 @@ public class JokboService {
     }
 
     /**
-     * 족보에 달린 댓글 조회하기.
+     * 족보에 달린 모든 댓글 조회하기.
      */
     public List<JokboComment> getAllJokboComments(Long jokboId) {
         return jokboCommentRepository.findAllJokboComments(jokboId);
+    }
+
+    /**
+     * 족보에 달린 댓글 하나 조회하기.
+     */
+    public JokboComment getAJokboComment(Long id) {
+
+        // 존재하지 않는 족보 댓글을 조회하려고 하는 것에 대한 예외처리 필요.
+        return jokboCommentRepository.findOne(id);
+    }
+
+    /**
+     * 댓글 삭제하기.
+     */
+    @Transactional
+    public void deleteJokboComment(JokboComment jokboComment, Long userId) {
+        if(jokboComment.getUser().getId() != userId) {
+            // 다른 사람이 작성한 댓글을 삭제하려고 하는 경우.
+            throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
+        }
+
+        jokboCommentRepository.delete(jokboComment.getId());
     }
 
     public int countAll() {return jokboRepository.countAll();}
