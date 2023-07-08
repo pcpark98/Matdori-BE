@@ -51,4 +51,7 @@ public class Jokbo {
 
     @OneToMany(mappedBy = "jokbo")
     private List<JokboComment> jokboComments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "jokbo")
+    private List<JokboFavorite> jokboFavorites = new ArrayList<>();
 }
