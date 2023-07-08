@@ -1,6 +1,7 @@
 package com.matdori.matdori.controller;
 
 import com.matdori.matdori.domain.*;
+import com.matdori.matdori.service.JokboService;
 import com.matdori.matdori.service.StoreService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 public class StoreApiController {
 
     private final StoreService storeService;
+    private final JokboService jokboService;
+
 
     // 별점을 가져와야 하므로
     // 족보가 완성되면 작성
@@ -42,6 +45,18 @@ public class StoreApiController {
 
         return ResponseEntity.ok().body(Response.success(Categories.stream().map(c -> new StoreMenuResponse(c))
                 .collect(Collectors.toList())));
+    }
+
+    // pagecount 추가 필요
+    // 족보 탭 조회하기
+    @GetMapping("/stores/{storeIndex}/jokbos")
+    public ResponseEntity<Response<List<JokboResponse>>> readAllJokbo(@PathVariable("storeIndex") Long storeIndex){
+        List<Jokbo> jokbos = storeService.findAllJokbo(storeIndex);
+
+        return ResponseEntity.ok().body(Response.success(jokbos.stream()
+                .map(j -> new JokboResponse(j.getId(), j.getTitle(), j.getContents(),j.getJokboImgs(), j.getJokboComments().size()))
+                .collect(Collectors.toList())));
+
     }
 
     @Data
@@ -76,5 +91,24 @@ public class StoreApiController {
         String phone_number;
         String address;
         String comment;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class JokboResponse{
+        private Long jokboId;
+        private String title;
+        private String contents;
+        private String imgUrl;
+        private int commentCnt;
+
+        public JokboResponse(Long jokboId, String title, String contents, List<JokboImg> imgUrl, int commentCnt) {
+            this.jokboId = jokboId;
+            this.title = title;
+            this.contents = contents;
+            if(imgUrl.size() != 0)
+                this.imgUrl = imgUrl.get(0).getImgUrl();
+            this.commentCnt = commentCnt;
+        }
     }
 }
