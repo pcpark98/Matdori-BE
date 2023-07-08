@@ -145,7 +145,7 @@ public class JokboApiController {
      * 페이징 처리 및 정렬 처리 구현 필요
      */
     @GetMapping("/jokbos/{jokboIndex}/comments")
-    public ResponseEntity<Response<List<JokboCommentResponse>>> getAllJokboComments (
+    public ResponseEntity<Response<ReadJokboCommentResponse>> getAllJokboComments (
             @PathVariable("jokboIndex") Long jokboId,
             @RequestParam(value = "order", required = false) String order,
             @RequestParam(value = "pageCount", required = false) Long pageCount) {
@@ -154,16 +154,21 @@ public class JokboApiController {
         // 페이징 처리 및 정렬 처리 구현 필요.
 
         List<JokboComment> jokboComments = jokboService.getAllJokboComments(jokboId);
-        return ResponseEntity.ok().body(
-                Response.success(jokboComments.stream()
-                        .map(c -> new JokboCommentResponse(
-                                c.getId(),
-                                c.getCreatedAt(),
-                                c.getContents(),
-                                c.getIsDeleted(),
-                                c.getUser().getId(),
-                                c.getUser().getNickname()))
-                        .collect(Collectors.toList())));
+        List<JokboCommentResponse> comment_list = jokboComments.stream()
+                .map(c -> new JokboCommentResponse(
+                        c.getId(),
+                        c.getCreatedAt(),
+                        c.getContents(),
+                        c.getIsDeleted(),
+                        c.getUser().getId(),
+                        c.getUser().getNickname()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok()
+                .body(Response.success(new ReadJokboCommentResponse(
+                        comment_list,
+                        comment_list.size()
+                )));
     }
 
     /**
@@ -220,7 +225,7 @@ public class JokboApiController {
     }
 
     /**
-     * 족보에 달린 모든 댓글 조회하기의 응답을 위한 DTO
+     * 족보 댓글의 정보를 조회하기 위한 DTO
      */
     @Data
     @AllArgsConstructor
@@ -232,5 +237,15 @@ public class JokboApiController {
 
         Long user_index;
         String nickname;
+    }
+
+    /**
+     * 족보에 달린 모든 댓글 조회하기의 응답을 위한 DTO
+     */
+    @Data
+    @AllArgsConstructor
+    static class ReadJokboCommentResponse {
+        List<JokboCommentResponse> comment_list;
+        int comment_cnt;
     }
 }
