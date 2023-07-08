@@ -27,4 +27,10 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<StoreFavorite> storeFavorites;
+
+    @OneToMany(mappedBy = "user")
+    private List<Jokbo> jokbos;
+
+    @OneToMany(mappedBy = "user")
+    private List<JokboComment> jokboComments;
 }
