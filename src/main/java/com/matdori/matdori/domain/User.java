@@ -33,4 +33,7 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<JokboComment> jokboComments;
+
+    @OneToMany(mappedBy = "user")
+    private List<JokboFavorite> jokboFavorites;
 }
