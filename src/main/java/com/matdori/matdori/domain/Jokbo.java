@@ -30,8 +30,6 @@ public class Jokbo {
 
     private String title;
     private String contents;
-    @Column(name = "total_rating")
-    private int totalRating;
 
     @Column(name = "flavor_rating")
     private int flavorRating;
