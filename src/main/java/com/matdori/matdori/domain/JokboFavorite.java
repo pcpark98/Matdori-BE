@@ -21,4 +21,9 @@ public class JokboFavorite {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_index")
     private User user;
+
+    public JokboFavorite(Jokbo jokbo, User user) {
+        this.jokbo = jokbo;
+        this.user = user;
+    }
 }

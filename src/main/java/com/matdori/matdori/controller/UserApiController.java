@@ -50,11 +50,11 @@ public class UserApiController {
 
     // 가게 좋아요 누르기
     @PostMapping("/users/{userIndex}/favorite-store")
-    public ResponseEntity<Response<Void>> createFavoriteStore(@PathVariable("userIndex") Long userId,
-                                    @RequestBody @Valid CreateFavoriteStoreRequest requestDto){
+    public ResponseEntity<Response<Void>> createFavoriteStore(@PathVariable("userIndex") @NotNull Long userId,
+                                    @RequestBody @Valid CreateFavoriteStoreRequest request){
 
         AuthorizationService.checkSession(userId);
-        userService.createFavoriteStore(requestDto.storeId, userId);
+        userService.createFavoriteStore(request.storeId, userId);
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
@@ -120,15 +120,16 @@ public class UserApiController {
                 .body(Response.success(null));
     }
 
-    /* 좋아하는 족보 테이블 완성되면 작업
+
     @PostMapping("/users/{userIndex}/favorite-jokbo")
     public ResponseEntity<Response<Void>> createFavoriteJokbo(@RequestBody @Valid CreateFavoriteJokboRequest request,
                                                               @PathVariable("userIndex") Long userId){
         AuthorizationService.checkSession(userId);
+        userService.createFavoriteJokbo(request.jokboId, userId);
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }   
-    */
+
 
     // 비밀번호 변경하기
     @PutMapping("/users/{userIndex}/password")
@@ -202,6 +203,7 @@ public class UserApiController {
     @Data
     @AllArgsConstructor
     static class CreateFavoriteStoreRequest{
+        @NotNull
         private Long storeId;
     }
 
@@ -225,17 +227,21 @@ public class UserApiController {
 
     @Data
     static class AuthenticateEmailRequest{
+        @NotBlank
         private String email;
     }
     @Data
     static class AuthenticateNumberRequest{
+        @NotBlank
         private String number;
+        @NotNull
         private EmailAuthorizationType type;
     }
 
     @Data
     static class CreateFavoriteJokboRequest{
-        private Long storeId;
+        @NotNull
+        private Long jokboId;
     }
 
     @Data

@@ -21,10 +21,8 @@ public class StoreFavorite {
     @JoinColumn(name = "store_index")
     private Store store;
 
-    public static StoreFavorite createStoreFavorite(User user, Store store){
-        StoreFavorite storeFavorite = new StoreFavorite();
-        storeFavorite.setStore(store);
-        storeFavorite.setUser(user);
-        return storeFavorite;
+    public StoreFavorite(User user, Store store) {
+        this.user = user;
+        this.store = store;
     }
 }
