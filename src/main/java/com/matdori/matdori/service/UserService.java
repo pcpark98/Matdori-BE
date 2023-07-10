@@ -94,13 +94,19 @@ public class UserService {
 
     @Transactional
     public void updateNickname(Long userId, String nickname){
-        // 중복 닉네임 예외처리 필요
+        checkNicknameExistence(nickname);
+        // 중복체크랑 업데이트를 한 transaction에 묶어야됨.. 하
         User user = userRepository.findOne(userId);
         user.setNickname(nickname);
     }
 
     public List<Jokbo> readAllMyJokbo(Long userId){ return jokboRepository.findByUserIndex(userId);}
     public List<JokboComment> readAllMyJokboComment(Long userId){ return jokboCommentRepository.findByUserIndex(userId);}
+
+    public void checkNicknameExistence(String nickname) {
+        Optional<User> user = userRepository.findByNickname(nickname);
+        if(user.isPresent()) throw new DuplicatedNicknameException(ErrorCode.DUPLICATED_NICKNAME);
+    }
 
 }
 

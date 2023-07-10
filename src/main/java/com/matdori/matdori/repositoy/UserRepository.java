@@ -41,5 +41,13 @@ public class UserRepository {
                 .stream()
                 .findAny();
     }
-
+    public Optional<User> findByNickname(String nickname){
+        return em.createQuery(
+                        "SELECT u FROM User u " +
+                                "WHERE u.nickname =: nickname ", User.class)
+                .setParameter("nickname", nickname)
+                .getResultList()
+                .stream()
+                .findAny();
+    }
 }

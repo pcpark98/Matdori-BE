@@ -7,10 +7,8 @@ import com.matdori.matdori.service.MailService;
 import com.matdori.matdori.service.UserService;
 import com.matdori.matdori.service.UserSha256;
 import com.matdori.matdori.util.SessionUtil;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import com.matdori.matdori.util.UserUtil;
+import lombok.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,7 +40,7 @@ public class UserApiController {
         user.setEmail(request.email);
         user.setDepartment("학과 parsing 필요");
         user.setPassword(request.password);
-        user.setNickname("맛도리1234");
+        user.setNickname(UserUtil.getRandomNickname());
         // 약관 동의 추가하는 로직 필요
         userService.signUp(user);
         return ResponseEntity.ok()
@@ -224,6 +222,14 @@ public class UserApiController {
                 .body(Response.success(null));
     }
 
+    // 중복 닉네임 체크
+    @GetMapping("/nickname")
+    public ResponseEntity<Response<Void>> checkNicknameExistence(@RequestBody @Valid checkNicknameRequest request){
+        userService.checkNicknameExistence(request.nickname);
+        return ResponseEntity.ok()
+                .body(Response.success(null));
+    }
+
     @Data
     static class LoginRequest{
         @NotNull
@@ -316,11 +322,13 @@ public class UserApiController {
 
     @Data
     static class UpdatePasswordRequest{
+        @NotBlank
         private String password;
     }
 
     @Data
     static class UpdateNicknameRequest{
+        @NotBlank
         private String nickname;
     }
 
@@ -361,5 +369,11 @@ public class UserApiController {
         private String email;
         @NotBlank
         private String password;
+    }
+
+    @Data
+    static class checkNicknameRequest{
+        @NotBlank
+        private String nickname;
     }
 }
