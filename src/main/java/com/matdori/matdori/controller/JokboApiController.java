@@ -36,7 +36,6 @@ public class JokboApiController {
         User user = userService.findOne(userIndex);
         jokbo.setUser(user);
 
-        jokbo.setTotalRating(request.getTotal_rating());
         jokbo.setFlavorRating(request.getFlavor_rating());
         jokbo.setUnderPricedRating(request.getUnder_priced_rating());
         jokbo.setCleanRating(request.getClean_rating());
@@ -209,7 +208,6 @@ public class JokboApiController {
      */
     @Data
     static class CreateJokboRequest {
-        private int total_rating;
         private int flavor_rating;
         private int under_priced_rating;
         private int clean_rating;
