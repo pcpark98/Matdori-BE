@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,10 +35,12 @@ public class UserApiController {
     // 회원 가입
     @PostMapping("/sign-up")
     public ResponseEntity<Response<Void>> createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
+        // 이메일 인증여부 확인
+        AuthorizationService.checkEmailVerificationCompletion(request.email, EmailAuthorizationType.SIGNUP);
         User user = new User();
         user.setEmail(request.email);
         user.setDepartment("학과 parsing 필요");
-        user.setPassword(UserSha256.encrypt(request.password));
+        user.setPassword(request.password);
         user.setNickname("맛도리1234");
         // 약관 동의 추가하는 로직 필요
         userService.signUp(user);
@@ -82,7 +86,7 @@ public class UserApiController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<Response<LoginResponse>> login(@RequestBody LoginRequest request) throws NoSuchAlgorithmException {
+    public ResponseEntity<Response<LoginResponse>> login(@Valid @RequestBody LoginRequest request) throws NoSuchAlgorithmException {
         User user = authorizationService.login(request.email, UserSha256.encrypt(request.password));
         String uuid = UUID.randomUUID().toString();
 
@@ -94,8 +98,8 @@ public class UserApiController {
 
     // 로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<Response<Void>> login(HttpServletRequest request) {
-        AuthorizationService.logout(request.getSession());
+    public ResponseEntity<Response<Void>> logout() {
+        AuthorizationService.logout();
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
@@ -111,8 +115,7 @@ public class UserApiController {
     // 인증번호 체크
     @PostMapping("/authentication-number")
     public ResponseEntity<Response<Void>> authenticateNumber(@RequestBody @Valid AuthenticateNumberRequest request){
-        // 인증하고 최종 회원 가입 시까지 인증여부를 남겨둬야될 듯
-        AuthorizationService.checkAuthorizationNumber(request.number);
+        AuthorizationService.checkAuthorizationNumber(request.number, request.type);
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
@@ -168,9 +171,19 @@ public class UserApiController {
                 .collect(Collectors.toList())));
     }
 
+    // 비밀번호 찾기
+    @PutMapping("/password")
+    public ResponseEntity<Response<Void>> updatePasswordWithoutLogin(@RequestBody updatePasswordWithoutLoginRequest request) throws NoSuchAlgorithmException {
+        userService.updatePasswordWithoutLogin(request.email, request.password);
+        return ResponseEntity.ok()
+                .body(Response.success(null));
+    }
+
     @Data
     static class LoginRequest{
+        @NotNull
         private String email;
+        @NotNull
         private String password;
     }
 
@@ -203,7 +216,9 @@ public class UserApiController {
 
     @Data
     static class CreateUserRequest{
+        @NotBlank
         private String email;
+        @NotBlank
         private String password;
         //private int[] termIndex;
     }
@@ -215,6 +230,7 @@ public class UserApiController {
     @Data
     static class AuthenticateNumberRequest{
         private String number;
+        private EmailAuthorizationType type;
     }
 
     @Data
@@ -257,5 +273,13 @@ public class UserApiController {
         private String storeName;
         private String contents;
         private LocalDateTime writtenAt;
+    }
+
+    @Data
+    static class updatePasswordWithoutLoginRequest{
+        @NotBlank
+        private String email;
+        @NotBlank
+        private String password;
     }
 }

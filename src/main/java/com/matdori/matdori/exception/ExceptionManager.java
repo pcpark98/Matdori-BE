@@ -3,6 +3,7 @@ package com.matdori.matdori.exception;
 import com.matdori.matdori.domain.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -54,11 +55,26 @@ public class ExceptionManager {
                 .body(Response.error(e.getErrorCode().name()));
     }
     @ExceptionHandler(InvalidRequiredParamException.class)
-    public ResponseEntity<?> nvalidRequiredParamException(InvalidRequiredParamException e){
+    public ResponseEntity<?> invalidRequiredParamException(InvalidRequiredParamException e){
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(Response.error(e.getErrorCode().name()));
     }
-    // --------------------------------------------------------
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> methodArgumentNotValidException(MethodArgumentNotValidException e){
+        return ResponseEntity.status(ErrorCode.INVALID_REQUIRED_PARAM.getStatus())
+                .body(Response.error(ErrorCode.INVALID_REQUIRED_PARAM.name()));
+    }
+    @ExceptionHandler(IncompleteEmailVerificationException.class)
+    public ResponseEntity<?> incompleteEmailVerificationException(IncompleteEmailVerificationException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<?> invalidPasswordException(InvalidPasswordException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name())); //
+        // --------------------------------------------------------
+    }
 
 }

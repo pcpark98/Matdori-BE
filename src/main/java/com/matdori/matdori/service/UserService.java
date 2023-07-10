@@ -3,6 +3,8 @@ package com.matdori.matdori.service;
 import com.matdori.matdori.domain.*;
 import com.matdori.matdori.exception.*;
 import com.matdori.matdori.repositoy.*;
+import com.matdori.matdori.util.SessionUtil;
+import com.matdori.matdori.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +27,16 @@ public class UserService {
 
     public User findOne(Long userId) { return userRepository.findOne(userId); }
     @Transactional
-    public void signUp(User user){
+    public void signUp(User user) throws NoSuchAlgorithmException {
         // 이메일 형식 체크
-        if(!user.getEmail().matches("[0-9]{8}@inha.ac.kr"))
+        if(!UserUtil.isValidEmailFormat(user.getEmail()))
             throw new InvalidEmailException(ErrorCode.INVALID_EMAIL_FORMAT);
+
+        if(!UserUtil.isValidPasswordFormat(user.getPassword()))
+            throw new InvalidEmailException(ErrorCode.INVALID_PASSWORD_FORMAT);
+
+        // password 암호화
+        user.setPassword(UserSha256.encrypt(user.getPassword()));
         // 회원 중복 체크
         Optional<User> duplicatedUser =  userRepository.findByEmail(user.getEmail());
         if(duplicatedUser.isPresent())
@@ -50,7 +58,25 @@ public class UserService {
 
     @Transactional
     public void updatePassword(Long userId, String password) throws NoSuchAlgorithmException {
+        if(!UserUtil.isValidPasswordFormat(password))
+            throw new InvalidPasswordException(ErrorCode.INVALID_EMAIL_FORMAT);
+
         User user = userRepository.findOne(userId);
+        user.setPassword(UserSha256.encrypt(password));
+    }
+
+    @Transactional
+    public void updatePasswordWithoutLogin(String email, String password) throws NoSuchAlgorithmException {
+        // 비밀번호 형식 체크
+        if(!UserUtil.isValidPasswordFormat(password))
+            throw new InvalidPasswordException(ErrorCode.INVALID_PASSWORD_FORMAT);
+        // 이메일 인증 여부 체크
+        EmailAuthorizationType type = EmailAuthorizationType.valueOf(SessionUtil.getAttribute(email));
+        if(type == null || type != EmailAuthorizationType.UPDATEPASSWORD)
+            throw new IncompleteEmailVerificationException(ErrorCode.INCOMPLETE_EMAIL_VERIFICATION);
+
+        // 비밀번호 변경
+        User user = userRepository.findByEmail(email).get();
         user.setPassword(UserSha256.encrypt(password));
     }
 
