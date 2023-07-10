@@ -9,6 +9,7 @@ import com.matdori.matdori.service.UserSha256;
 import com.matdori.matdori.util.SessionUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -68,7 +69,7 @@ public class UserApiController {
         AuthorizationService.checkSession(userId);
         List<StoreFavorite> FavoriteStores = userService.findAllFavoriteStore(userId);
         return ResponseEntity.ok().body(Response.success(FavoriteStores.stream()
-                .map(s -> new readFavoriteStoresResponse(s.getId(), s.getStore().getId(), s.getStore().getName(), s.getStore().getImg_url()))
+                .map(s -> new readFavoriteStoresResponse(s.getId(), s.getStore().getId(), s.getStore().getName(),s.getStore().getCategory() ,s.getStore().getImg_url()))
                 .collect(Collectors.toList())));
     }
 
@@ -80,6 +81,18 @@ public class UserApiController {
 
         AuthorizationService.checkSession(userId);
         userService.deleteFavoriteStore(storeId);
+        return ResponseEntity.ok()
+                .body(Response.success(null));
+    }
+
+    // 내가 좋아요한 족보 삭제
+    @DeleteMapping("/users/{userIndex}/favorite-jokbos/{jokboIndex}")
+    public ResponseEntity<Response<Void>> deleteFavoriteJokbo(
+            @PathVariable("userIndex") Long userId,
+            @PathVariable("jokboIndex") Long jokboId){
+
+        AuthorizationService.checkSession(userId);
+        userService.deleteFavoriteJokbo(jokboId);
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
@@ -121,6 +134,7 @@ public class UserApiController {
     }
 
 
+    // 족보 좋아요 누르기
     @PostMapping("/users/{userIndex}/favorite-jokbo")
     public ResponseEntity<Response<Void>> createFavoriteJokbo(@RequestBody @Valid CreateFavoriteJokboRequest request,
                                                               @PathVariable("userIndex") Long userId){
@@ -128,8 +142,35 @@ public class UserApiController {
         userService.createFavoriteJokbo(request.jokboId, userId);
         return ResponseEntity.ok()
                 .body(Response.success(null));
-    }   
+    }
 
+    // 내가 좋아요한 족보 리스트 조회
+    @GetMapping("/users/{userIndex}/favorite-jokbos")
+    public ResponseEntity<Response<List<ReadFavoriteJokbosResponse>>> readFavoriteJokbos(
+            @PathVariable("userIndex") Long userId,
+            @RequestParam Long pageCount){
+
+        AuthorizationService.checkSession(userId);
+        List<JokboFavorite> jokboFavorites = userService.findAllFavoriteJokbo(userId);
+
+        return ResponseEntity.ok().body(
+                Response.success(jokboFavorites.stream()
+                        .map(j -> {
+                            Jokbo jokbo = j.getJokbo();
+                            Double totalRating = (double) ((jokbo.getCleanRating() + jokbo.getFlavorRating() + jokbo.getUnderPricedRating())/3);
+                            return new ReadFavoriteJokbosResponse(
+                                    j.getId(),
+                                    jokbo.getId(),
+                                    jokbo.getTitle(),
+                                    totalRating,
+                                    jokbo.getJokboImgs(),
+                                    jokbo.getContents(),
+                                    jokbo.getJokboFavorites().size(),
+                                    jokbo.getJokboComments().size());
+                        })
+                        .collect(Collectors.toList())));
+
+    }
 
     // 비밀번호 변경하기
     @PutMapping("/users/{userIndex}/password")
@@ -158,7 +199,10 @@ public class UserApiController {
         AuthorizationService.checkSession(userId);
         List<Jokbo> jokbos = userService.readAllMyJokbo(userId);
         return ResponseEntity.ok().body(Response.success(jokbos.stream()
-                .map(j -> new AllMyJokboResponse(j.getId(), j.getTitle(), j.getContents(),j.getJokboImgs(), j.getJokboComments().size()))
+                .map(j ->{
+                    Double totalRating = (double) (j.getCleanRating() + j.getFlavorRating() + j.getUnderPricedRating())/3;
+                    return new AllMyJokboResponse(j.getId(), j.getTitle(), j.getContents(),totalRating ,j.getJokboImgs(), j.getJokboComments().size(), j.getJokboFavorites().size());
+                })
                 .collect(Collectors.toList())));
     }
 
@@ -201,7 +245,6 @@ public class UserApiController {
         private String department;
     }
     @Data
-    @AllArgsConstructor
     static class CreateFavoriteStoreRequest{
         @NotNull
         private Long storeId;
@@ -213,8 +256,35 @@ public class UserApiController {
         private Long favoriteStoreId;
         private Long storeId;
         private String name;
+        private String category;
         private String imgUrl;
     }
+
+    @Data
+    @NoArgsConstructor
+    static class ReadFavoriteJokbosResponse{
+        private Long favoriteJokboId;
+        private Long jokboId;
+        private String title;
+        private Double totalRating;
+        private String imgUrl;
+        private String contents;
+        private int commentCnt;
+        private int favoriteCnt;
+
+        public ReadFavoriteJokbosResponse(Long favoriteJokboId, Long jokboId, String title, Double totalRating, List<JokboImg> imgUrl, String contents, int commentCnt, int favoriteCnt) {
+            this.favoriteJokboId = favoriteJokboId;
+            this.jokboId = jokboId;
+            this.title = title;
+            this.totalRating = totalRating;
+            if(imgUrl.size() != 0)
+                this.imgUrl = imgUrl.get(0).getImgUrl();
+            this.contents = contents;
+            this.commentCnt = commentCnt;
+            this.favoriteCnt = favoriteCnt;
+        }
+    }
+
 
     @Data
     static class CreateUserRequest{
@@ -260,16 +330,20 @@ public class UserApiController {
         private Long jokboId;
         private String title;
         private String contents;
+        private Double totalRating;
         private String imgUrl;
         private int commentCnt;
+        private int favoriteCnt;
 
-        public AllMyJokboResponse(Long jokboId, String title, String contents, List<JokboImg> imgUrl, int commentCnt) {
+        public AllMyJokboResponse(Long jokboId, String title, String contents, Double totalRating,List<JokboImg> imgUrl, int commentCnt, int favoriteCnt) {
             this.jokboId = jokboId;
             this.title = title;
             this.contents = contents;
+            this.totalRating = totalRating;
             if(imgUrl.size() != 0)
                 this.imgUrl = imgUrl.get(0).getImgUrl();
             this.commentCnt = commentCnt;
+            this.favoriteCnt = favoriteCnt;
         }
     }
     @Data

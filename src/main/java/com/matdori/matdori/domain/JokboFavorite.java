@@ -1,6 +1,7 @@
 package com.matdori.matdori.domain;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -9,6 +10,7 @@ import static javax.persistence.FetchType.*;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor
 public class JokboFavorite {
     @Id @GeneratedValue
     @Column(name = "jokbo_favorite_index")

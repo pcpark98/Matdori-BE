@@ -46,9 +46,13 @@ public class UserService {
         userRepository.save(user);
     }
     public List<StoreFavorite> findAllFavoriteStore(Long userId) { return storeFavoriteRepository.findAllFavoriteStore(userId);}
+
+    public List<JokboFavorite> findAllFavoriteJokbo(Long userId) { return jokboFavoriteRepository.findAllFavoriteJokbo(userId);}
     @Transactional
     public void deleteFavoriteStore(Long favoriteStoreId) { storeFavoriteRepository.deleteStoreFavorite(favoriteStoreId);}
 
+    @Transactional
+    public void deleteFavoriteJokbo(Long favoriteJokboId) { jokboFavoriteRepository.delete(favoriteJokboId);}
     @Transactional
     public void createFavoriteStore(Long storeId, Long userId) {
         User user = userRepository.findOne(userId);
