@@ -44,12 +44,12 @@ public class Jokbo {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "jokbo")
+    @OneToMany(mappedBy = "jokbo", cascade = CascadeType.ALL)
     private List<JokboImg> jokboImgs = new ArrayList<>();
 
-    @OneToMany(mappedBy = "jokbo")
+    @OneToMany(mappedBy = "jokbo", cascade = CascadeType.ALL)
     private List<JokboComment> jokboComments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "jokbo")
+    @OneToMany(mappedBy = "jokbo", cascade = CascadeType.ALL)
     private List<JokboFavorite> jokboFavorites = new ArrayList<>();
 }
