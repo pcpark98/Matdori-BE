@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -208,13 +210,22 @@ public class JokboApiController {
      */
     @Data
     static class CreateJokboRequest {
+        @NotNull
         private int flavorRating;
+
+        @NotNull
         private int underPricedRating;
+
+        @NotNull
         private int cleanRating;
 
+        @NotNull
         private Long storeIndex;
 
+        @NotBlank
         private String title;
+
+        @NotBlank
         private String contents;
 
         private List<MultipartFile> images;
@@ -242,7 +253,10 @@ public class JokboApiController {
      */
     @Data
     static class CreateJokboCommentRequest {
+        @NotNull
         private Long userIndex;
+
+        @NotBlank
         private String contents;
     }
 
@@ -276,6 +290,7 @@ public class JokboApiController {
      */
     @Data
     static class DeleteJokboCommentRequest {
+        @NotNull
         private Long userIndex;
     }
 
