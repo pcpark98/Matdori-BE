@@ -25,6 +25,8 @@ public class UserService {
     private final JokboRepository jokboRepository;
     private final JokboCommentRepository jokboCommentRepository;
     private final JokboFavoriteRepository jokboFavoriteRepository;
+    private final TermsAgreementRepository termsAgreementRepository;
+    private final TermsOfServiceRepository termsOfServiceRepository;
 
     public User findOne(Long userId) { return userRepository.findOne(userId); }
     @Transactional
@@ -44,6 +46,11 @@ public class UserService {
             throw new DuplicatedUserException(ErrorCode.DUPLICATED_USER);
 
         userRepository.save(user);
+        List<TermsOfService> allTerms = termsOfServiceRepository.findAllTerms();
+
+        for(TermsOfService terms : allTerms){
+            termsAgreementRepository.save(new TermAgreement(user, terms));
+        }
     }
     public List<StoreFavorite> findAllFavoriteStore(Long userId, int pageCount) { return storeFavoriteRepository.findAllFavoriteStore(userId, pageCount);}
 
@@ -107,6 +114,5 @@ public class UserService {
         Optional<User> user = userRepository.findByNickname(nickname);
         if(user.isPresent()) throw new DuplicatedNicknameException(ErrorCode.DUPLICATED_NICKNAME);
     }
-
 }
 
