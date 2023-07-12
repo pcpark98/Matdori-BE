@@ -30,14 +30,17 @@ public class JokboFavoriteRepository {
     /**
      * 내가 좋아요 누른 모든 족보 가져오기.
      */
-    public List<JokboFavorite> findAllFavoriteJokbo(Long id) {
+    public List<JokboFavorite> findAllFavoriteJokbo(Long id, int pageCount) {
         return em.createQuery(
                 "SELECT DISTINCT f FROM User u " +
                         "JOIN u.jokboFavorites f " +
                         "JOIN FETCH f.jokbo j " +
                         "LEFT JOIN FETCH j.jokboComments " +
                         "WHERE u.id =: id", JokboFavorite.class)
-                .setParameter("id", id).getResultList();
+                .setParameter("id", id)
+                .setFirstResult((pageCount-1)*15)
+                .setMaxResults(15)
+                .getResultList();
     }
 
 

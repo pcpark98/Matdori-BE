@@ -62,10 +62,10 @@ public class UserApiController {
     @GetMapping("/users/{userIndex}/favorite-stores")
     public ResponseEntity<Response<List<readFavoriteStoresResponse>>> readFavoriteStores(
             @PathVariable("userIndex") Long userId,
-            @RequestParam Long pageCount){
+            @RequestParam int pageCount){
 
         AuthorizationService.checkSession(userId);
-        List<StoreFavorite> FavoriteStores = userService.findAllFavoriteStore(userId);
+        List<StoreFavorite> FavoriteStores = userService.findAllFavoriteStore(userId, pageCount);
         return ResponseEntity.ok().body(Response.success(FavoriteStores.stream()
                 .map(s -> new readFavoriteStoresResponse(s.getId(), s.getStore().getId(), s.getStore().getName(),s.getStore().getCategory() ,s.getStore().getImgUrl()))
                 .collect(Collectors.toList())));
@@ -146,10 +146,10 @@ public class UserApiController {
     @GetMapping("/users/{userIndex}/favorite-jokbos")
     public ResponseEntity<Response<List<ReadFavoriteJokbosResponse>>> readFavoriteJokbos(
             @PathVariable("userIndex") Long userId,
-            @RequestParam Long pageCount){
+            @RequestParam int pageCount){
 
         AuthorizationService.checkSession(userId);
-        List<JokboFavorite> jokboFavorites = userService.findAllFavoriteJokbo(userId);
+        List<JokboFavorite> jokboFavorites = userService.findAllFavoriteJokbo(userId, pageCount);
 
         return ResponseEntity.ok().body(
                 Response.success(jokboFavorites.stream()
@@ -191,11 +191,10 @@ public class UserApiController {
     }
 
     @GetMapping("/users/{userIndex}/jokbos")
-    //pageCount 넣어야됨
-    // favoriteCnt 넣어야됨
-    public ResponseEntity<Response<List<AllMyJokboResponse>>> readAllMyJokbo(@PathVariable("userIndex") Long userId){
+    public ResponseEntity<Response<List<AllMyJokboResponse>>> readAllMyJokbo(@PathVariable("userIndex") Long userId,
+                                                                             @RequestParam int pageCount){
         AuthorizationService.checkSession(userId);
-        List<Jokbo> jokbos = userService.readAllMyJokbo(userId);
+        List<Jokbo> jokbos = userService.readAllMyJokbo(userId, pageCount);
         return ResponseEntity.ok().body(Response.success(jokbos.stream()
                 .map(j ->{
                     Double totalRating = (double) (j.getCleanRating() + j.getFlavorRating() + j.getUnderPricedRating())/3;
@@ -205,10 +204,10 @@ public class UserApiController {
     }
 
     @GetMapping("/users/{userIndex}/comments")
-    //pageCount 넣어야됨
-    public ResponseEntity<Response<List<AllMyJokboCommentResponse>>> readAllMyJokboComment(@PathVariable("userIndex") Long userId){
+    public ResponseEntity<Response<List<AllMyJokboCommentResponse>>> readAllMyJokboComment(@PathVariable("userIndex") Long userId,
+                                                                                           @RequestParam int pageCount){
         AuthorizationService.checkSession(userId);
-        List<JokboComment> comments = userService.readAllMyJokboComment(userId);
+        List<JokboComment> comments = userService.readAllMyJokboComment(userId, pageCount);
         return ResponseEntity.ok().body(Response.success(comments.stream()
                 .map(c -> new AllMyJokboCommentResponse(c.getJokbo().getId(), c.getJokbo().getStore().getName(), c.getContents(), c.getCreatedAt()))
                 .collect(Collectors.toList())));

@@ -25,6 +25,8 @@ public class UserService {
     private final JokboRepository jokboRepository;
     private final JokboCommentRepository jokboCommentRepository;
     private final JokboFavoriteRepository jokboFavoriteRepository;
+    private final TermsAgreementRepository termsAgreementRepository;
+    private final TermsOfServiceRepository termsOfServiceRepository;
 
     public User findOne(Long userId) { return userRepository.findOne(userId); }
     @Transactional
@@ -44,10 +46,15 @@ public class UserService {
             throw new DuplicatedUserException(ErrorCode.DUPLICATED_USER);
 
         userRepository.save(user);
-    }
-    public List<StoreFavorite> findAllFavoriteStore(Long userId) { return storeFavoriteRepository.findAllFavoriteStore(userId);}
+        List<TermsOfService> allTerms = termsOfServiceRepository.findAllTerms();
 
-    public List<JokboFavorite> findAllFavoriteJokbo(Long userId) { return jokboFavoriteRepository.findAllFavoriteJokbo(userId);}
+        for(TermsOfService terms : allTerms){
+            termsAgreementRepository.save(new TermAgreement(user, terms));
+        }
+    }
+    public List<StoreFavorite> findAllFavoriteStore(Long userId, int pageCount) { return storeFavoriteRepository.findAllFavoriteStore(userId, pageCount);}
+
+    public List<JokboFavorite> findAllFavoriteJokbo(Long userId, int pageCount) { return jokboFavoriteRepository.findAllFavoriteJokbo(userId, pageCount);}
     @Transactional
     public void deleteFavoriteStore(Long favoriteStoreId) { storeFavoriteRepository.deleteStoreFavorite(favoriteStoreId);}
 
@@ -100,13 +107,12 @@ public class UserService {
         user.setNickname(nickname);
     }
 
-    public List<Jokbo> readAllMyJokbo(Long userId){ return jokboRepository.findByUserIndex(userId);}
-    public List<JokboComment> readAllMyJokboComment(Long userId){ return jokboCommentRepository.findByUserIndex(userId);}
+    public List<Jokbo> readAllMyJokbo(Long userId, int pageCount){ return jokboRepository.findByUserIndex(userId, pageCount);}
+    public List<JokboComment> readAllMyJokboComment(Long userId, int pageCount){ return jokboCommentRepository.findByUserIndex(userId, pageCount);}
 
     public void checkNicknameExistence(String nickname) {
         Optional<User> user = userRepository.findByNickname(nickname);
         if(user.isPresent()) throw new DuplicatedNicknameException(ErrorCode.DUPLICATED_NICKNAME);
     }
-
 }
 
