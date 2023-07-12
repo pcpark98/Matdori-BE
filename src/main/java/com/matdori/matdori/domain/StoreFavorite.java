@@ -1,12 +1,15 @@
 package com.matdori.matdori.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor
 public class StoreFavorite {
 
     @Id @GeneratedValue
@@ -21,10 +24,8 @@ public class StoreFavorite {
     @JoinColumn(name = "store_index")
     private Store store;
 
-    public static StoreFavorite createStoreFavorite(User user, Store store){
-        StoreFavorite storeFavorite = new StoreFavorite();
-        storeFavorite.setStore(store);
-        storeFavorite.setUser(user);
-        return storeFavorite;
+    public StoreFavorite(User user, Store store) {
+        this.user = user;
+        this.store = store;
     }
 }

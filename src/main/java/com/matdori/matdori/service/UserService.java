@@ -24,6 +24,7 @@ public class UserService {
     private final StoreRepository storeRepository;
     private final JokboRepository jokboRepository;
     private final JokboCommentRepository jokboCommentRepository;
+    private final JokboFavoriteRepository jokboFavoriteRepository;
 
     public User findOne(Long userId) { return userRepository.findOne(userId); }
     @Transactional
@@ -45,15 +46,26 @@ public class UserService {
         userRepository.save(user);
     }
     public List<StoreFavorite> findAllFavoriteStore(Long userId) { return storeFavoriteRepository.findAllFavoriteStore(userId);}
+
+    public List<JokboFavorite> findAllFavoriteJokbo(Long userId) { return jokboFavoriteRepository.findAllFavoriteJokbo(userId);}
     @Transactional
     public void deleteFavoriteStore(Long favoriteStoreId) { storeFavoriteRepository.deleteStoreFavorite(favoriteStoreId);}
 
     @Transactional
+    public void deleteFavoriteJokbo(Long favoriteJokboId) { jokboFavoriteRepository.delete(favoriteJokboId);}
+    @Transactional
     public void createFavoriteStore(Long storeId, Long userId) {
         User user = userRepository.findOne(userId);
         Store store = storeRepository.findOne(storeId);
-        StoreFavorite storeFavorite = StoreFavorite.createStoreFavorite(user, store);
+        StoreFavorite storeFavorite = new StoreFavorite(user, store);
         storeFavoriteRepository.saveStoreFavorite(storeFavorite);
+    }
+
+    @Transactional
+    public void createFavoriteJokbo(Long jokboId, Long userId){
+        User user = userRepository.findOne(userId);
+        Jokbo jokbo = jokboRepository.findOne(jokboId);
+        jokboFavoriteRepository.save(new JokboFavorite(jokbo, user));
     }
 
     @Transactional
@@ -82,12 +94,19 @@ public class UserService {
 
     @Transactional
     public void updateNickname(Long userId, String nickname){
-        // 중복 닉네임 예외처리 필요
+        checkNicknameExistence(nickname);
+        // 중복체크랑 업데이트를 한 transaction에 묶어야됨.. 하
         User user = userRepository.findOne(userId);
         user.setNickname(nickname);
     }
 
     public List<Jokbo> readAllMyJokbo(Long userId){ return jokboRepository.findByUserIndex(userId);}
     public List<JokboComment> readAllMyJokboComment(Long userId){ return jokboCommentRepository.findByUserIndex(userId);}
+
+    public void checkNicknameExistence(String nickname) {
+        Optional<User> user = userRepository.findByNickname(nickname);
+        if(user.isPresent()) throw new DuplicatedNicknameException(ErrorCode.DUPLICATED_NICKNAME);
+    }
+
 }
 

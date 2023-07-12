@@ -73,8 +73,15 @@ public class ExceptionManager {
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<?> invalidPasswordException(InvalidPasswordException e){
         return ResponseEntity.status(e.getErrorCode().getStatus())
-                .body(Response.error(e.getErrorCode().name())); //
-        // --------------------------------------------------------
+                .body(Response.error(e.getErrorCode().name()));
     }
+
+    @ExceptionHandler(DuplicatedNicknameException.class)
+    public ResponseEntity<?> duplicatedNicknameException(DuplicatedNicknameException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    // --------------------------------------------------------
 
 }

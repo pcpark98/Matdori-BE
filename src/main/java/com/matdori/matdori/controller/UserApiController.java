@@ -7,9 +7,8 @@ import com.matdori.matdori.service.MailService;
 import com.matdori.matdori.service.UserService;
 import com.matdori.matdori.service.UserSha256;
 import com.matdori.matdori.util.SessionUtil;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import com.matdori.matdori.util.UserUtil;
+import lombok.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,7 +40,7 @@ public class UserApiController {
         user.setEmail(request.email);
         user.setDepartment("학과 parsing 필요");
         user.setPassword(request.password);
-        user.setNickname("맛도리1234");
+        user.setNickname(UserUtil.getRandomNickname());
         // 약관 동의 추가하는 로직 필요
         userService.signUp(user);
         return ResponseEntity.ok()
@@ -50,11 +49,11 @@ public class UserApiController {
 
     // 가게 좋아요 누르기
     @PostMapping("/users/{userIndex}/favorite-store")
-    public ResponseEntity<Response<Void>> createFavoriteStore(@PathVariable("userIndex") Long userId,
-                                    @RequestBody @Valid CreateFavoriteStoreRequest requestDto){
+    public ResponseEntity<Response<Void>> createFavoriteStore(@PathVariable("userIndex") @NotNull Long userId,
+                                    @RequestBody @Valid CreateFavoriteStoreRequest request){
 
         AuthorizationService.checkSession(userId);
-        userService.createFavoriteStore(requestDto.storeId, userId);
+        userService.createFavoriteStore(request.storeId, userId);
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
@@ -68,7 +67,7 @@ public class UserApiController {
         AuthorizationService.checkSession(userId);
         List<StoreFavorite> FavoriteStores = userService.findAllFavoriteStore(userId);
         return ResponseEntity.ok().body(Response.success(FavoriteStores.stream()
-                .map(s -> new readFavoriteStoresResponse(s.getId(), s.getStore().getId(), s.getStore().getName(), s.getStore().getImg_url()))
+                .map(s -> new readFavoriteStoresResponse(s.getId(), s.getStore().getId(), s.getStore().getName(),s.getStore().getCategory() ,s.getStore().getImg_url()))
                 .collect(Collectors.toList())));
     }
 
@@ -80,6 +79,18 @@ public class UserApiController {
 
         AuthorizationService.checkSession(userId);
         userService.deleteFavoriteStore(storeId);
+        return ResponseEntity.ok()
+                .body(Response.success(null));
+    }
+
+    // 내가 좋아요한 족보 삭제
+    @DeleteMapping("/users/{userIndex}/favorite-jokbos/{jokboIndex}")
+    public ResponseEntity<Response<Void>> deleteFavoriteJokbo(
+            @PathVariable("userIndex") Long userId,
+            @PathVariable("jokboIndex") Long jokboId){
+
+        AuthorizationService.checkSession(userId);
+        userService.deleteFavoriteJokbo(jokboId);
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
@@ -120,15 +131,44 @@ public class UserApiController {
                 .body(Response.success(null));
     }
 
-    /* 좋아하는 족보 테이블 완성되면 작업
+
+    // 족보 좋아요 누르기
     @PostMapping("/users/{userIndex}/favorite-jokbo")
     public ResponseEntity<Response<Void>> createFavoriteJokbo(@RequestBody @Valid CreateFavoriteJokboRequest request,
                                                               @PathVariable("userIndex") Long userId){
         AuthorizationService.checkSession(userId);
+        userService.createFavoriteJokbo(request.jokboId, userId);
         return ResponseEntity.ok()
                 .body(Response.success(null));
-    }   
-    */
+    }
+
+    // 내가 좋아요한 족보 리스트 조회
+    @GetMapping("/users/{userIndex}/favorite-jokbos")
+    public ResponseEntity<Response<List<ReadFavoriteJokbosResponse>>> readFavoriteJokbos(
+            @PathVariable("userIndex") Long userId,
+            @RequestParam Long pageCount){
+
+        AuthorizationService.checkSession(userId);
+        List<JokboFavorite> jokboFavorites = userService.findAllFavoriteJokbo(userId);
+
+        return ResponseEntity.ok().body(
+                Response.success(jokboFavorites.stream()
+                        .map(j -> {
+                            Jokbo jokbo = j.getJokbo();
+                            Double totalRating = (double) ((jokbo.getCleanRating() + jokbo.getFlavorRating() + jokbo.getUnderPricedRating())/3);
+                            return new ReadFavoriteJokbosResponse(
+                                    j.getId(),
+                                    jokbo.getId(),
+                                    jokbo.getTitle(),
+                                    totalRating,
+                                    jokbo.getJokboImgs(),
+                                    jokbo.getContents(),
+                                    jokbo.getJokboFavorites().size(),
+                                    jokbo.getJokboComments().size());
+                        })
+                        .collect(Collectors.toList())));
+
+    }
 
     // 비밀번호 변경하기
     @PutMapping("/users/{userIndex}/password")
@@ -157,7 +197,10 @@ public class UserApiController {
         AuthorizationService.checkSession(userId);
         List<Jokbo> jokbos = userService.readAllMyJokbo(userId);
         return ResponseEntity.ok().body(Response.success(jokbos.stream()
-                .map(j -> new AllMyJokboResponse(j.getId(), j.getTitle(), j.getContents(),j.getJokboImgs(), j.getJokboComments().size()))
+                .map(j ->{
+                    Double totalRating = (double) (j.getCleanRating() + j.getFlavorRating() + j.getUnderPricedRating())/3;
+                    return new AllMyJokboResponse(j.getId(), j.getTitle(), j.getContents(),totalRating ,j.getJokboImgs(), j.getJokboComments().size(), j.getJokboFavorites().size());
+                })
                 .collect(Collectors.toList())));
     }
 
@@ -175,6 +218,14 @@ public class UserApiController {
     @PutMapping("/password")
     public ResponseEntity<Response<Void>> updatePasswordWithoutLogin(@RequestBody updatePasswordWithoutLoginRequest request) throws NoSuchAlgorithmException {
         userService.updatePasswordWithoutLogin(request.email, request.password);
+        return ResponseEntity.ok()
+                .body(Response.success(null));
+    }
+
+    // 중복 닉네임 체크
+    @GetMapping("/nickname")
+    public ResponseEntity<Response<Void>> checkNicknameExistence(@RequestBody @Valid checkNicknameRequest request){
+        userService.checkNicknameExistence(request.nickname);
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
@@ -200,8 +251,8 @@ public class UserApiController {
         private String department;
     }
     @Data
-    @AllArgsConstructor
     static class CreateFavoriteStoreRequest{
+        @NotNull
         private Long storeId;
     }
 
@@ -211,8 +262,35 @@ public class UserApiController {
         private Long favoriteStoreId;
         private Long storeId;
         private String name;
+        private String category;
         private String imgUrl;
     }
+
+    @Data
+    @NoArgsConstructor
+    static class ReadFavoriteJokbosResponse{
+        private Long favoriteJokboId;
+        private Long jokboId;
+        private String title;
+        private Double totalRating;
+        private String imgUrl;
+        private String contents;
+        private int commentCnt;
+        private int favoriteCnt;
+
+        public ReadFavoriteJokbosResponse(Long favoriteJokboId, Long jokboId, String title, Double totalRating, List<JokboImg> imgUrl, String contents, int commentCnt, int favoriteCnt) {
+            this.favoriteJokboId = favoriteJokboId;
+            this.jokboId = jokboId;
+            this.title = title;
+            this.totalRating = totalRating;
+            if(imgUrl.size() != 0)
+                this.imgUrl = imgUrl.get(0).getImgUrl();
+            this.contents = contents;
+            this.commentCnt = commentCnt;
+            this.favoriteCnt = favoriteCnt;
+        }
+    }
+
 
     @Data
     static class CreateUserRequest{
@@ -225,26 +303,32 @@ public class UserApiController {
 
     @Data
     static class AuthenticateEmailRequest{
+        @NotBlank
         private String email;
     }
     @Data
     static class AuthenticateNumberRequest{
+        @NotBlank
         private String number;
+        @NotNull
         private EmailAuthorizationType type;
     }
 
     @Data
     static class CreateFavoriteJokboRequest{
-        private Long storeId;
+        @NotNull
+        private Long jokboId;
     }
 
     @Data
     static class UpdatePasswordRequest{
+        @NotBlank
         private String password;
     }
 
     @Data
     static class UpdateNicknameRequest{
+        @NotBlank
         private String nickname;
     }
 
@@ -254,16 +338,20 @@ public class UserApiController {
         private Long jokboId;
         private String title;
         private String contents;
+        private Double totalRating;
         private String imgUrl;
         private int commentCnt;
+        private int favoriteCnt;
 
-        public AllMyJokboResponse(Long jokboId, String title, String contents, List<JokboImg> imgUrl, int commentCnt) {
+        public AllMyJokboResponse(Long jokboId, String title, String contents, Double totalRating,List<JokboImg> imgUrl, int commentCnt, int favoriteCnt) {
             this.jokboId = jokboId;
             this.title = title;
             this.contents = contents;
+            this.totalRating = totalRating;
             if(imgUrl.size() != 0)
                 this.imgUrl = imgUrl.get(0).getImgUrl();
             this.commentCnt = commentCnt;
+            this.favoriteCnt = favoriteCnt;
         }
     }
     @Data
@@ -281,5 +369,11 @@ public class UserApiController {
         private String email;
         @NotBlank
         private String password;
+    }
+
+    @Data
+    static class checkNicknameRequest{
+        @NotBlank
+        private String nickname;
     }
 }

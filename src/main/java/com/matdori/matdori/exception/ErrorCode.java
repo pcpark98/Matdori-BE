@@ -16,7 +16,8 @@ public enum ErrorCode {
     EXPIRED_SESSION(HttpStatus.UNAUTHORIZED, "세션이 만료됐습니다."),
     INSUFFICIENT_PRIVILEGES(HttpStatus.UNAUTHORIZED, "권한이 없는 정보입니다."),
     INVALID_REQUIRED_COOKIE(HttpStatus.UNAUTHORIZED, "쿠키가 누락되었습니다."),
-    INCOMPLETE_EMAIL_VERIFICATION(HttpStatus.UNAUTHORIZED, "이메일 인증이 필요합니다.");
+    INCOMPLETE_EMAIL_VERIFICATION(HttpStatus.UNAUTHORIZED, "이메일 인증이 필요합니다."),
+    DUPLICATED_NICKNAME(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다.");
 
     private HttpStatus status;
     private String message;
