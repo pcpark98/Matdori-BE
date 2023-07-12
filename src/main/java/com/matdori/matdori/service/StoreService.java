@@ -28,4 +28,12 @@ public class StoreService {
 
     public com.matdori.matdori.repositoy.Dto.StoreInformationHeader readStoreInformationHeader(Long storeId) { return storeRepository.readStoreInformationHeader(storeId);}
 
+    /**
+     * 해당 가게의 별점 평균 구하기
+     */
+    public Double getTotalRating(Long id) {
+        Store store = storeRepository.findOne(id);
+        return storeRepository.getTotalRating(store);
+    }
+
 }

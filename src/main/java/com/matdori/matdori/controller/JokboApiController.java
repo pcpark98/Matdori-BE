@@ -1,6 +1,7 @@
 package com.matdori.matdori.controller;
 
 import com.matdori.matdori.domain.*;
+import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
 import com.matdori.matdori.service.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -206,6 +207,30 @@ public class JokboApiController {
     }
 
     /**
+     * 학과별 추천 식당 조회하기
+     */
+    @GetMapping("/stores/department")
+    public ResponseEntity<Response<List<DepartmentRecommendationResponse>>> readDepartmentRecommendation(
+            @RequestParam(value = "department") String department) {
+        // 없는 department인 경우에 대한 예외 처리 필요
+
+        List<StoreListByDepartment> storeList = jokboService.getStoreListByDepartment(department);
+        List<DepartmentRecommendationResponse> responseList = storeList.stream()
+                .map(s -> new DepartmentRecommendationResponse(
+                        s.getStoreIndex(),
+                        s.getName(),
+                        s.getImgUrl(),
+                        storeService.getTotalRating(s.getStoreIndex())
+                )).collect(Collectors.toList());
+
+        return ResponseEntity.ok().body(
+                Response.success(
+                        responseList
+                )
+        );
+    }
+
+    /**
      * 족보 생성을 위한 DTO
      */
     @Data
@@ -301,5 +326,17 @@ public class JokboApiController {
     @AllArgsConstructor
     static class CountAllJokboResponse {
         private int count;
+    }
+
+    /**
+     * 학과별 추천 식당 조회하기의 응답을 위한 DTO
+     */
+    @Data
+    @AllArgsConstructor
+    static class DepartmentRecommendationResponse {
+        private Long storeIndex;
+        private String name;
+        private String imgUrl;
+        private Double totalRating;
     }
 }
