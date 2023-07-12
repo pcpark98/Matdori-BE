@@ -81,7 +81,7 @@ public class JokboApiController {
                         new JokboContentsResponse(
                                 jokbo.getStore().getId(),
                                 jokbo.getStore().getName(),
-                                jokbo.getStore().getImg_url(),
+                                jokbo.getStore().getImgUrl(),
                                 jokbo.getTitle(),
                                 jokbo.getUser().getNickname(),
                                 jokbo.getContents(),

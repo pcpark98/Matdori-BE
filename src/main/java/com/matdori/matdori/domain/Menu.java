@@ -19,5 +19,5 @@ public class Menu {
 
     private String name;
     private Integer price;
-    private String img_url;
+    private String imgUrl;
 }

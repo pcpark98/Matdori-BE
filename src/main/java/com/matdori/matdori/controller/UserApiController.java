@@ -67,7 +67,7 @@ public class UserApiController {
         AuthorizationService.checkSession(userId);
         List<StoreFavorite> FavoriteStores = userService.findAllFavoriteStore(userId);
         return ResponseEntity.ok().body(Response.success(FavoriteStores.stream()
-                .map(s -> new readFavoriteStoresResponse(s.getId(), s.getStore().getId(), s.getStore().getName(),s.getStore().getCategory() ,s.getStore().getImg_url()))
+                .map(s -> new readFavoriteStoresResponse(s.getId(), s.getStore().getId(), s.getStore().getName(),s.getStore().getCategory() ,s.getStore().getImgUrl()))
                 .collect(Collectors.toList())));
     }
 
