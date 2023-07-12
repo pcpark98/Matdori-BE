@@ -30,8 +30,6 @@ public class Jokbo {
 
     private String title;
     private String contents;
-    @Column(name = "total_rating")
-    private int totalRating;
 
     @Column(name = "flavor_rating")
     private int flavorRating;
@@ -46,12 +44,12 @@ public class Jokbo {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "jokbo")
+    @OneToMany(mappedBy = "jokbo", cascade = CascadeType.ALL)
     private List<JokboImg> jokboImgs = new ArrayList<>();
 
-    @OneToMany(mappedBy = "jokbo")
+    @OneToMany(mappedBy = "jokbo", cascade = CascadeType.ALL)
     private List<JokboComment> jokboComments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "jokbo")
+    @OneToMany(mappedBy = "jokbo", cascade = CascadeType.ALL)
     private List<JokboFavorite> jokboFavorites = new ArrayList<>();
 }

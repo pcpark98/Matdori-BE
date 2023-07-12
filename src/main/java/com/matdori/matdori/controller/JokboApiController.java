@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,12 +38,11 @@ public class JokboApiController {
         User user = userService.findOne(userIndex);
         jokbo.setUser(user);
 
-        jokbo.setTotalRating(request.getTotal_rating());
-        jokbo.setFlavorRating(request.getFlavor_rating());
-        jokbo.setUnderPricedRating(request.getUnder_priced_rating());
-        jokbo.setCleanRating(request.getClean_rating());
+        jokbo.setFlavorRating(request.getFlavorRating());
+        jokbo.setUnderPricedRating(request.getUnderPricedRating());
+        jokbo.setCleanRating(request.getCleanRating());
 
-        Store mappingStore = storeService.findOne(request.getStore_index());
+        Store mappingStore = storeService.findOne(request.getStoreIndex());
         jokbo.setStore(mappingStore);
 
         jokbo.setTitle(request.getTitle());
@@ -120,14 +121,14 @@ public class JokboApiController {
             @PathVariable("jokboIndex") Long jokboId,
             @RequestBody @Valid CreateJokboCommentRequest request) {
 
-        AuthorizationService.checkSession(request.getUser_index());
+        AuthorizationService.checkSession(request.getUserIndex());
 
         JokboComment jokboComment = new JokboComment();
 
         Jokbo jokbo = jokboService.findOne(jokboId);
         jokboComment.setJokbo(jokbo);
 
-        User user = userService.findOne(request.getUser_index());
+        User user = userService.findOne(request.getUserIndex());
         jokboComment.setUser(user);
 
         jokboComment.setContents(request.getContents());
@@ -182,10 +183,10 @@ public class JokboApiController {
 
         // commentId가 존재하는 족보 댓글을 가리키는지 확인 필요.
 
-        AuthorizationService.checkSession(request.getUser_index());
+        AuthorizationService.checkSession(request.getUserIndex());
 
         JokboComment jokboComment = jokboService.getAJokboComment(commentId);
-        jokboService.deleteJokboComment(jokboComment, request.getUser_index());
+        jokboService.deleteJokboComment(jokboComment, request.getUserIndex());
 
         return ResponseEntity.ok().body(
                 Response.success(null)
@@ -209,14 +210,22 @@ public class JokboApiController {
      */
     @Data
     static class CreateJokboRequest {
-        private int total_rating;
-        private int flavor_rating;
-        private int under_priced_rating;
-        private int clean_rating;
+        @NotNull
+        private int flavorRating;
 
-        private Long store_index;
+        @NotNull
+        private int underPricedRating;
 
+        @NotNull
+        private int cleanRating;
+
+        @NotNull
+        private Long storeIndex;
+
+        @NotBlank
         private String title;
+
+        @NotBlank
         private String contents;
 
         private List<MultipartFile> images;
@@ -228,15 +237,15 @@ public class JokboApiController {
     @Data
     @AllArgsConstructor
     static class JokboContentsResponse {
-        Long store_index;
-        String store_name;
-        String store_img_url;
+        Long storeIndex;
+        String storeName;
+        String storeImgUrl;
 
         String title;
         String nickname;
         String contents;
 
-        List<String> jokbo_img_url_list;
+        List<String> jokboImgUrlList;
     }
 
     /**
@@ -244,7 +253,10 @@ public class JokboApiController {
      */
     @Data
     static class CreateJokboCommentRequest {
-        private Long user_index;
+        @NotNull
+        private Long userIndex;
+
+        @NotBlank
         private String contents;
     }
 
@@ -254,12 +266,12 @@ public class JokboApiController {
     @Data
     @AllArgsConstructor
     static class JokboCommentResponse {
-        Long comment_index;
-        LocalDateTime created_at;
+        Long commentIndex;
+        LocalDateTime createdAt;
         String contents;
-        boolean check_deleted;
+        boolean checkDeleted;
 
-        Long user_index;
+        Long userIndex;
         String nickname;
     }
 
@@ -269,8 +281,8 @@ public class JokboApiController {
     @Data
     @AllArgsConstructor
     static class ReadJokboCommentResponse {
-        List<JokboCommentResponse> comment_list;
-        int comment_cnt;
+        List<JokboCommentResponse> commentList;
+        int commentCnt;
     }
 
     /**
@@ -278,7 +290,8 @@ public class JokboApiController {
      */
     @Data
     static class DeleteJokboCommentRequest {
-        private Long user_index;
+        @NotNull
+        private Long userIndex;
     }
 
     /**
