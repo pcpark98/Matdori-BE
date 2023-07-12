@@ -60,11 +60,13 @@ public class JokboRepository {
                 .getResultList();
     }
 
-    public List<Jokbo> findByStoreIndex(Long storeId){
+    public List<Jokbo> findByStoreIndex(Long storeId, int startIndex){
         return em.createQuery(
                 "SELECT j FROM Jokbo j " +
                         "WHERE j.store.id =: storeId", Jokbo.class)
                 .setParameter("storeId", storeId)
+                .setFirstResult(startIndex)
+                .setMaxResults(15)
                 .getResultList();
     }
 }

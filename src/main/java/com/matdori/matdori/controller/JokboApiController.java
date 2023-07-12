@@ -1,6 +1,7 @@
 package com.matdori.matdori.controller;
 
 import com.matdori.matdori.domain.*;
+import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
 import com.matdori.matdori.service.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -81,7 +82,7 @@ public class JokboApiController {
                         new JokboContentsResponse(
                                 jokbo.getStore().getId(),
                                 jokbo.getStore().getName(),
-                                jokbo.getStore().getImg_url(),
+                                jokbo.getStore().getImgUrl(),
                                 jokbo.getTitle(),
                                 jokbo.getUser().getNickname(),
                                 jokbo.getContents(),
@@ -213,13 +214,13 @@ public class JokboApiController {
             @RequestParam(value = "department") String department) {
         // 없는 department인 경우에 대한 예외 처리 필요
 
-        List<Store> storeList = jokboService.getStoreListByDepartment(department);
+        List<StoreListByDepartment> storeList = jokboService.getStoreListByDepartment(department);
         List<DepartmentRecommendationResponse> responseList = storeList.stream()
                 .map(s -> new DepartmentRecommendationResponse(
-                        s.getId(),
+                        s.getStoreIndex(),
                         s.getName(),
-                        s.getImg_url(),
-                        storeService.getTotalRating(s.getId())
+                        s.getImgUrl(),
+                        storeService.getTotalRating(s.getStoreIndex())
                 )).collect(Collectors.toList());
 
         return ResponseEntity.ok().body(

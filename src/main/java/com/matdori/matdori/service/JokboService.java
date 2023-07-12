@@ -6,6 +6,7 @@ import com.matdori.matdori.domain.JokboImg;
 import com.matdori.matdori.domain.Store;
 import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.exception.InsufficientPrivilegesException;
+import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
 import com.matdori.matdori.repositoy.JokboCommentRepository;
 import com.matdori.matdori.repositoy.JokboImgRepository;
 import com.matdori.matdori.repositoy.JokboRepository;
@@ -141,7 +142,7 @@ public class JokboService {
     /**
      * 해당 학과의 족보가 가장 많은 가게 구하기
      */
-    public List<Store> getStoreListByDepartment(String department) {
+    public List<StoreListByDepartment> getStoreListByDepartment(String department) {
         return storeRepository.getStoreListByDepartment(department);
     }
 }

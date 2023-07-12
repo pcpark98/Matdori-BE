@@ -1,8 +1,11 @@
 package com.matdori.matdori.repositoy;
 
+import com.matdori.matdori.controller.StoreApiController;
 import com.matdori.matdori.domain.Category;
+import com.matdori.matdori.domain.Jokbo;
 import com.matdori.matdori.domain.Menu;
 import com.matdori.matdori.domain.Store;
+import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -32,15 +35,15 @@ public class StoreRepository {
     /**
      * 해당 학과의 족보가 가장 많은 가게 리스트 구하기.
      */
-    public List<Store> getStoreListByDepartment(String department) {
+    public List<StoreListByDepartment> getStoreListByDepartment(String department) {
         return em.createQuery(
-                        "SELECT s.id FROM Store s " +
-                                "JOIN s.jokbos j " +
-                                "JOIN j.user u " +
-                                "GROUP BY s.id " +
-                                "HAVING u.department =: department " +
-                                "ORDER BY s.jokbos.size DESC"
-                        , Store.class)
+                "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByDepartment(s.id, s.name, s.imgUrl) " +
+                        "FROM Jokbo j " +
+                        "JOIN j.store s " +
+                        "JOIN j.user u " +
+                        "GROUP BY s.id, s.name, s.imgUrl, u.department " +
+                        "HAVING u.department =: department " +
+                        "ORDER BY s.jokbos.size DESC ", StoreListByDepartment.class)
                 .setParameter("department", department)
                 .setMaxResults(10)
                 .getResultList();
@@ -58,4 +61,15 @@ public class StoreRepository {
                 .getSingleResult();
     }
 
+    public com.matdori.matdori.repositoy.Dto.StoreInformationHeader readStoreInformationHeader(Long storeId){
+        return em.createQuery(
+                        "SELECT new com.matdori.matdori.repositoy.Dto.StoreInformationHeader(j.store.name, " +
+                                "AVG(j.flavorRating), AVG(j.cleanRating),AVG(j.underPricedRating), j.store.imgUrl ) " +
+                                "FROM Jokbo j " +
+                                "JOIN j.store " +
+                                "GROUP BY j.store.name, j.store.id, j.store.imgUrl " +
+                                "HAVING j.store.id =:storeId", com.matdori.matdori.repositoy.Dto.StoreInformationHeader.class)
+                .setParameter("storeId", storeId)
+                .getSingleResult();
+    }
 }

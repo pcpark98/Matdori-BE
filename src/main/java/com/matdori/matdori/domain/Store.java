@@ -24,7 +24,7 @@ public class Store {
     private String comment;
     @Embedded
     private OpenHours openHours;
-    private String img_url;
+    private String imgUrl;
     @CreationTimestamp
     private LocalDateTime created_at;
 

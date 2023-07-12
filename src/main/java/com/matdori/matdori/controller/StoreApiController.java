@@ -1,16 +1,15 @@
 package com.matdori.matdori.controller;
 
 import com.matdori.matdori.domain.*;
+import com.matdori.matdori.repositoy.Dto.StoreInformationHeader;
 import com.matdori.matdori.service.JokboService;
 import com.matdori.matdori.service.StoreService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.*;
 import javax.validation.Valid;
@@ -50,13 +49,22 @@ public class StoreApiController {
     // pagecount 추가 필요
     // 족보 탭 조회하기
     @GetMapping("/stores/{storeIndex}/jokbos")
-    public ResponseEntity<Response<List<JokboResponse>>> readAllJokbo(@PathVariable("storeIndex") Long storeIndex){
-        List<Jokbo> jokbos = storeService.findAllJokbo(storeIndex);
+    public ResponseEntity<Response<List<JokboResponse>>> readAllJokbo(@PathVariable("storeIndex") Long storeIndex,
+                                                                      @RequestParam int pageCount){
+        List<Jokbo> jokbos = storeService.findAllJokbo(storeIndex, pageCount);
 
         return ResponseEntity.ok().body(Response.success(jokbos.stream()
-                .map(j -> new JokboResponse(j.getId(), j.getTitle(), j.getContents(),j.getJokboImgs(), j.getJokboComments().size()))
+                .map(j -> new JokboResponse(j.getId(), j.getTitle(), j.getContents(),j.getJokboImgs(), j.getJokboFavorites().size() ,j.getJokboComments().size()))
                 .collect(Collectors.toList())));
 
+    }
+
+    //상단 가게 이름 및 별점 표시 부분 조회하기
+    @GetMapping("/stores/{storeIndex}/info-header")
+    public ResponseEntity<Response<StoreInformationHeader>> readStoreInformationHeader(@PathVariable("storeIndex") Long storeIndex){
+        StoreInformationHeader storeInformationHeader = storeService.readStoreInformationHeader(storeIndex);
+
+        return ResponseEntity.ok().body(Response.success(storeInformationHeader));
     }
 
     @Data
@@ -76,11 +84,11 @@ public class StoreApiController {
      static class MenuDto{
         private String name;
         private Integer price;
-        private String img_url;
+        private String imgUrl;
         public MenuDto(Menu menu) {
             this.name = menu.getName();
             this.price = menu.getPrice();
-            this.img_url = menu.getImg_url();
+            this.imgUrl = menu.getImgUrl();
         }
     }
 
@@ -88,7 +96,7 @@ public class StoreApiController {
     @AllArgsConstructor
     static class StoreInformationResponse{
         OpenHours time;
-        String phone_number;
+        String phoneNumber;
         String address;
         String comment;
     }
@@ -100,14 +108,16 @@ public class StoreApiController {
         private String title;
         private String contents;
         private String imgUrl;
+        private int favoriteCnt;
         private int commentCnt;
 
-        public JokboResponse(Long jokboId, String title, String contents, List<JokboImg> imgUrl, int commentCnt) {
+        public JokboResponse(Long jokboId, String title, String contents, List<JokboImg> imgUrl, int favoriteCnt, int commentCnt) {
             this.jokboId = jokboId;
             this.title = title;
             this.contents = contents;
             if(imgUrl.size() != 0)
                 this.imgUrl = imgUrl.get(0).getImgUrl();
+            this.favoriteCnt = favoriteCnt;
             this.commentCnt = commentCnt;
         }
     }

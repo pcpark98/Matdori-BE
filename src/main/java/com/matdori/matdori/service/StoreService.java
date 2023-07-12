@@ -24,7 +24,9 @@ public class StoreService {
 
     public List<Category> findAllCategoryWithMenu (Long id) { return storeRepository.findAllCategoryWithMenu(id);}
 
-    public List<Jokbo> findAllJokbo(Long storeId) { return jokboRepository.findByStoreIndex(storeId);}
+    public List<Jokbo> findAllJokbo(Long storeId, int startIndex) { return jokboRepository.findByStoreIndex(storeId, startIndex);}
+
+    public com.matdori.matdori.repositoy.Dto.StoreInformationHeader readStoreInformationHeader(Long storeId) { return storeRepository.readStoreInformationHeader(storeId);}
 
     /**
      * 해당 가게의 별점 평균 구하기
