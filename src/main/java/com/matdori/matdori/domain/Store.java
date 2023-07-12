@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -26,4 +27,7 @@ public class Store {
     private String img_url;
     @CreationTimestamp
     private LocalDateTime created_at;
+
+    @OneToMany(mappedBy = "store")
+    private List<Jokbo> jokbos;
 }

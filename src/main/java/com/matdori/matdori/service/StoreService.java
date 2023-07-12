@@ -26,4 +26,12 @@ public class StoreService {
 
     public List<Jokbo> findAllJokbo(Long storeId) { return jokboRepository.findByStoreIndex(storeId);}
 
+    /**
+     * 해당 가게의 별점 평균 구하기
+     */
+    public Double getTotalRating(Long id) {
+        Store store = storeRepository.findOne(id);
+        return storeRepository.getTotalRating(store);
+    }
+
 }

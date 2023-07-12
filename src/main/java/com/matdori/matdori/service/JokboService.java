@@ -3,11 +3,13 @@ package com.matdori.matdori.service;
 import com.matdori.matdori.domain.Jokbo;
 import com.matdori.matdori.domain.JokboComment;
 import com.matdori.matdori.domain.JokboImg;
+import com.matdori.matdori.domain.Store;
 import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.exception.InsufficientPrivilegesException;
 import com.matdori.matdori.repositoy.JokboCommentRepository;
 import com.matdori.matdori.repositoy.JokboImgRepository;
 import com.matdori.matdori.repositoy.JokboRepository;
+import com.matdori.matdori.repositoy.StoreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ public class JokboService {
     private final JokboRepository jokboRepository;
     private final JokboImgRepository jokboImgRepository;
     private final JokboCommentRepository jokboCommentRepository;
+    private final StoreRepository storeRepository;
 
     /**
      * 족보 작성하기.
@@ -134,4 +137,11 @@ public class JokboService {
      * 족보의 총 개수 조회하기.
      */
     public int countAll() {return jokboRepository.countAll();}
+
+    /**
+     * 해당 학과의 족보가 가장 많은 가게 구하기
+     */
+    public List<Store> getStoreListByDepartment(String department) {
+        return storeRepository.getStoreListByDepartment(department);
+    }
 }
