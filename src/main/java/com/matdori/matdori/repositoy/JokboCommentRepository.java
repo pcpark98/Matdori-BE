@@ -35,7 +35,7 @@ public class JokboCommentRepository {
     /**
      * 내가 쓴 모든 댓글 조회하기.
      */
-    public List<JokboComment> findByUserIndex(Long userId){
+    public List<JokboComment> findByUserIndex(Long userId, int pageCount){
         return em.createQuery(
                         "SELECT c FROM JokboComment c " +
                                 "JOIN c.user u ON u.id =: userId AND u.id = c.user.id " +
@@ -43,6 +43,8 @@ public class JokboCommentRepository {
                                 "JOIN FETCH j.store " +
                                 "WHERE c.isDeleted = false ", JokboComment.class)
                 .setParameter("userId", userId)
+                .setFirstResult((pageCount-1)*15)
+                .setMaxResults(15)
                 .getResultList();
     }
 

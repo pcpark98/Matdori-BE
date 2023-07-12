@@ -17,12 +17,14 @@ public class StoreFavoriteRepository {
 
     public void deleteStoreFavorite(Long id) { em.remove(em.find(StoreFavorite.class, id));}
 
-    public List<StoreFavorite> findAllFavoriteStore(Long id) {
+    public List<StoreFavorite> findAllFavoriteStore(Long id, int pageCount) {
         return em.createQuery(
                 "SELECT f FROM User u " +
                         "JOIN u.storeFavorites f " +
                         "JOIN FETCH f.store s " +
                         "WHERE u.id =: id", StoreFavorite.class
-        ).setParameter("id",id).getResultList();
+        ).setParameter("id",id)
+                .setFirstResult((pageCount-1)*15)
+                .getResultList();
     }
 }
