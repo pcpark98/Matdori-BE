@@ -32,7 +32,7 @@ public class JokboFavoriteRepository {
      */
     public List<JokboFavorite> findAllFavoriteJokbo(Long id) {
         return em.createQuery(
-                "SELECT f FROM User u " +
+                "SELECT DISTINCT f FROM User u " +
                         "JOIN u.jokboFavorites f " +
                         "JOIN FETCH f.jokbo j " +
                         "LEFT JOIN FETCH j.jokboComments " +
