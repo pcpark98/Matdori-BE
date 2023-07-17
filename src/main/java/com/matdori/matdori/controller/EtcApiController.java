@@ -2,6 +2,7 @@ package com.matdori.matdori.controller;
 
 import com.matdori.matdori.domain.Notice;
 import com.matdori.matdori.domain.Response;
+import com.matdori.matdori.domain.TermsOfService;
 import com.matdori.matdori.service.EtcService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -56,6 +57,21 @@ public class EtcApiController {
                 )
         );
     }
+
+    /**
+     * 이용약관 리스트 받기
+     */
+    @GetMapping("/terms-of-service")
+    public ResponseEntity<Response<List<TermsOfService>>> readAllTerms() {
+
+        List<TermsOfService> terms = etcService.findAllTerms();
+        return ResponseEntity.ok().body(
+                Response.success(
+                        terms
+                )
+        );
+    }
+
 
     /**
      * 공지사항 리스트 조회하기의 응답을 위한 DTO
