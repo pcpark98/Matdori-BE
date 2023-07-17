@@ -2,6 +2,7 @@ package com.matdori.matdori.repositoy;
 
 import com.matdori.matdori.domain.Category;
 import com.matdori.matdori.domain.Store;
+import com.matdori.matdori.repositoy.Dto.JokboRichStore;
 import com.matdori.matdori.repositoy.Dto.MatdoriPick;
 import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,5 +106,21 @@ public class StoreRepository {
         }
 
         return matdoriPicks;
+    }
+
+    /**
+     * 족보 부자 가게 리스트 조회하기
+     */
+    public List<JokboRichStore> getJokboRichStores() {
+        return em.createQuery("SELECT new com.matdori.matdori.repositoy.Dto.JokboRichStore(s.id, s.name, s.imgUrl, s.jokbos.size) " +
+                        "FROM Jokbo j " +
+                        "JOIN j.store s " +
+                        "WHERE j.createdAt between :startTime and :endTime " +
+                        "GROUP BY s.id, s.name, s.imgUrl, s.jokbos.size " +
+                        "ORDER BY s.jokbos.size DESC ", JokboRichStore.class)
+                .setParameter("startTime", LocalDateTime.now().minusDays(30))
+                .setParameter("endTime", LocalDateTime.now())
+                .setMaxResults(3)
+                .getResultList();
     }
 }

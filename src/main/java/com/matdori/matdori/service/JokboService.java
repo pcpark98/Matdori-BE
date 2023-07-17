@@ -5,6 +5,7 @@ import com.matdori.matdori.domain.JokboComment;
 import com.matdori.matdori.domain.JokboImg;
 import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.exception.InsufficientPrivilegesException;
+import com.matdori.matdori.repositoy.Dto.JokboRichStore;
 import com.matdori.matdori.repositoy.Dto.MatdoriPick;
 import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
 import com.matdori.matdori.repositoy.JokboCommentRepository;
@@ -151,5 +152,12 @@ public class JokboService {
     public List<MatdoriPick> getMatdoriPick(String department) {
         // 없는 학과에 대한 예외처리 필요.
         return storeRepository.getMatdoriPick(department);
+    }
+
+    /**
+     * 족보 부자 가게 리스트 조회하기.
+     */
+    public List<JokboRichStore> getJokboRichStores() {
+        return storeRepository.getJokboRichStores();
     }
 }
