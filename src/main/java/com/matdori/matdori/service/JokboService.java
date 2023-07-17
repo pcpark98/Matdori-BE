@@ -3,9 +3,9 @@ package com.matdori.matdori.service;
 import com.matdori.matdori.domain.Jokbo;
 import com.matdori.matdori.domain.JokboComment;
 import com.matdori.matdori.domain.JokboImg;
-import com.matdori.matdori.domain.Store;
 import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.exception.InsufficientPrivilegesException;
+import com.matdori.matdori.repositoy.Dto.MatdoriPick;
 import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
 import com.matdori.matdori.repositoy.JokboCommentRepository;
 import com.matdori.matdori.repositoy.JokboImgRepository;
@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,5 +143,13 @@ public class JokboService {
      */
     public List<StoreListByDepartment> getStoreListByDepartment(String department) {
         return storeRepository.getStoreListByDepartment(department);
+    }
+
+    /**
+     * 맛도리 픽 조회하기.
+     */
+    public List<MatdoriPick> getMatdoriPick(String department) {
+        // 없는 학과에 대한 예외처리 필요.
+        return storeRepository.getMatdoriPick(department);
     }
 }
