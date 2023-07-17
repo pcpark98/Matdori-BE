@@ -1,6 +1,7 @@
 package com.matdori.matdori.controller;
 
 import com.matdori.matdori.domain.*;
+import com.matdori.matdori.repositoy.Dto.MatdoriPick;
 import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
 import com.matdori.matdori.service.*;
 import lombok.AllArgsConstructor;
@@ -226,6 +227,23 @@ public class JokboApiController {
         return ResponseEntity.ok().body(
                 Response.success(
                         responseList
+                )
+        );
+    }
+
+    /**
+     * 맛도리 픽 가게 리스트 조회하기.
+     */
+    @GetMapping("/stores/matdori-pick")
+    public ResponseEntity<Response<List<MatdoriPick>>> readMatdoriPick(
+            @RequestParam(value = "department") String department) {
+        // 없는 department인 경우에 대한 예외 처리 필요.
+
+        List<MatdoriPick> matdoriPick = jokboService.getMatdoriPick(department);
+
+        return ResponseEntity.ok().body(
+                Response.success(
+                        matdoriPick
                 )
         );
     }

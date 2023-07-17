@@ -1,15 +1,15 @@
 package com.matdori.matdori.repositoy;
 
-import com.matdori.matdori.controller.StoreApiController;
 import com.matdori.matdori.domain.Category;
-import com.matdori.matdori.domain.Jokbo;
-import com.matdori.matdori.domain.Menu;
 import com.matdori.matdori.domain.Store;
+import com.matdori.matdori.repositoy.Dto.MatdoriPick;
 import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -36,6 +36,7 @@ public class StoreRepository {
      * 해당 학과의 족보가 가장 많은 가게 리스트 구하기.
      */
     public List<StoreListByDepartment> getStoreListByDepartment(String department) {
+        // 해당 학과의 족보가 달린 가게가 3개 이하일 경우에 대한 처리 필요.
         return em.createQuery(
                 "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByDepartment(s.id, s.name, s.imgUrl) " +
                         "FROM Jokbo j " +
@@ -71,5 +72,37 @@ public class StoreRepository {
                                 "HAVING j.store.id =:storeId", com.matdori.matdori.repositoy.Dto.StoreInformationHeader.class)
                 .setParameter("storeId", storeId)
                 .getSingleResult();
+    }
+
+    /**
+     * 맛도리 픽 가게 리스트 조회하기.
+     */
+    public List<MatdoriPick> getMatdoriPick(String department) {
+        // 없는 학과에 대한 예외처리 필요.
+
+        String sql = "(SELECT store_index, name, img_url " +
+                "FROM store " +
+                "ORDER BY RANDOM()) " +
+                "EXCEPT " +
+                "(SELECT s.store_index, s.name, s.img_url " +
+                "FROM jokbo j " +
+                "JOIN store s ON j.store_index = s.store_index " +
+                "JOIN users u ON j.user_index = u.user_index " +
+                "WHERE u.department = ? " +
+                "GROUP BY s.store_index, s.name, s.img_url, u.department " +
+                "ORDER BY COUNT(j.jokbo_index) DESC)" +
+                "LIMIT 3";
+
+        Query nativeQuery = em.createNativeQuery(sql)
+                .setParameter(1, department);
+
+        List<Object[]> resultList = nativeQuery.getResultList();
+        List<MatdoriPick> matdoriPicks = new ArrayList<>();
+        for(Object[] row : resultList) {
+            MatdoriPick matdoriPick = new MatdoriPick(Long.valueOf(row[0].toString()), row[1].toString(), row[2].toString());
+            matdoriPicks.add(matdoriPick);
+        }
+
+        return matdoriPicks;
     }
 }
