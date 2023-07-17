@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -37,6 +38,21 @@ public class EtcApiController {
         return ResponseEntity.ok().body(
                 Response.success(
                         responseList
+                )
+        );
+    }
+
+    /**
+     * 공지사항 글 조회하기
+     */
+    @GetMapping("/notice/{noticeIndex}")
+    public ResponseEntity<Response<Notice>> readANotice(
+            @PathVariable("noticeIndex") Long noticeIndex) {
+
+        Notice notice = etcService.findANotice(noticeIndex);
+        return ResponseEntity.ok().body(
+                Response.success(
+                        notice
                 )
         );
     }

@@ -21,4 +21,12 @@ public class EtcService {
     public List<Notice> findAllNotice() {
         return noticeRepository.findAll();
     }
+
+    /**
+     * 공지사항 글 조회하기
+     */
+    public Notice findANotice(Long id) {
+        // 없는 공지사항 id에 대한 조회 예외처리 필요.
+        return noticeRepository.findOne(id);
+    }
 }
