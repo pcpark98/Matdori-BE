@@ -1,6 +1,7 @@
 package com.matdori.matdori.controller;
 
 import com.matdori.matdori.domain.*;
+import com.matdori.matdori.repositoy.Dto.JokboRichStore;
 import com.matdori.matdori.repositoy.Dto.MatdoriPick;
 import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
 import com.matdori.matdori.service.*;
@@ -244,6 +245,20 @@ public class JokboApiController {
         return ResponseEntity.ok().body(
                 Response.success(
                         matdoriPick
+                )
+        );
+    }
+
+    /**
+     * 족보 부자 가게 리스트 조회하기.
+     */
+    @GetMapping("/stores/best")
+    public ResponseEntity<Response<List<JokboRichStore>>> readJokboRichStores() {
+        List<JokboRichStore> jokboRichStores = jokboService.getJokboRichStores();
+
+        return ResponseEntity.ok().body(
+                Response.success(
+                        jokboRichStores
                 )
         );
     }
