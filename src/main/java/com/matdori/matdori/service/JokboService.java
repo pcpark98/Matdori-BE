@@ -35,7 +35,6 @@ public class JokboService {
      */
     @Transactional
     public void createJokbo(Jokbo jokbo) {
-        // 족보에 대한 검증이 필요할까?
         jokboRepository.save(jokbo);
     }
 

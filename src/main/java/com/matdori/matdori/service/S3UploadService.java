@@ -26,10 +26,16 @@ public class S3UploadService {
 
     /**
      * AWS S3 버킷에 파일을 업로드.
+     *
+     * 고쳐야 할 부분.
+     * 1. 지원하지 않는 확장자에 대해 break가 아니라 에러 던지기. 하나라도 지원하지 않으면 다 업로드 안 됨.
+     * 2. 파일 전체에 대해 타입체크를 먼저하고, 그 이후에 업로드하기. 즉, for문 따로따로 돌리기.
+     * 3. 확장자 저장할 필요 없으니까 지우기.
      */
     public List<String> uploadFiles(List<MultipartFile> multipartFiles) throws IOException {
 
         List<String> imageUrls = new ArrayList<>();
+
         if(!CollectionUtils.isEmpty(multipartFiles)) {
             for(MultipartFile multipartFile : multipartFiles) {
                 // 파일의 확장자 추출
@@ -54,7 +60,6 @@ public class S3UploadService {
                 }
 
                 // 이미지 리사이징을 추후에 추가해야 할 수 있음.
-
                 String originalFileName = multipartFile.getOriginalFilename();
                 String uniqueFileName = changeFileName(originalFileName);
 
@@ -84,6 +89,9 @@ public class S3UploadService {
 
     /**
      * FileName의 중복을 방지하기 위해 UUID를 이용해 파일에 새로 붙일 랜덤 이름을 생성.
+     *
+     * 고쳐야할 부분
+     * 1. toString() 지우기.
      */
     private String changeFileName(String originalFileName) {
         String uniqueFileName = UUID.randomUUID().toString() + originalFileName;
