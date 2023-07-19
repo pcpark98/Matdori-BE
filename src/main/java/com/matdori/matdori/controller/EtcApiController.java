@@ -36,6 +36,7 @@ public class EtcApiController {
                        n.getContents(),
                        n.getCreatedAt()
                 )).collect(Collectors.toList());
+
         return ResponseEntity.ok().body(
                 Response.success(
                         responseList
@@ -45,6 +46,9 @@ public class EtcApiController {
 
     /**
      * 공지사항 글 조회하기
+     *
+     * 고쳐야 할 부분
+     * 1. noticeIndex 유효한지 확인.
      */
     @GetMapping("/notice/{noticeIndex}")
     public ResponseEntity<Response<Notice>> readANotice(
