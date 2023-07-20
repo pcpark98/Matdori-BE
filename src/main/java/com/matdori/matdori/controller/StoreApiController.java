@@ -83,7 +83,7 @@ public class StoreApiController {
     @Operation(summary = "가게 족보 탭 조회 API", description = "가게 정보의 족보 탭을 조회합니다.")
     @Parameters({
             @Parameter(name = "storeIndex", description = "가게 id"),
-            @Parameter(name = "pageCount", description = "몇 페이지인지")
+            @Parameter(name = "pageCount", description = "페이지")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
