@@ -26,6 +26,9 @@ dependencies {
 	// S3에 이미지를 업로드 하기 위한 설정
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
+	// Swagger
+	implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
+
 }
 
 tasks.named('test') {
