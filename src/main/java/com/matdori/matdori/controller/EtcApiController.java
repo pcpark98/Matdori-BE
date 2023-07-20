@@ -67,7 +67,7 @@ public class EtcApiController {
     @Parameter(name = "noticeIndex", description = "공지사항 id")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 noticeIndex", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 공지사항. noticeIndex 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/notice/{noticeIndex}")
