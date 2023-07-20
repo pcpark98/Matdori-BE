@@ -8,6 +8,7 @@ import com.matdori.matdori.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -153,8 +154,9 @@ public class JokboApiController {
      * 2. imgUrls 가져올 때, jokboService 호출하지 말고, jokboImgs.get(index).~ 로 가져오기.
      * 3. 족보를 삭제한 이후에, S3에 저장된 이미지를 삭제하려다가 오류가 발생하면 롤백이 필요함. -> 한 트랜젝션으로 묶기
      */
-    @Operation(summary = "족보 삭제 API", description = "족보 게시글을 삭제합니다.")
+    @Operation(summary = "내가 쓴 족보 삭제 API", description = "족보 게시글을 삭제합니다.")
     @Parameters({
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "userIndex", description = "유저 id"),
             @Parameter(name = "jokboIndex", description = "족보 id")
     })
@@ -195,7 +197,10 @@ public class JokboApiController {
      * 1. jokboId가 유효한지 확인.
      */
     @Operation(summary = "족보 댓글 작성 API", description = "족보에 댓글을 작성합니다.")
-    @Parameter(name = "jokboIndex", description = "족보 id")
+    @Parameters({
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "jokboIndex", description = "족보 id")
+    })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
             @ApiResponse(responseCode = "400", description = "jokboIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
@@ -277,6 +282,7 @@ public class JokboApiController {
      */
     @Operation(summary = "내가 쓴 댓글 삭제 API", description = "유저 본인이 작성한 댓글을 삭제합니다.")
     @Parameters({
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "jokboIndex", description = "족보 id"),
             @Parameter(name = "commentIndex", description = "댓글 id")
     })

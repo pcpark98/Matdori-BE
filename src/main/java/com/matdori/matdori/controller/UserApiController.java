@@ -11,6 +11,7 @@ import com.matdori.matdori.util.UserUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -71,7 +72,10 @@ public class UserApiController {
      * 가게 좋아요 누르기
      */
     @Operation(summary = "가게 좋아요 누르기 API", description = "유저가 가게에 대해 좋아요를 눌러 저장합니다.")
-    @Parameter(name = "userIndex", description = "유저 id")
+    @Parameters({
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "userIndex", description = "유저 id")
+    })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
             @ApiResponse(responseCode = "400", description = "userIndex 혹은 storeIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
@@ -99,6 +103,7 @@ public class UserApiController {
      */
     @Operation(summary = "내가 좋아요 누른 가게 리스트 조회 API", description = "유저가 좋아요를 누른 가게의 리스트를 조회합니다.")
     @Parameters({
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "userIndex", description = "유저 id"),
             @Parameter(name = "pageCount", description = "페이지")
     })
@@ -136,6 +141,7 @@ public class UserApiController {
      */
     @Operation(summary = "내가 좋아요 누른 가게 삭제 API", description = "유저가 가게에 좋아요 누른 것을 취소합니다.")
     @Parameters({
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "userIndex", description = "유저 id"),
             @Parameter(name = "favoriteStoreIndex", description = "좋아요한 가게 id")
     })
@@ -167,6 +173,7 @@ public class UserApiController {
      */
     @Operation(summary = "내가 좋아요 누른 족보 삭제 API", description = "유저가 족보에 좋아요 누른 것을 취소합니다.")
     @Parameters({
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "userIndex", description = "유저 id"),
             @Parameter(name = "jokboIndex", description = "족보 id")
     })
@@ -276,7 +283,10 @@ public class UserApiController {
      * 족보에 좋아요 누르기
      */
     @Operation(summary = "족보에 좋아요 누르기 API", description = "유저가 족보에 대해 좋아요를 눌러 저장합니다.")
-    @Parameter(name = "userIndex", description = "유저 id")
+    @Parameters({
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "userIndex", description = "유저 id")
+    })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
             @ApiResponse(responseCode = "400", description = "userIndex 또는 jokboId 누락", content = @Content(schema = @Schema(implementation = Error.class))),
@@ -299,6 +309,7 @@ public class UserApiController {
      */
     @Operation(summary = "내가 좋아요 한 족보 리스트 조회 API", description = "유저가 좋아요를 눌러 저장한 족보들을 조회합니다.")
     @Parameters({
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "userIndex", description = "유저 id"),
             @Parameter(name = "pageCount", description = "페이지")
     })
@@ -340,7 +351,10 @@ public class UserApiController {
      * 비밀번호 변경하기
      */
     @Operation(summary = "비밀번호 변경 API", description = "유저의 비밀번호 변경을 수행합니다.")
-    @Parameter(name = "userIndex", description = "유저 id")
+    @Parameters({
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "userIndex", description = "유저 id")
+    })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
             @ApiResponse(responseCode = "400", description = "userIndex 또는 password 누락 OR 비밀번호 형식 안 맞음.", content = @Content(schema = @Schema(implementation = Error.class))),
@@ -362,7 +376,10 @@ public class UserApiController {
      * 닉네임 변경하기
      */
     @Operation(summary = "닉네임 변경 API", description = "닉네임 변경을 수행합니다.")
-    @Parameter(name = "userIndex", description = "유저 id")
+    @Parameters({
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "userIndex", description = "유저 id")
+    })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
             @ApiResponse(responseCode = "400", description = "userIndex 또는 nickname 누락 OR 닉네임 최대 길이 초과.", content = @Content(schema = @Schema(implementation = Error.class))),
@@ -385,6 +402,7 @@ public class UserApiController {
      */
     @Operation(summary = "내가 쓴 모든 족보 조회 API", description = "내가 작성한 모든 족보를 조회합니다.")
     @Parameters({
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "userIndex", description = "유저 id"),
             @Parameter(name = "pageCount", description = "페이지")
     })
@@ -421,6 +439,7 @@ public class UserApiController {
      */
     @Operation(summary = "내가 쓴 모든 댓글 조회 API", description = "내가 족보에 작성한 모든 댓글들을 조회합니다.")
     @Parameters({
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "userIndex", description = "유저 id"),
             @Parameter(name = "pageCount", description = "페이지")
     })
