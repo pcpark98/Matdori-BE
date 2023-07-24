@@ -17,7 +17,10 @@ public enum ErrorCode {
     INSUFFICIENT_PRIVILEGES(HttpStatus.UNAUTHORIZED, "권한이 없는 정보입니다."),
     INVALID_REQUIRED_COOKIE(HttpStatus.UNAUTHORIZED, "쿠키가 누락되었습니다."),
     INCOMPLETE_EMAIL_VERIFICATION(HttpStatus.UNAUTHORIZED, "이메일 인증이 필요합니다."),
-    DUPLICATED_NICKNAME(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다.");
+    DUPLICATED_NICKNAME(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
+    NOT_EXISTED_JOKBO(HttpStatus.BAD_REQUEST, "존재하지 않는 족보입니다."),
+    NOT_EXISTED_JOKBO_COMMENT(HttpStatus.BAD_REQUEST, "존재하지 않는 댓글입니다."),
+    NOT_EXISTED_JOKBO_IMG(HttpStatus.BAD_REQUEST, "존재하지 않는 족보 이미지입니다.");
 
     private HttpStatus status;
     private String message;

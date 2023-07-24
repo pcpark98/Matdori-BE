@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -24,5 +25,13 @@ public class JokboImgRepository {
      */
     public void delete(Long id) {
         em.remove(em.find(JokboImg.class, id));
+    }
+
+    /**
+     * id로 족보 이미지 조회하기
+     */
+    public Optional<JokboImg> findOne(Long id) {
+        JokboImg jokboImg = em.find(JokboImg.class, id);
+        return Optional.ofNullable(jokboImg);
     }
 }

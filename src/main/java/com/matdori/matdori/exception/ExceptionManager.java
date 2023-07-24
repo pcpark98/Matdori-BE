@@ -84,4 +84,21 @@ public class ExceptionManager {
 
     // --------------------------------------------------------
 
+    @ExceptionHandler(NotExistedJokboException.class)
+    public ResponseEntity<?> notExistedJokboException(NotExistedJokboException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(NotExistedJokboCommentException.class)
+    public ResponseEntity<?> notExistedJokboCommentException(NotExistedJokboCommentException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(NotExistedJokboImgException.class)
+    public ResponseEntity<?> notExistedJokboImgException(NotExistedJokboImgException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
 }
