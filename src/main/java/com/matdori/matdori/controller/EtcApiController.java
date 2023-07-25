@@ -59,9 +59,6 @@ public class EtcApiController {
 
     /**
      * 공지사항 글 조회하기
-     *
-     * 고쳐야 할 부분
-     * 1. noticeIndex 유효한지 확인.
      */
     @Operation(summary = "공지사항 글 조회 API", description = "단일 공지사항 글을 조회합니다.")
     @Parameter(name = "noticeIndex", description = "공지사항 id")

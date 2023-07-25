@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -51,8 +52,9 @@ public class JokboCommentRepository {
     /**
      * 족보 댓글 id로 족보 댓글 하나 조회하기.
      */
-    public JokboComment findOne (Long id) {
-        return em.find(JokboComment.class, id);
+    public Optional<JokboComment> findOne (Long id) {
+        JokboComment jokboComment = em.find(JokboComment.class, id);
+        return Optional.ofNullable(jokboComment);
     }
 
     /**

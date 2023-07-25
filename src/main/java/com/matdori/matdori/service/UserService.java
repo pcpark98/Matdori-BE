@@ -103,8 +103,10 @@ public class UserService {
     @Transactional
     public void createFavoriteJokbo(Long jokboId, Long userId){
         User user = userRepository.findOne(userId);
-        Jokbo jokbo = jokboRepository.findOne(jokboId);
-        jokboFavoriteRepository.save(new JokboFavorite(jokbo, user));
+
+        Optional<Jokbo> jokbo = jokboRepository.findOne(jokboId);
+        if(jokbo.isPresent()) jokboFavoriteRepository.save(new JokboFavorite(jokbo.get(), user));
+        else throw new NotExistedJokboException(ErrorCode.NOT_EXISTED_JOKBO);
     }
 
     /**

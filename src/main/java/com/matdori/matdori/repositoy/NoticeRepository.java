@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -23,8 +24,9 @@ public class NoticeRepository {
     /**
      * id로 단일 공지사항 검색하기.
      */
-    public Notice findOne(Long id) {
-        return em.find(Notice.class, id);
+    public Optional<Notice> findOne(Long id) {
+        Notice notice = em.find(Notice.class, id);
+        return Optional.ofNullable(notice);
     }
 
     /**
