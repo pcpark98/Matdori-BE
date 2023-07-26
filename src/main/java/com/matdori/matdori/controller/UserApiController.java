@@ -536,7 +536,7 @@ public class UserApiController {
         private Long favoriteStoreId;
         private Long storeId;
         private String name;
-        private String category;
+        private StoreCategory category;
         private String imgUrl;
     }
 

@@ -113,4 +113,10 @@ public class ExceptionManager {
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(Response.error(e.getErrorCode().name()));
     }
+
+    @ExceptionHandler(NotExistStoreCategoryException.class)
+    public ResponseEntity<?> notExistStoreCategoryException(NotExistStoreCategoryException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
 }
