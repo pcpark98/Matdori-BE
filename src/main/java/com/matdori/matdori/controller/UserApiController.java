@@ -98,8 +98,7 @@ public class UserApiController {
      * 내가 좋아요 누른 가게 리스트 조회하기.
      *
      * 고쳐야 할 부분
-     * 1. FavoriteStores 카멜 케이스로 바꾸기.
-     * 2. DTO에 Builder 사용해보기.
+     * 1. DTO에 Builder 사용해보기.
      */
     @Operation(summary = "내가 좋아요 누른 가게 리스트 조회 API", description = "유저가 좋아요를 누른 가게의 리스트를 조회합니다.")
     @Parameters({
@@ -122,8 +121,8 @@ public class UserApiController {
         AuthorizationService.checkSession(userId);
 
         // 카멜 케이스로 바꾸기
-        List<StoreFavorite> FavoriteStores = userService.findAllFavoriteStore(userId, pageCount);
-        return ResponseEntity.ok().body(Response.success(FavoriteStores.stream()
+        List<StoreFavorite> favoriteStores = userService.findAllFavoriteStore(userId, pageCount);
+        return ResponseEntity.ok().body(Response.success(favoriteStores.stream()
                 .map(s -> new readFavoriteStoresResponse(
                         s.getId(),
                         s.getStore().getId(),
@@ -135,9 +134,6 @@ public class UserApiController {
 
     /**
      * 내가 좋아요한 가게 삭제하기.
-     *
-     * 고쳐야 할 부분
-     * 1. deleteFavoriteStore에 넘길 storeId가 존재하는 id인지 예외처리하기.
      */
     @Operation(summary = "내가 좋아요 누른 가게 삭제 API", description = "유저가 가게에 좋아요 누른 것을 취소합니다.")
     @Parameters({
@@ -154,22 +150,19 @@ public class UserApiController {
     @DeleteMapping("/users/{userIndex}/favorite-stores/{favoriteStoreIndex}")
     public ResponseEntity<Response<Void>> deleteFavoriteStore(
             @PathVariable("userIndex") Long userId,
-            @PathVariable("favoriteStoreIndex") Long storeId){
+            @PathVariable("favoriteStoreIndex") Long favoriteStoreId){
 
         // 세션 체크
         AuthorizationService.checkSession(userId);
 
         // storeId가 유효한지 검증 필요.
-        userService.deleteFavoriteStore(storeId);
+        userService.deleteFavoriteStore(favoriteStoreId);
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
 
     /**
      * 내가 좋아요한 족보 삭제하기.
-     *
-     * 고쳐야 할 부분
-     * 1.jokboId가 유효한지 검증 필요
      */
     @Operation(summary = "내가 좋아요 누른 족보 삭제 API", description = "유저가 족보에 좋아요 누른 것을 취소합니다.")
     @Parameters({
