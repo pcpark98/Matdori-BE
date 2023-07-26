@@ -104,9 +104,6 @@ public class StoreApiController {
 
     /**
      * 상단 가게 이름 및 별점 표시 부분 조회하기.
-     *
-     * 고쳐야 할 부분
-     * 1. storeIndex가 유효한지 확인.
      */
     @Operation(summary = "가게 이름 및 별점 표시 조회 API", description = "가게 정보 상단의 가게 이름 및 별점 표시 부분을 조회합니다.")
     @Parameter(name = "storeIndex", description = "가게 id")

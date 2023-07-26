@@ -17,7 +17,7 @@ public class Store {
     @Column(name = "store_index")
     private Long id;
     private String name;
-    private String category;
+    private StoreCategory category;
     @Column(name = "phone_number")
     private String phoneNumber;
     private String address;
