@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Getter @Setter
 public class Menu {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "menu_index")
     private Long id;
 
@@ -18,6 +18,6 @@ public class Menu {
     private Category category;
 
     private String name;
-    private Integer price;
+    private String price;
     private String imgUrl;
 }

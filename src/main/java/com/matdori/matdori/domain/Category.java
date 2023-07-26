@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Getter @Setter
 public class Category {
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "category_index")
     private Long id;
 
