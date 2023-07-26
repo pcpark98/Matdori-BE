@@ -140,7 +140,7 @@ public class StoreApiController {
     @AllArgsConstructor
      static class MenuDto{
         private String name;
-        private Integer price;
+        private String price;
         private String imgUrl;
 
         public MenuDto(Menu menu) {

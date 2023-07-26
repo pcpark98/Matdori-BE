@@ -13,6 +13,7 @@ import javax.persistence.Query;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -64,7 +65,7 @@ public class StoreRepository {
                 .getSingleResult();
     }
 
-    public com.matdori.matdori.repositoy.Dto.StoreInformationHeader readStoreInformationHeader(Long storeId){
+    public Optional<com.matdori.matdori.repositoy.Dto.StoreInformationHeader> readStoreInformationHeader(Long storeId){
         return em.createQuery(
                         "SELECT new com.matdori.matdori.repositoy.Dto.StoreInformationHeader(s.name, " +
                                 "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl) " +
@@ -73,7 +74,7 @@ public class StoreRepository {
                                 "GROUP BY s.name, s.id, s.imgUrl " +
                                 "HAVING s.id =:storeId", com.matdori.matdori.repositoy.Dto.StoreInformationHeader.class)
                 .setParameter("storeId", storeId)
-                .getSingleResult();
+                .getResultList().stream().findAny();
     }
 
     /**

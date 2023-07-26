@@ -6,6 +6,7 @@ import com.matdori.matdori.domain.Menu;
 import com.matdori.matdori.domain.Store;
 import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.exception.NotExistStoreException;
+import com.matdori.matdori.repositoy.Dto.StoreInformationHeader;
 import com.matdori.matdori.repositoy.JokboRepository;
 import com.matdori.matdori.repositoy.StoreRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,7 +34,12 @@ public class StoreService {
 
     public List<Jokbo> findAllJokbo(Long storeId, int startIndex) { return jokboRepository.findByStoreIndex(storeId, startIndex);}
 
-    public com.matdori.matdori.repositoy.Dto.StoreInformationHeader readStoreInformationHeader(Long storeId) { return storeRepository.readStoreInformationHeader(storeId);}
+    public com.matdori.matdori.repositoy.Dto.StoreInformationHeader readStoreInformationHeader(Long storeId) {
+        Optional<StoreInformationHeader> storeInformationHeader = storeRepository.readStoreInformationHeader(storeId);
+        if(storeInformationHeader.isEmpty())
+            throw new NotExistStoreException(ErrorCode.NOT_EXISTED_STORE);
+        return storeInformationHeader.get();
+    }
 
     /**
      * 해당 가게의 별점 평균 구하기
