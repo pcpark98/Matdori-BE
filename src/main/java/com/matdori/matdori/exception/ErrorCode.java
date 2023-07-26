@@ -21,7 +21,8 @@ public enum ErrorCode {
     NOT_EXISTED_JOKBO(HttpStatus.BAD_REQUEST, "존재하지 않는 족보입니다."),
     NOT_EXISTED_JOKBO_COMMENT(HttpStatus.BAD_REQUEST, "존재하지 않는 댓글입니다."),
     NOT_EXISTED_JOKBO_IMG(HttpStatus.BAD_REQUEST, "존재하지 않는 족보 이미지입니다."),
-    NOT_EXISTED_NOTICE(HttpStatus.BAD_REQUEST, "존재하지 않는 공지사항입니다.");
+    NOT_EXISTED_NOTICE(HttpStatus.BAD_REQUEST, "존재하지 않는 공지사항입니다."),
+    NOT_EXISTED_STORE(HttpStatus.BAD_REQUEST, "존재하지 않는 가게입니다.");
 
     private HttpStatus status;
     private String message;

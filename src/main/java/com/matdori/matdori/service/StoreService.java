@@ -4,6 +4,8 @@ import com.matdori.matdori.domain.Category;
 import com.matdori.matdori.domain.Jokbo;
 import com.matdori.matdori.domain.Menu;
 import com.matdori.matdori.domain.Store;
+import com.matdori.matdori.exception.ErrorCode;
+import com.matdori.matdori.exception.NotExistStoreException;
 import com.matdori.matdori.repositoy.JokboRepository;
 import com.matdori.matdori.repositoy.StoreRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,11 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final JokboRepository jokboRepository;
     public List<Store> findAll() { return storeRepository.findAll(); }
-    public Store findOne(Long id) {return storeRepository.findOne(id); }
+    public Store findOne(Long id) {
+        Store store = storeRepository.findOne(id);
+        if(store == null) throw new NotExistStoreException(ErrorCode.NOT_EXISTED_STORE);
+        return store;
+    }
 
     public List<Category> findAllCategoryWithMenu (Long id) { return storeRepository.findAllCategoryWithMenu(id);}
 

@@ -66,12 +66,12 @@ public class StoreRepository {
 
     public com.matdori.matdori.repositoy.Dto.StoreInformationHeader readStoreInformationHeader(Long storeId){
         return em.createQuery(
-                        "SELECT new com.matdori.matdori.repositoy.Dto.StoreInformationHeader(j.store.name, " +
-                                "AVG(j.flavorRating), AVG(j.cleanRating),AVG(j.underPricedRating), j.store.imgUrl ) " +
-                                "FROM Jokbo j " +
-                                "JOIN j.store " +
-                                "GROUP BY j.store.name, j.store.id, j.store.imgUrl " +
-                                "HAVING j.store.id =:storeId", com.matdori.matdori.repositoy.Dto.StoreInformationHeader.class)
+                        "SELECT new com.matdori.matdori.repositoy.Dto.StoreInformationHeader(s.name, " +
+                                "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl) " +
+                                "FROM Store s " +
+                                "LEFT JOIN s.jokbos j " +
+                                "GROUP BY s.name, s.id, s.imgUrl " +
+                                "HAVING s.id =:storeId", com.matdori.matdori.repositoy.Dto.StoreInformationHeader.class)
                 .setParameter("storeId", storeId)
                 .getSingleResult();
     }

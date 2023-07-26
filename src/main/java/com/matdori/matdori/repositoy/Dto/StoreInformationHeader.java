@@ -13,13 +13,21 @@ public class StoreInformationHeader{
     private Double cleanRating;
     private String imgUrl;
 
+
     public StoreInformationHeader(String name, Double flavorRating, Double underPricedRating, Double cleanRating, String imgUrl) {
         this.name = name;
-        this.totalRating = Math.round ((flavorRating + underPricedRating + cleanRating) /3 * 10.0) / 10.0;
-        this.flavorRating = flavorRating;
-        this.underPricedRating = underPricedRating;
-        this.cleanRating = cleanRating;
+        Double totalRating = getScore(flavorRating) +getScore(underPricedRating) + getScore(cleanRating);
+        if(totalRating != 0.0) this.totalRating = totalRating/3;
+        else this.totalRating = 0.0;
+        this.flavorRating = getScore(flavorRating);
+        this.underPricedRating = getScore(underPricedRating);
+        this.cleanRating = getScore(cleanRating);
         this.imgUrl = imgUrl;
+    }
+    public Double getScore(Double score){
+        if(score == null)
+            return 0.0;
+        else return score;
     }
 }
 
