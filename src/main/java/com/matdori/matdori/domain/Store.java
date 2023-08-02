@@ -25,7 +25,7 @@ public class Store {
     private String name;
 
     @NotBlank
-    @Column(length =20, unique = true)
+    @Column(length =20)
     @Size(max = 20)
     @Enumerated(EnumType.STRING)
     private StoreCategory category;
