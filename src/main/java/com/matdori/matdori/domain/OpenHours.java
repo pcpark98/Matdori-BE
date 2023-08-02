@@ -11,18 +11,18 @@ import javax.persistence.Embeddable;
 @Data
 @NoArgsConstructor
 public class OpenHours {
-    @Column(length = 20)
+    @Column(length = 30)
     private String monday;
-    @Column(length = 20)
+    @Column(length = 30)
     private String tuesday;
-    @Column(length = 20)
+    @Column(length = 30)
     private String wednesday;
-    @Column(length = 20)
+    @Column(length = 30)
     private String thursday;
-    @Column(length = 20)
+    @Column(length = 30)
     private String friday;
-    @Column(length = 20)
+    @Column(length = 30)
     private String saturday;
-    @Column(length = 20)
+    @Column(length = 30)
     private String sunday;
 }
