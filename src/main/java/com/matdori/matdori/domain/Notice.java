@@ -3,6 +3,7 @@ package com.matdori.matdori.domain;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.w3c.dom.Text;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,11 +30,12 @@ public class Notice {
     @Column(columnDefinition = "TEXT")
     private String contents;
 
-    @Column(name = "img_url")
+    @Column(name = "img_url", length = 255)
     private String imgUrl;
 
     @NotNull
     @CreationTimestamp
+    @NotNull
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

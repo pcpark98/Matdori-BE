@@ -10,6 +10,9 @@ import javax.persistence.*;
 @Entity
 @Getter @Setter
 @NoArgsConstructor
+@Table(
+        uniqueConstraints= @UniqueConstraint(columnNames = {"store_index", "user_index"})
+)
 public class StoreFavorite {
 
     @Id @GeneratedValue

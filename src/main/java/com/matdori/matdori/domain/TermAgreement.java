@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Entity
@@ -27,6 +28,7 @@ public class TermAgreement {
     private TermsOfService termsOfService;
 
     @Column(name = "created_at")
+    @NotNull
     @CreationTimestamp
     private LocalDateTime createdAt;
 

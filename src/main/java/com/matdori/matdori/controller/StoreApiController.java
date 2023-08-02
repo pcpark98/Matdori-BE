@@ -48,8 +48,8 @@ public class StoreApiController {
                         new StoreInformationResponse(
                                 store.getOpenHours(),
                                 store.getPhoneNumber(),
-                                store.getAddress(),
-                                store.getComment())));
+                                store.getAddress()
+                                )));
     }
 
     /**
@@ -153,7 +153,6 @@ public class StoreApiController {
         OpenHours time;
         String phoneNumber;
         String address;
-        String comment;
     }
 
     @Data
