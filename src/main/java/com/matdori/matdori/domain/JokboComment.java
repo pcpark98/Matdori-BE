@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
 
@@ -26,6 +27,8 @@ public class JokboComment {
     @JoinColumn(name = "user_index")
     private User user;
 
+    @NotBlank
+    @Column(columnDefinition = "TEXT")
     private String contents;
 
     @Column(name = "is_deleted")
