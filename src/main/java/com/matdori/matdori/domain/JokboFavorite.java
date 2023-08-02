@@ -11,6 +11,13 @@ import static javax.persistence.FetchType.*;
 @Entity
 @Getter @Setter
 @NoArgsConstructor
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {"jokbo_index", "user_index"}
+                )
+        }
+)
 public class JokboFavorite {
     @Id @GeneratedValue
     @Column(name = "jokbo_favorite_index")
