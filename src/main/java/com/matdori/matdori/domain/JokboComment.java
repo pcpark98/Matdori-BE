@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
@@ -31,9 +32,11 @@ public class JokboComment {
     @Column(columnDefinition = "TEXT")
     private String contents;
 
+    @NotNull
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
+    @NotNull
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
