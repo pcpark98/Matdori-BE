@@ -3,8 +3,7 @@ package com.matdori.matdori.service;
 import com.matdori.matdori.domain.Jokbo;
 import com.matdori.matdori.domain.JokboComment;
 import com.matdori.matdori.domain.JokboImg;
-import com.matdori.matdori.exception.ErrorCode;
-import com.matdori.matdori.exception.InsufficientPrivilegesException;
+import com.matdori.matdori.exception.*;
 import com.matdori.matdori.repositoy.Dto.JokboRichStore;
 import com.matdori.matdori.repositoy.Dto.MatdoriPick;
 import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
@@ -19,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -55,9 +55,10 @@ public class JokboService {
      */
     public Jokbo findOne(Long id) {
 
-        // 존재하지 않는 족보의 id로 조회하려고 하는 경우에 대한 예외 처리 필요.
+        Optional<Jokbo> jokbo = jokboRepository.findOne(id);
+        if(!jokbo.isPresent()) throw new NotExistedJokboException(ErrorCode.NOT_EXISTED_JOKBO);
 
-        return jokboRepository.findOne(id);
+        return jokbo.get();
     }
 
     /**
@@ -86,12 +87,18 @@ public class JokboService {
         if(!CollectionUtils.isEmpty(jokboImgs)) {
             for(JokboImg jokboImg : jokboImgs) {
                 // 족보에 첨부된 이미지들 삭제.
-                jokboImgRepository.delete(jokboImg.getId());
+                Optional<JokboImg> currentImage = jokboImgRepository.findOne(jokboImg.getId());
+
+                if(currentImage.isPresent()) jokboImgRepository.delete(jokboImg.getId());
+                else throw new NotExistedJokboImgException(ErrorCode.NOT_EXISTED_JOKBO_IMG);
             }
         }
 
-        // 족보 삭제.
-        jokboRepository.delete(jokbo.getId());
+        // 존재하는 족보인지 확인
+        Optional<Jokbo> jokboToDelete = jokboRepository.findOne(jokbo.getId());
+
+        if(jokboToDelete.isPresent()) jokboRepository.delete(jokbo.getId()); // 족보 삭제
+        else throw new NotExistedJokboException(ErrorCode.NOT_EXISTED_JOKBO);
     }
 
     /**
@@ -100,7 +107,6 @@ public class JokboService {
     @Transactional
     public void createJokboComment(JokboComment jokboComment) {
 
-        // 족보 댓글에 대한 검증이 필요할까?
         jokboCommentRepository.save(jokboComment);
     }
 
@@ -108,6 +114,11 @@ public class JokboService {
      * 족보에 달린 모든 댓글 조회하기.
      */
     public List<JokboComment> getAllJokboComments(Long jokboId) {
+
+        // 없는 족보에 대한 댓글을 조회하려고 하는 경우
+        Optional<Jokbo> jokbo = jokboRepository.findOne(jokboId);
+        if(!jokbo.isPresent()) throw new NotExistedJokboException(ErrorCode.NOT_EXISTED_JOKBO);
+
         return jokboCommentRepository.findAllJokboComments(jokboId);
     }
 
@@ -116,8 +127,10 @@ public class JokboService {
      */
     public JokboComment getAJokboComment(Long id) {
 
-        // 존재하지 않는 족보 댓글을 조회하려고 하는 것에 대한 예외처리 필요.
-        return jokboCommentRepository.findOne(id);
+        Optional<JokboComment> jokboComment = jokboCommentRepository.findOne(id);
+        if(!jokboComment.isPresent()) throw new NotExistedJokboCommentException(ErrorCode.NOT_EXISTED_JOKBO_COMMENT);
+
+        return jokboComment.get();
     }
 
     /**
@@ -130,18 +143,23 @@ public class JokboService {
             throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
         }
 
+        // 여기 보던 중
         jokboCommentRepository.delete(jokboComment.getId());
     }
 
     /**
      * 족보의 총 개수 조회하기.
      */
-    public int countAll() {return jokboRepository.countAll();}
+    public int countAll() {
+
+        return jokboRepository.countAll();
+    }
 
     /**
      * 해당 학과의 족보가 가장 많은 가게 구하기
      */
     public List<StoreListByDepartment> getStoreListByDepartment(String department) {
+
         return storeRepository.getStoreListByDepartment(department);
     }
 
@@ -149,7 +167,7 @@ public class JokboService {
      * 맛도리 픽 조회하기.
      */
     public List<MatdoriPick> getMatdoriPick(String department) {
-        // 없는 학과에 대한 예외처리 필요.
+
         return storeRepository.getMatdoriPick(department);
     }
 
@@ -157,6 +175,7 @@ public class JokboService {
      * 족보 부자 가게 리스트 조회하기.
      */
     public List<JokboRichStore> getJokboRichStores() {
+
         return storeRepository.getJokboRichStores();
     }
 }

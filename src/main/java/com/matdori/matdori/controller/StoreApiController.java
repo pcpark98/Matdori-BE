@@ -30,8 +30,6 @@ public class StoreApiController {
     /**
      * 가게 정보 탭 조회하기.
      *
-     * 고쳐야 할 부분.
-     * 1. findOne에 id가 유효한지 확인
      */
     @Operation(summary = "가게 정보 탭 조회 API", description = "가게 정보 탭을 조회합니다.")
     @Parameter(name = "storeIndex", description = "가게 id")
@@ -50,15 +48,12 @@ public class StoreApiController {
                         new StoreInformationResponse(
                                 store.getOpenHours(),
                                 store.getPhoneNumber(),
-                                store.getAddress(),
-                                store.getComment())));
+                                store.getAddress()
+                                )));
     }
 
     /**
      * 메뉴 탭 조회하기.
-     *
-     * 고쳐야 할 부분
-     * 1. Categories 카멜 케이스로 수정.
      *
      */
     @Operation(summary = "메뉴 탭 조회 API", description = "가게 정보의 메뉴 탭을 조회합니다.")
@@ -71,9 +66,9 @@ public class StoreApiController {
     })
     @GetMapping("/stores/{storeIndex}/menu")
     public ResponseEntity<Response<List<StoreMenuResponse>>> readStoreMenu(@PathVariable("storeIndex") Long id){
-        List<Category> Categories = storeService.findAllCategoryWithMenu(id);
+        List<Category> categories = storeService.findAllCategoryWithMenu(id);
 
-        return ResponseEntity.ok().body(Response.success(Categories.stream().map(c -> new StoreMenuResponse(c))
+        return ResponseEntity.ok().body(Response.success(categories.stream().map(c -> new StoreMenuResponse(c))
                 .collect(Collectors.toList())));
     }
 
@@ -109,9 +104,6 @@ public class StoreApiController {
 
     /**
      * 상단 가게 이름 및 별점 표시 부분 조회하기.
-     *
-     * 고쳐야 할 부분
-     * 1. storeIndex가 유효한지 확인.
      */
     @Operation(summary = "가게 이름 및 별점 표시 조회 API", description = "가게 정보 상단의 가게 이름 및 별점 표시 부분을 조회합니다.")
     @Parameter(name = "storeIndex", description = "가게 id")
@@ -145,7 +137,7 @@ public class StoreApiController {
     @AllArgsConstructor
      static class MenuDto{
         private String name;
-        private Integer price;
+        private String price;
         private String imgUrl;
 
         public MenuDto(Menu menu) {
@@ -161,7 +153,6 @@ public class StoreApiController {
         OpenHours time;
         String phoneNumber;
         String address;
-        String comment;
     }
 
     @Data

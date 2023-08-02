@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
@@ -22,9 +24,11 @@ public class JokboImg {
     @JoinColumn(name = "jokbo_index")
     private Jokbo jokbo;
 
+    @NotBlank
     @Column(name = "img_url")
     private String imgUrl;
 
+    @NotNull
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;

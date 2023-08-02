@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -24,8 +25,9 @@ public class JokboRepository {
     /**
      * id로 단일 족보 검색하기.
      */
-    public Jokbo findOne(Long id) {
-        return em.find(Jokbo.class, id);
+    public Optional<Jokbo> findOne(Long id) {
+        Jokbo jokbo = em.find(Jokbo.class, id);
+        return Optional.ofNullable(jokbo);
     }
 
     /**

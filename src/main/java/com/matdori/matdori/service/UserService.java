@@ -74,37 +74,38 @@ public class UserService {
      * 내가 좋아요 누른 가게 삭제하기.
      */
     @Transactional
-    public void deleteFavoriteStore(Long favoriteStoreId) { storeFavoriteRepository.deleteStoreFavorite(favoriteStoreId);}
+    public void deleteFavoriteStore(Long favoriteStoreId) {
+        if(storeFavoriteRepository.findOne(favoriteStoreId) == null)
+            throw new NotExistStoreException(ErrorCode.NOT_EXISTED_STORE);
+        storeFavoriteRepository.deleteStoreFavorite(favoriteStoreId);
+    }
 
     @Transactional
     public void deleteFavoriteJokbo(Long favoriteJokboId) { jokboFavoriteRepository.delete(favoriteJokboId);}
 
     /**
      * 가게에 좋아요 누르기
-     *
-     * 고쳐야 할 부분
-     * 1. store를 findOne으로 조회할 때, 없는 storeId에 대한 예외처리 필요.
-     *
      */
     @Transactional
     public void createFavoriteStore(Long storeId, Long userId) {
         User user = userRepository.findOne(userId);
         Store store = storeRepository.findOne(storeId);
+        if(store == null)
+            throw new NotExistStoreException(ErrorCode.NOT_EXISTED_STORE);
         StoreFavorite storeFavorite = new StoreFavorite(user, store);
         storeFavoriteRepository.saveStoreFavorite(storeFavorite);
     }
 
     /**
      * 족보에 좋아요 누르기
-     *
-     * 고쳐야 할 부분
-     * 1. jokbo findOne 예외처리.
      */
     @Transactional
     public void createFavoriteJokbo(Long jokboId, Long userId){
         User user = userRepository.findOne(userId);
-        Jokbo jokbo = jokboRepository.findOne(jokboId);
-        jokboFavoriteRepository.save(new JokboFavorite(jokbo, user));
+
+        Optional<Jokbo> jokbo = jokboRepository.findOne(jokboId);
+        if(jokbo.isPresent()) jokboFavoriteRepository.save(new JokboFavorite(jokbo.get(), user));
+        else throw new NotExistedJokboException(ErrorCode.NOT_EXISTED_JOKBO);
     }
 
     /**
