@@ -1,7 +1,10 @@
 package com.matdori.matdori.service;
 
 import com.matdori.matdori.domain.Mail;
+import com.matdori.matdori.exception.ErrorCode;
+import com.matdori.matdori.exception.InvalidEmailException;
 import com.matdori.matdori.util.SessionUtil;
+import com.matdori.matdori.util.UserUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,10 @@ public class MailService{
      * 인증 메일 보내기
      */
     public void sendAuthorizationMail(String toAddress){
+
+        if(!UserUtil.isValidEmailFormat(toAddress))
+            throw new InvalidEmailException(ErrorCode.INVALID_EMAIL_FORMAT);
+
         // 유저가 입력한 코드가 맞는 코드인지 검증하기 위해 임시저장할 세션.
         HttpSession session = SessionUtil.getSession();
 
