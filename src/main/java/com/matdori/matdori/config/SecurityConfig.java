@@ -17,7 +17,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.csrf().disable()
-                .cors().configurationSource(corsConfigurationSource());
+                .cors().configurationSource(corsConfigurationSource())
+
+                // 쿠키 없이 요청하는 것들에 대해 permitAll 설정
+                .and()
+                .authorizeRequests()
+                .anyRequest().permitAll();
 
         return http.build();
     }
