@@ -36,7 +36,8 @@ public class JokboFavoriteRepository {
                         "JOIN u.jokboFavorites f " +
                         "JOIN FETCH f.jokbo j " +
                         "LEFT JOIN FETCH j.jokboComments " +
-                        "WHERE u.id =: id", JokboFavorite.class)
+                        "WHERE u.id =: id " +
+                        "ORDER BY f.id", JokboFavorite.class)
                 .setParameter("id", id)
                 .setFirstResult((pageCount-1)*15)
                 .setMaxResults(15)

@@ -42,7 +42,8 @@ public class JokboCommentRepository {
                                 "JOIN c.user u ON u.id =: userId AND u.id = c.user.id " +
                                 "JOIN FETCH c.jokbo j " +
                                 "JOIN FETCH j.store " +
-                                "WHERE c.isDeleted = false ", JokboComment.class)
+                                "WHERE c.isDeleted = false " +
+                                "ORDER BY c.id", JokboComment.class)
                 .setParameter("userId", userId)
                 .setFirstResult((pageCount-1)*15)
                 .setMaxResults(15)

@@ -134,7 +134,8 @@ public class StoreRepository {
                                 "FROM Store s " +
                                 "LEFT JOIN s.jokbos j " +
                                 "GROUP BY s.name,s.category, s.id, s.imgUrl " +
-                                "HAVING s.category =:category", StoreListByCategory.class)
+                                "HAVING s.category =:category " +
+                                "ORDER BY s.id", StoreListByCategory.class)
                 .setParameter("category" , category)
                 .setFirstResult((startIndex-1)*15)
                 .setMaxResults(15)

@@ -71,7 +71,8 @@ public class JokboRepository {
     public List<Jokbo> findByStoreIndex(Long storeId, int startIndex){
         return em.createQuery(
                 "SELECT j FROM Jokbo j " +
-                        "WHERE j.store.id =: storeId", Jokbo.class)
+                        "WHERE j.store.id =: storeId " +
+                        "ORDER BY j.id", Jokbo.class)
                 .setParameter("storeId", storeId)
                 .setFirstResult(startIndex)
                 .setMaxResults(15)
