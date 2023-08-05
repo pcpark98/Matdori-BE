@@ -119,4 +119,10 @@ public class ExceptionManager {
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(Response.error(e.getErrorCode().name()));
     }
+
+    @ExceptionHandler(NotExistedDepartmentException.class)
+    public ResponseEntity<?> notExistedDepartmentException(NotExistedDepartmentException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
 }

@@ -121,6 +121,19 @@ public class StoreApiController {
         return ResponseEntity.ok().body(Response.success(storeInformationHeader));
     }
 
+    /**
+     * 카테고리별 가게 리스트 조회하기
+     */
+    @Operation(summary = "카테고리별 가게 조회", description = "카테고리에 해당하는 가게들을 조회합니다.")
+    @Parameters({
+            @Parameter(name = "category", description = "카테고리"),
+            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = "category, pageCount 누락. 유효하지 않은 카테고리로 요청", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
+    })
     @GetMapping("/stores")
     public ResponseEntity<Response<List<StoreListByCategory>>> readStoresByCategory(@RequestParam("category")String category,
                                                                                     @RequestParam("pageCount")int startIndex){
