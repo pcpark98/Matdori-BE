@@ -3,6 +3,7 @@ package com.matdori.matdori.domain;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.validator.constraints.Range;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -22,8 +23,8 @@ public class User {
     private Long id;
 
     @NotBlank
-    @Column(length = 25)
-    @Size(max = 25)
+    @Column(length = 40)
+    @Size(max = 40)
     private String email;
 
     @NotBlank
@@ -34,14 +35,11 @@ public class User {
     @Column(length = 30,unique = true)
     private String nickname;
 
-    @NotBlank
-    @Column(length = 20)
-    @Size(max =20)
-    private String department;
+    @Enumerated(EnumType.STRING)
+    private Department department;
 
     @CreationTimestamp
     @Column(name = "created_at")
-    @NotNull
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "user")

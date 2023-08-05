@@ -41,9 +41,6 @@ public class UserApiController {
 
     /**
      * 회원 가입
-     *
-     * 고쳐야 할 부분
-     * 1. 학과 입력 받기 + setDepartment
      */
     @Operation(summary = "회원 가입 API", description = "회원 가입을 처리합니다.")
     @ApiResponses({
@@ -58,10 +55,9 @@ public class UserApiController {
         AuthorizationService.checkEmailVerificationCompletion(request.email, EmailAuthorizationType.SIGNUP);
         User user = new User();
         user.setEmail(request.email);
-        user.setDepartment("학과 parsing 필요");
+        user.setDepartment(Department.nameOf(request.department));
         user.setPassword(request.password);
         user.setNickname(UserUtil.getRandomNickname());
-
         // 약관 동의 추가하는 로직 필요
         userService.signUp(user);
         return ResponseEntity.ok()
@@ -216,7 +212,7 @@ public class UserApiController {
         // 보내진 쿠키를 프론트에서 저장해서 다음 요청에 함께 보냄.
         return ResponseEntity.ok()
                 .header("set-cookie","sessionId="+uuid)
-                .body(Response.success(new LoginResponse(new LoginResult(user.getId(), user.getNickname(), user.getDepartment()))));
+                .body(Response.success(new LoginResponse(new LoginResult(user.getId(), user.getNickname(), user.getDepartment().getName()))));
     }
 
     /**
@@ -494,6 +490,14 @@ public class UserApiController {
                 .body(Response.success(null));
     }
 
+    /**
+     * 학과 리스트 불러오기
+     */
+    @Operation(summary = "학과 리스트 불러오기", description = "학과 리스트를 불러옵니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class))),
+    })
     @GetMapping("/departments")
     public ResponseEntity<Response<List<String>>> readDepartments(){
         return ResponseEntity.ok().body(Response.success(Department.getDepartmentList()));
@@ -578,6 +582,9 @@ public class UserApiController {
 
         @NotBlank
         private String password;
+
+        @NotBlank
+        private String department;
     }
 
     @Data

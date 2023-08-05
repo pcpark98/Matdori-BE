@@ -2,6 +2,7 @@ package com.matdori.matdori.domain;
 
 import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.exception.NotExistStoreCategoryException;
+import com.matdori.matdori.exception.NotExistedDepartmentException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +71,7 @@ public enum Department {
         this.name = name;
     }
 
-    private String getName(){ return this.name;}
+    public String getName(){ return this.name;}
 
     // 한글명을 enum 명으로 바꿔주는 함수
     public static Department nameOf(String name){
@@ -78,7 +79,7 @@ public enum Department {
             if(_name.getName().equals(name))
                 return _name;
         }
-        throw new NotExistStoreCategoryException(ErrorCode.NOT_EXISTED_STORE_CATEGORY);
+        throw new NotExistedDepartmentException(ErrorCode.NOT_EXISTED_DEPARTMENT);
     }
 
     public static List<String> getDepartmentList(){
