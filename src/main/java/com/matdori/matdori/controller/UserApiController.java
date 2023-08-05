@@ -494,6 +494,11 @@ public class UserApiController {
                 .body(Response.success(null));
     }
 
+    @GetMapping("/departments")
+    public ResponseEntity<Response<List<String>>> readDepartments(){
+        return ResponseEntity.ok().body(Response.success(Department.getDepartmentList()));
+    }
+
     @Data
     static class LoginRequest{
         @NotNull
