@@ -24,7 +24,8 @@ public class StoreFavoriteRepository {
                 "SELECT f FROM User u " +
                         "JOIN u.storeFavorites f " +
                         "JOIN FETCH f.store s " +
-                        "WHERE u.id =: id", StoreFavorite.class
+                        "WHERE u.id =: id " +
+                        "ORDER BY f.id", StoreFavorite.class
         ).setParameter("id",id)
                 .setFirstResult((pageCount-1)*15)
                 .getResultList();
