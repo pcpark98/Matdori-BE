@@ -46,6 +46,6 @@ public class StoreService {
         return storeRepository.getTotalRating(store);
     }
 
-    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(String category) { return storeRepository.findByCategory(StoreCategory.nameOf(category));}
+    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(String category, int startIndex) { return storeRepository.findByCategory(StoreCategory.nameOf(category), startIndex);}
 
 }

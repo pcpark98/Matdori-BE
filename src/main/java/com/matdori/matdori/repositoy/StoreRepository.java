@@ -127,7 +127,7 @@ public class StoreRepository {
                 .getResultList();
     }
 
-    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(StoreCategory category){
+    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(StoreCategory category, int startIndex){
         return em.createQuery(
                         "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByCategory(s.id, s.name, " +
                                 "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl, s.jokbos.size) " +
@@ -136,6 +136,8 @@ public class StoreRepository {
                                 "GROUP BY s.name,s.category, s.id, s.imgUrl " +
                                 "HAVING s.category =:category", StoreListByCategory.class)
                 .setParameter("category" , category)
+                .setFirstResult(startIndex)
+                .setMaxResults(15)
                 .getResultList();
     }
 

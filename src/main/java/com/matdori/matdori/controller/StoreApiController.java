@@ -122,8 +122,9 @@ public class StoreApiController {
     }
 
     @GetMapping("/stores")
-    public ResponseEntity<Response<List<StoreListByCategory>>> readStoresByCategory(@RequestParam("category")String category){
-        List<StoreListByCategory> stores = storeService.findByCategory(category);
+    public ResponseEntity<Response<List<StoreListByCategory>>> readStoresByCategory(@RequestParam("category")String category,
+                                                                                    @RequestParam("pageCount")int startIndex){
+        List<StoreListByCategory> stores = storeService.findByCategory(category, startIndex);
 
         return ResponseEntity.ok().body(Response.success(stores));
     }
