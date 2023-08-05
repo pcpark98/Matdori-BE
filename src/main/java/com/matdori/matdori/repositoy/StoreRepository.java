@@ -136,7 +136,7 @@ public class StoreRepository {
                                 "GROUP BY s.name,s.category, s.id, s.imgUrl " +
                                 "HAVING s.category =:category", StoreListByCategory.class)
                 .setParameter("category" , category)
-                .setFirstResult(startIndex)
+                .setFirstResult((startIndex-1)*15)
                 .setMaxResults(15)
                 .getResultList();
     }
