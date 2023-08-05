@@ -2,6 +2,7 @@ package com.matdori.matdori.controller;
 
 import com.matdori.matdori.domain.*;
 import com.matdori.matdori.repositoy.Dto.StoreInformationHeader;
+import com.matdori.matdori.repositoy.Dto.StoreListByCategory;
 import com.matdori.matdori.service.StoreService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -120,6 +121,13 @@ public class StoreApiController {
         return ResponseEntity.ok().body(Response.success(storeInformationHeader));
     }
 
+    @GetMapping("/stores")
+    public ResponseEntity<Response<List<StoreListByCategory>>> readStoresByCategory(@RequestParam("category")String category){
+        List<StoreListByCategory> stores = storeService.findByCategory(category);
+
+        return ResponseEntity.ok().body(Response.success(stores));
+    }
+
     @Data
     @AllArgsConstructor
     static class StoreMenuResponse{
@@ -175,4 +183,5 @@ public class StoreApiController {
             this.commentCnt = commentCnt;
         }
     }
+
 }

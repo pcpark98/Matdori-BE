@@ -1,9 +1,6 @@
 package com.matdori.matdori.service;
 
-import com.matdori.matdori.domain.Category;
-import com.matdori.matdori.domain.Jokbo;
-import com.matdori.matdori.domain.Menu;
-import com.matdori.matdori.domain.Store;
+import com.matdori.matdori.domain.*;
 import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.exception.NotExistStoreException;
 import com.matdori.matdori.repositoy.Dto.StoreInformationHeader;
@@ -48,5 +45,7 @@ public class StoreService {
         Store store = storeRepository.findOne(id);
         return storeRepository.getTotalRating(store);
     }
+
+    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(String category) { return storeRepository.findByCategory(StoreCategory.nameOf(category));}
 
 }
