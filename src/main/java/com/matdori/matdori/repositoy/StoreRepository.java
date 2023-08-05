@@ -2,8 +2,10 @@ package com.matdori.matdori.repositoy;
 
 import com.matdori.matdori.domain.Category;
 import com.matdori.matdori.domain.Store;
+import com.matdori.matdori.domain.StoreCategory;
 import com.matdori.matdori.repositoy.Dto.JokboRichStore;
 import com.matdori.matdori.repositoy.Dto.MatdoriPick;
+import com.matdori.matdori.repositoy.Dto.StoreListByCategory;
 import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -124,4 +126,21 @@ public class StoreRepository {
                 .setMaxResults(3)
                 .getResultList();
     }
+
+    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(StoreCategory category){
+        return em.createQuery(
+                        "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByCategory(s.id, s.name, " +
+                                "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl, s.jokbos.size) " +
+                                "FROM Store s " +
+                                "LEFT JOIN s.jokbos j " +
+                                "GROUP BY s.name,s.category, s.id, s.imgUrl " +
+                                "HAVING s.category =:category", StoreListByCategory.class)
+                .setParameter("category" , category)
+                .getResultList();
+    }
+
+    /*
+
+
+     */
 }
