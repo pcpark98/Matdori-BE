@@ -1,6 +1,7 @@
 package com.matdori.matdori.repositoy;
 
 import com.matdori.matdori.domain.Category;
+import com.matdori.matdori.domain.Department;
 import com.matdori.matdori.domain.Store;
 import com.matdori.matdori.domain.StoreCategory;
 import com.matdori.matdori.repositoy.Dto.JokboRichStore;
@@ -40,7 +41,7 @@ public class StoreRepository {
     /**
      * 해당 학과의 족보가 가장 많은 가게 리스트 구하기.
      */
-    public List<StoreListByDepartment> getStoreListByDepartment(String department) {
+    public List<StoreListByDepartment> getStoreListByDepartment(Department department) {
         // 해당 학과의 족보가 달린 가게가 3개 이하일 경우에 대한 처리 필요.
         return em.createQuery(
                 "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByDepartment(s.id, s.name, s.imgUrl) " +
