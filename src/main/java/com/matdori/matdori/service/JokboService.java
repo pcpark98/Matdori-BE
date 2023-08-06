@@ -1,5 +1,6 @@
 package com.matdori.matdori.service;
 
+import com.matdori.matdori.domain.Department;
 import com.matdori.matdori.domain.Jokbo;
 import com.matdori.matdori.domain.JokboComment;
 import com.matdori.matdori.domain.JokboImg;
@@ -160,7 +161,7 @@ public class JokboService {
      */
     public List<StoreListByDepartment> getStoreListByDepartment(String department) {
 
-        return storeRepository.getStoreListByDepartment(department);
+        return storeRepository.getStoreListByDepartment(Department.nameOf(department));
     }
 
     /**
