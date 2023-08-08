@@ -39,7 +39,6 @@ public class JokboCommentComplain {
     @Column(columnDefinition = "TEXT")
     private String contents;
 
-    @NotNull
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;

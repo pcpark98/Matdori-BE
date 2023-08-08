@@ -52,7 +52,6 @@ public class Jokbo {
     @Column(name = "clean_rating")
     private int cleanRating;
 
-    @NotNull
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;

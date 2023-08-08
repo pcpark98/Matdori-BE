@@ -33,9 +33,7 @@ public class Notice {
     @Column(name = "img_url", length = 255)
     private String imgUrl;
 
-    @NotNull
     @CreationTimestamp
-    @NotNull
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

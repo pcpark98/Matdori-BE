@@ -41,7 +41,6 @@ public class User {
 
     @CreationTimestamp
     @Column(name = "created_at")
-    @NotNull
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "user")
