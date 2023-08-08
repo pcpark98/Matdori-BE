@@ -43,7 +43,6 @@ public class Store {
     private String imgUrl;
 
     @CreationTimestamp
-    @NotNull
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

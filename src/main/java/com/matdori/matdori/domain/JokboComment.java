@@ -36,7 +36,6 @@ public class JokboComment {
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
-    @NotNull
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;

@@ -28,7 +28,6 @@ public class TermAgreement {
     private TermsOfService termsOfService;
 
     @Column(name = "created_at")
-    @NotNull
     @CreationTimestamp
     private LocalDateTime createdAt;
 
