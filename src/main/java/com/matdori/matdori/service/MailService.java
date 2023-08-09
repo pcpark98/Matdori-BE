@@ -1,8 +1,10 @@
 package com.matdori.matdori.service;
 
 import com.matdori.matdori.domain.Mail;
+import com.matdori.matdori.exception.DuplicatedUserException;
 import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.exception.InvalidEmailException;
+import com.matdori.matdori.repositoy.UserRepository;
 import com.matdori.matdori.util.SessionUtil;
 import com.matdori.matdori.util.UserUtil;
 import lombok.AllArgsConstructor;
@@ -16,7 +18,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class MailService{
     private JavaMailSender mailSender;
+
     private static final String FROM_ADDRESS = "inha_matdori@naver.com";
+    private final UserRepository userRepository;
 
     /**
      * 인증 메일 보내기
@@ -25,6 +29,8 @@ public class MailService{
 
         if(!UserUtil.isValidEmailFormat(toAddress))
             throw new InvalidEmailException(ErrorCode.INVALID_EMAIL_FORMAT);
+        if(userRepository.findByEmail(toAddress).isPresent())
+            throw new DuplicatedUserException(ErrorCode.DUPLICATED_USER);
 
         // 유저가 입력한 코드가 맞는 코드인지 검증하기 위해 임시저장할 세션.
         HttpSession session = SessionUtil.getSession();
