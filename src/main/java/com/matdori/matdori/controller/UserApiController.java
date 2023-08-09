@@ -211,7 +211,7 @@ public class UserApiController {
         // 응답에 header("set-cookie") 해주고 "sessionId="+uuid 이렇게 키=벨류 형태로 줌. -> 응답 헤더에 쿠키가 실려서 감.
         // 보내진 쿠키를 프론트에서 저장해서 다음 요청에 함께 보냄.
         return ResponseEntity.ok()
-                .header("set-cookie","sessionId="+uuid)
+                .header("set-cookie","sessionId="+uuid +"; samesite=none; secure=true")
                 .body(Response.success(new LoginResponse(new LoginResult(user.getId(), user.getNickname(), user.getDepartment().getName()))));
     }
 
