@@ -45,9 +45,15 @@ public class UserApiController {
     @Operation(summary = "회원 가입 API", description = "회원 가입을 처리합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락 또는 이메일, 비밀번호 형식 안 맞음.", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "409", description = "중복 회원가입(이미 존재하는 유저)", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 유효하지 않은 이메일 형식(INVALID_EMAIL_FORMAT) <br> 유효하지 않은 비밀번호 형식(INVALID_PASSWORD_FORMAT) <br> 유효하지 않은 학과(NOT_EXISTED_DEPARTMENT)"),
+            @ApiResponse(responseCode = "401", description = "이메일 인증 누락 (INCOMPLETE_EMAIL_VERIFICATION)"),
+            @ApiResponse(responseCode = "409", description = "중복 회원가입(DUPLICATED_USER)"),
+            @ApiResponse(responseCode = "500", description = "서버 에러"),
+    })
+    @Parameters({
+            @Parameter(name = "email", description = "사용자 이메일",required = true),
+            @Parameter(name = "password", description = "비밀번호" , required = true),
+            @Parameter(name = "department", description = "학과명", required = true)
     })
     @PostMapping("/sign-up")
     public ResponseEntity<Response<Void>> createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
