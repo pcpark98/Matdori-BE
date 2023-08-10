@@ -2,6 +2,7 @@ package com.matdori.matdori.controller;
 
 
 import com.matdori.matdori.domain.*;
+import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.service.AuthorizationService;
 import com.matdori.matdori.service.MailService;
 import com.matdori.matdori.service.UserService;
@@ -199,9 +200,13 @@ public class UserApiController {
     @Operation(summary = "로그인 API", description = "로그인을 수행합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "email 또는 password 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "로그인 실패", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_EMAIL_FORMAT)"),
+            @ApiResponse(responseCode = "401", description = "로그인 실패(INVALID_CREDENTIALS)"),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
+    })
+    @Parameters({
+            @Parameter(name = "email", description = "이메일", required = true),
+            @Parameter(name = "password", description = "비밀번호", required = true)
     })
     @PostMapping("/login")
     public ResponseEntity<Response<LoginResponse>> login(@Valid @RequestBody LoginRequest request) throws NoSuchAlgorithmException {
@@ -227,8 +232,10 @@ public class UserApiController {
     @Operation(summary = "로그아웃 API", description = "로그아웃을 수행합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_EMAIL_FORMAT)"),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
+    @Parameter(name ="sessionId", in = ParameterIn.COOKIE, required = true)
     @PostMapping("/logout")
     public ResponseEntity<Response<Void>> logout() {
 
@@ -245,9 +252,14 @@ public class UserApiController {
     @Operation(summary = "인증 메일 전송 API", description = "이메일 인증을 위한 인증 메일을 전송합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "email 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "409", description = "중복 회원가입(이미 존재하는 유저)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_EMAIL_FORMAT)"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 회원(NOT_EXISTED_USER) <type=UPDATEPASSWORD 일 경우"),
+            @ApiResponse(responseCode = "409", description = "이미 존재하는 회원(DUPLICATED_USER) <type=SIGNUP 일 경우>"),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class))),
+    })
+    @Parameters({
+            @Parameter(name = "email", description = "이메일", required = true),
+            @Parameter(name = "type", description = "인증타입 (SIGNUP/UPDATEPASSWORD)", required = true)
     })
     @PostMapping("/email-authentication")
     public ResponseEntity<Response<Void>> authenticateEmail(@RequestBody @Valid AuthenticateEmailRequest request){
@@ -262,9 +274,13 @@ public class UserApiController {
     @Operation(summary = "이메일 인증 번호 확인 API", description = "이메일 인증을 위해 입력된 인증 번호를 확인합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "number 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "인증 실패(잘못된 인증번호)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)"),
+            @ApiResponse(responseCode = "401", description = "인증 가능 시간 만료(EXPIRED_SESSION) <br> 잘못된 인증번호(WRONG_AUTHENTICATION_NUMBER) : 추가예정 "),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
+    })
+    @Parameters({
+            @Parameter(name = "number", description = "인증번호", required = true),
+            @Parameter(name = "type", description = "인증타입 (SIGNUP/UPDATEPASSWORD)", required = true)
     })
     @PostMapping("/authentication-number")
     public ResponseEntity<Response<Void>> authenticateNumber(@RequestBody @Valid AuthenticateNumberRequest request){
@@ -434,14 +450,15 @@ public class UserApiController {
      */
     @Operation(summary = "내가 쓴 모든 댓글 조회 API", description = "내가 족보에 작성한 모든 댓글들을 조회합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
-            @Parameter(name = "userIndex", description = "유저 id"),
-            @Parameter(name = "pageCount", description = "페이지")
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "userIndex", description = "유저 id", required = true),
+            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "userIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "쿠키에 들어있는 유저 정보와, 프론트에서 보낸 userIndex가 다름.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 세션 쿠키 누락(INVALID_REQUIRED_COOKIE)"),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)"),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)"),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/users/{userIndex}/comments")
@@ -467,8 +484,13 @@ public class UserApiController {
     @Operation(summary = "비밀번호 찾기 API", description = "로그인이 되지 않은 상태에서 비밀번호 찾기를 수행합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "email 또는 password의 누락 혹은 형식 안 맞음.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)"),
+            @ApiResponse(responseCode = "401", description = "이메일 인증 누락(INCOMPLETE_EMAIL_VERIFICATION)"),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
+    })
+    @Parameters({
+            @Parameter(name = "email", description = "이메일", required = true),
+            @Parameter(name = "password", description = "변경할 비밀번호", required = true)
     })
     @PutMapping("/password")
     public ResponseEntity<Response<Void>> updatePasswordWithoutLogin(@RequestBody updatePasswordWithoutLoginRequest request) throws NoSuchAlgorithmException {
@@ -484,10 +506,11 @@ public class UserApiController {
     @Operation(summary = "닉네임 중복 체크 API", description = "입력된 닉네임이 이미 존재하는지를 확인합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "nickname 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "409", description = "이미 존재하는 닉네임", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_EMAIL_FORMAT)"),
+            @ApiResponse(responseCode = "409", description = "이미 존재하는 닉네임(DUPLICATED_NICKNAME)"),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class))),
     })
+    @Parameter(name = "nickname",description = "변경할 닉네임",required = true)
     @GetMapping("/nickname")
     public ResponseEntity<Response<Void>> checkNicknameExistence(@RequestBody @Valid checkNicknameRequest request){
         userService.checkNicknameExistence(request.nickname);

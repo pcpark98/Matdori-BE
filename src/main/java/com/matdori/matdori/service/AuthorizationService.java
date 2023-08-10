@@ -32,7 +32,7 @@ public class AuthorizationService {
         // 로그인 가능 여부 체크
         if (!user.isPresent())
             // 유저가 존재하지 않는 경우.
-            throw new NotExistUserException(ErrorCode.NOT_EXISTED_USER);
+            throw new InvalidCredentialsException(ErrorCode.INVALID_CREDENTIALS);
 
         return user.get();
     }

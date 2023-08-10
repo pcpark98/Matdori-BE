@@ -132,4 +132,10 @@ public class ExceptionManager {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Response.error(ErrorCode.INVALID_REQUIRED_PARAM.name()));
     }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<?> invalidCredentialsException(InvalidCredentialsException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
 }
