@@ -1,5 +1,6 @@
 package com.matdori.matdori.service;
 
+import com.matdori.matdori.domain.EmailAuthorizationType;
 import com.matdori.matdori.domain.Mail;
 import com.matdori.matdori.exception.DuplicatedUserException;
 import com.matdori.matdori.exception.ErrorCode;
@@ -25,11 +26,11 @@ public class MailService{
     /**
      * 인증 메일 보내기
      */
-    public void sendAuthorizationMail(String toAddress){
+    public void sendAuthorizationMail(String toAddress, EmailAuthorizationType type){
 
         if(!UserUtil.isValidEmailFormat(toAddress))
             throw new InvalidEmailException(ErrorCode.INVALID_EMAIL_FORMAT);
-        if(userRepository.findByEmail(toAddress).isPresent())
+        if(type == EmailAuthorizationType.SIGNUP && userRepository.findByEmail(toAddress).isPresent())
             throw new DuplicatedUserException(ErrorCode.DUPLICATED_USER);
 
         // 유저가 입력한 코드가 맞는 코드인지 검증하기 위해 임시저장할 세션.

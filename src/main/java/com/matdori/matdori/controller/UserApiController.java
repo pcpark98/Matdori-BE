@@ -245,7 +245,7 @@ public class UserApiController {
     })
     @PostMapping("/email-authentication")
     public ResponseEntity<Response<Void>> authenticateEmail(@RequestBody @Valid AuthenticateEmailRequest request){
-        mailService.sendAuthorizationMail(request.email);
+        mailService.sendAuthorizationMail(request.email, request.type);
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
@@ -606,6 +606,9 @@ public class UserApiController {
     static class AuthenticateEmailRequest{
         @NotBlank
         private String email;
+
+        @NotNull
+        private EmailAuthorizationType type;
     }
 
     @Data
