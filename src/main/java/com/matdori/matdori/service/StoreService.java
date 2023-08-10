@@ -48,4 +48,12 @@ public class StoreService {
 
     public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(String category, int startIndex) { return storeRepository.findByCategory(StoreCategory.nameOf(category), startIndex);}
 
+    /**
+     * 가게에 매핑된 족보의 총 개수 조회하기.
+     */
+    public int countAllJokbos(Long id) {
+
+        return jokboRepository.countAllAtStore(id);
+    }
+
 }

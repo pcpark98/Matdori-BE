@@ -68,14 +68,24 @@ public class JokboRepository {
                 .getResultList();
     }
 
-    public List<Jokbo> findByStoreIndex(Long storeId, int startIndex){
+    public List<Jokbo> findByStoreIndex(Long storeId, int pageCount){
         return em.createQuery(
                 "SELECT j FROM Jokbo j " +
                         "WHERE j.store.id =: storeId " +
                         "ORDER BY j.id", Jokbo.class)
                 .setParameter("storeId", storeId)
-                .setFirstResult(startIndex)
+                .setFirstResult((pageCount-1)*15)
                 .setMaxResults(15)
                 .getResultList();
+    }
+
+    /**
+     * 가게에 매핑된 모든 족보의 개수 구하기.
+     */
+    public int countAllAtStore(Long storeId) {
+        return em.createQuery("SELECT j FROM Jokbo j " +
+                        "WHERE j.store.id =: storeId", Jokbo.class)
+                .setParameter("storeId", storeId)
+                .getResultList().size();
     }
 }
