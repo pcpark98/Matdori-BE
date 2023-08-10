@@ -15,7 +15,8 @@ public class TermsAgreementRepository {
     public void save(TermAgreement term) { em.persist(term);}
 
     public void delete(Long userId){
-        em.createQuery("DELETE FROM TermAgreement t WHERE t.user.id =: userId").setParameter("userId", userId);
+        em.createQuery("DELETE FROM TermAgreement t WHERE t.user.id =: userId").setParameter("userId", userId)
+                .executeUpdate();
     }
 
 }
