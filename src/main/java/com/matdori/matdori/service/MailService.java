@@ -5,6 +5,7 @@ import com.matdori.matdori.domain.Mail;
 import com.matdori.matdori.exception.DuplicatedUserException;
 import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.exception.InvalidEmailException;
+import com.matdori.matdori.exception.NotExistUserException;
 import com.matdori.matdori.repositoy.UserRepository;
 import com.matdori.matdori.util.SessionUtil;
 import com.matdori.matdori.util.UserUtil;
@@ -32,6 +33,8 @@ public class MailService{
             throw new InvalidEmailException(ErrorCode.INVALID_EMAIL_FORMAT);
         if(type == EmailAuthorizationType.SIGNUP && userRepository.findByEmail(toAddress).isPresent())
             throw new DuplicatedUserException(ErrorCode.DUPLICATED_USER);
+        if(type == EmailAuthorizationType.UPDATEPASSWORD && userRepository.findByEmail(toAddress).isEmpty())
+            throw new NotExistUserException(ErrorCode.NOT_EXISTED_USER);
 
         // 유저가 입력한 코드가 맞는 코드인지 검증하기 위해 임시저장할 세션.
         HttpSession session = SessionUtil.getSession();
