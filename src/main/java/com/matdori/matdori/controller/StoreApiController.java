@@ -33,11 +33,11 @@ public class StoreApiController {
      *
      */
     @Operation(summary = "가게 정보 탭 조회 API", description = "가게 정보 탭을 조회합니다.")
-    @Parameter(name = "storeIndex", description = "가게 id")
+    @Parameter(name = "storeIndex", description = "가게 id", required = true)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "storeIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 가게에 대한 조회 시도. storeIndex 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 가게(NOT_EXISTED_STORE)"),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/stores/{storeIndex}/information")
@@ -58,11 +58,11 @@ public class StoreApiController {
      *
      */
     @Operation(summary = "메뉴 탭 조회 API", description = "가게 정보의 메뉴 탭을 조회합니다.")
-    @Parameter(name = "storeIndex", description = "가게 id")
+    @Parameter(name = "storeIndex", description = "가게 id", required = true)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "storeIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 가게에 대한 조회 시도. storeIndex 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 가게(NOT_EXISTED_STORE)"),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/stores/{storeIndex}/menu")
@@ -78,13 +78,13 @@ public class StoreApiController {
      */
     @Operation(summary = "가게 족보 탭 조회 API", description = "가게 정보의 족보 탭을 조회합니다.")
     @Parameters({
-            @Parameter(name = "storeIndex", description = "가게 id"),
-            @Parameter(name = "pageCount", description = "페이지")
+            @Parameter(name = "storeIndex", description = "가게 id", required = true),
+            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "storeIndex 또는 pageCount 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 가게에 대한 조회 시도. storeIndex 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 가게(NOT_EXISTED_STORE)"),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/stores/{storeIndex}/jokbos")
@@ -107,11 +107,11 @@ public class StoreApiController {
      * 상단 가게 이름 및 별점 표시 부분 조회하기.
      */
     @Operation(summary = "가게 이름 및 별점 표시 조회 API", description = "가게 정보 상단의 가게 이름 및 별점 표시 부분을 조회합니다.")
-    @Parameter(name = "storeIndex", description = "가게 id")
+    @Parameter(name = "storeIndex", description = "가게 id", required = true)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "storeIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 가게에 대한 조회 시도. storeIndex 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 가게(NOT_EXISTED_STORE)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/stores/{storeIndex}/info-header")
@@ -126,12 +126,12 @@ public class StoreApiController {
      */
     @Operation(summary = "카테고리별 가게 조회", description = "카테고리에 해당하는 가게들을 조회합니다.")
     @Parameters({
-            @Parameter(name = "category", description = "카테고리"),
-            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답")
+            @Parameter(name = "category", description = "카테고리", required = true),
+            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "category, pageCount 누락. 유효하지 않은 카테고리로 요청", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)<br> 유효하지 않은 카테고리(NOT_EXISTED_STORE_CATEGORY)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/stores")

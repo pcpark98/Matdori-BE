@@ -4,6 +4,7 @@ import com.matdori.matdori.domain.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -124,5 +125,11 @@ public class ExceptionManager {
     public ResponseEntity<?> notExistedDepartmentException(NotExistedDepartmentException e){
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<?> missingServletRequestParameterException(MissingServletRequestParameterException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Response.error(ErrorCode.INVALID_REQUIRED_PARAM.name()));
     }
 }
