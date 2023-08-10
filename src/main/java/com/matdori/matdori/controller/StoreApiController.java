@@ -88,19 +88,31 @@ public class StoreApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/stores/{storeIndex}/jokbos")
-    public ResponseEntity<Response<List<JokboResponse>>> readAllJokbo(@PathVariable("storeIndex") Long storeIndex,
+    public ResponseEntity<Response<ReadAllJokboResponse>> readAllJokbo(@PathVariable("storeIndex") Long storeIndex,
                                                                       @RequestParam int pageCount){
+        int jokboCount = storeService.countAllJokbos(storeIndex);
         List<Jokbo> jokbos = storeService.findAllJokbo(storeIndex, pageCount);
+        List<JokboResponse> jokboList = jokbos.stream()
+                .map(j -> {
+                    Double totalRating = (double) ((j.getCleanRating() + j.getFlavorRating() + j.getUnderPricedRating())/3);
+                    return new JokboResponse(
+                            j.getId(),
+                            j.getTitle(),
+                            j.getContents(),
+                            j.getJokboImgs(),
+                            j.getJokboFavorites().size() ,
+                            j.getJokboComments().size(),
+                            totalRating);
+                })
+                .collect(Collectors.toList());
 
-        return ResponseEntity.ok().body(Response.success(jokbos.stream()
-                .map(j -> new JokboResponse(
-                        j.getId(),
-                        j.getTitle(),
-                        j.getContents(),
-                        j.getJokboImgs(),
-                        j.getJokboFavorites().size() ,
-                        j.getJokboComments().size()))
-                .collect(Collectors.toList())));
+        return ResponseEntity.ok()
+                .body(
+                        Response.success(
+                                new ReadAllJokboResponse(
+                                        jokboCount,
+                                        jokboList
+                                )));
     }
 
     /**
@@ -186,8 +198,9 @@ public class StoreApiController {
         private String imgUrl;
         private int favoriteCnt;
         private int commentCnt;
+        private double totalRating;
 
-        public JokboResponse(Long jokboId, String title, String contents, List<JokboImg> imgUrl, int favoriteCnt, int commentCnt) {
+        public JokboResponse(Long jokboId, String title, String contents, List<JokboImg> imgUrl, int favoriteCnt, int commentCnt, double totalRating) {
             this.jokboId = jokboId;
             this.title = title;
             this.contents = contents;
@@ -195,7 +208,15 @@ public class StoreApiController {
                 this.imgUrl = imgUrl.get(0).getImgUrl();
             this.favoriteCnt = favoriteCnt;
             this.commentCnt = commentCnt;
+            this.totalRating = totalRating;
         }
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class ReadAllJokboResponse {
+        private int jokboCnt;
+        List<JokboResponse> jokboList;
     }
 
 }
