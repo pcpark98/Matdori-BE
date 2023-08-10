@@ -175,5 +175,12 @@ public class UserService {
         Optional<User> user = userRepository.findByNickname(nickname);
         if(user.isPresent()) throw new DuplicatedNicknameException(ErrorCode.DUPLICATED_NICKNAME);
     }
+
+    // 개발 시에 사용할 유저삭제 api
+    @Transactional
+    public void deleteUser(Long userId){
+        termsAgreementRepository.delete(userId);
+        userRepository.delete(userId);
+    }
 }
 

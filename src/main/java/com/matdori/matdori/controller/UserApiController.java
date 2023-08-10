@@ -503,6 +503,21 @@ public class UserApiController {
         return ResponseEntity.ok().body(Response.success(Department.getDepartmentList()));
     }
 
+    /**
+     * 유저 삭제 임시 api
+     */
+    @Operation(summary = "유저삭제", description = "유저를 삭제합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class))),
+    })
+    @Parameter(name = "userIndex", description = "삭제할 유저 index")
+    @DeleteMapping("/users/{userIndex}")
+    public ResponseEntity<Response<Void>> deleteUser(@PathVariable("userIndex") Long userIndex){
+        userService.deleteUser(userIndex);
+        return ResponseEntity.ok().body(null);
+    }
+
     @Data
     static class LoginRequest{
         @NotNull

@@ -20,6 +20,8 @@ public class UserRepository {
     public User findOne(Long id){ return em.find(User.class, id); }
     public void save(User user) { em.persist(user);}
 
+    public void delete(Long userId){em.remove(em.find(User.class, userId));}
+
 
     public Optional<User> findByEmail(String email){
         return em.createQuery(
