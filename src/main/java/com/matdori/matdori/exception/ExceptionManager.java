@@ -138,4 +138,10 @@ public class ExceptionManager {
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(Response.error(e.getErrorCode().name()));
     }
+
+    @ExceptionHandler(NotExisitedJokboFavoriteException.class)
+    public ResponseEntity<?> notExisitedJokboFavorite(NotExisitedJokboFavoriteException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
 }

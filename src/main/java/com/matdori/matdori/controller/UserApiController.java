@@ -76,13 +76,15 @@ public class UserApiController {
      */
     @Operation(summary = "가게 좋아요 누르기 API", description = "유저가 가게에 대해 좋아요를 눌러 저장합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
-            @Parameter(name = "userIndex", description = "유저 id")
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "userIndex", description = "유저 id", required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "userIndex 혹은 storeIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "쿠키에 들어있는 유저 정보와, 프론트에서 보낸 userIndex가 다름.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 가게(NOT_EXISTED_STORE)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @PostMapping("/users/{userIndex}/favorite-store")
@@ -105,14 +107,15 @@ public class UserApiController {
      */
     @Operation(summary = "내가 좋아요 누른 가게 리스트 조회 API", description = "유저가 좋아요를 누른 가게의 리스트를 조회합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "userIndex", description = "유저 id"),
-            @Parameter(name = "pageCount", description = "페이지")
+            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "userIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "쿠키에 들어있는 유저 정보와, 프론트에서 보낸 userIndex가 다름.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/users/{userIndex}/favorite-stores")
@@ -123,7 +126,6 @@ public class UserApiController {
         // 세션 체크
         AuthorizationService.checkSession(userId);
 
-        // 카멜 케이스로 바꾸기
         List<StoreFavorite> favoriteStores = userService.findAllFavoriteStore(userId, pageCount);
         return ResponseEntity.ok().body(Response.success(favoriteStores.stream()
                 .map(s -> new readFavoriteStoresResponse(
@@ -141,13 +143,15 @@ public class UserApiController {
     @Operation(summary = "내가 좋아요 누른 가게 삭제 API", description = "유저가 가게에 좋아요 누른 것을 취소합니다.")
     @Parameters({
             @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
-            @Parameter(name = "userIndex", description = "유저 id"),
-            @Parameter(name = "favoriteStoreIndex", description = "좋아요한 가게 id")
+            @Parameter(name = "userIndex", description = "유저 id", required = true),
+            @Parameter(name = "favoriteStoreIndex", description = "좋아요한 가게 id", required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "userIndex 또는 favoriteStoreIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "쿠키에 들어있는 유저 정보와, 프론트에서 보낸 userIndex가 다름.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 가게(NOT_EXISTED_STORE)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @DeleteMapping("/users/{userIndex}/favorite-stores/{favoriteStoreIndex}")
@@ -171,25 +175,25 @@ public class UserApiController {
     @Parameters({
             @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "userIndex", description = "유저 id"),
-            @Parameter(name = "jokboIndex", description = "족보 id")
+            @Parameter(name = "favoriteJokboIndex", description = "족보 id")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "userIndex 또는 jokboIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "쿠키에 들어있는 유저 정보와, 프론트에서 보낸 userIndex가 다름.", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 족보, 또는 좋아요 하지 않은 족보에 대한 좋아요 취소 시도. jokboIndex 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "좋아요 하지 않은 족보에 대한 삭제(NOT_EXISTED_JOKBO_FAVORITE)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
-    @DeleteMapping("/users/{userIndex}/favorite-jokbos/{jokboIndex}")
+    @DeleteMapping("/users/{userIndex}/favorite-jokbos/{favoriteJokboIndex}")
     public ResponseEntity<Response<Void>> deleteFavoriteJokbo(
             @PathVariable("userIndex") Long userId,
-            @PathVariable("jokboIndex") Long jokboId){
+            @PathVariable("favoriteJokboIndex") Long favoriteJokboId){
 
         // 세션 체크
         AuthorizationService.checkSession(userId);
 
-        // jokboId가 유효한지 검증 필요.
-        userService.deleteFavoriteJokbo(jokboId);
+        userService.deleteFavoriteJokbo(favoriteJokboId, userId);
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
@@ -295,13 +299,15 @@ public class UserApiController {
      */
     @Operation(summary = "족보에 좋아요 누르기 API", description = "유저가 족보에 대해 좋아요를 눌러 저장합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
-            @Parameter(name = "userIndex", description = "유저 id")
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "userIndex", description = "유저 id", required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "userIndex 또는 jokboId 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "쿠키에 들어있는 유저 정보와, 프론트에서 보낸 userIndex가 다름.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 족보(NOT_EXISTED_JOKBO)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @PostMapping("/users/{userIndex}/favorite-jokbo")
@@ -320,14 +326,15 @@ public class UserApiController {
      */
     @Operation(summary = "내가 좋아요 한 족보 리스트 조회 API", description = "유저가 좋아요를 눌러 저장한 족보들을 조회합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "userIndex", description = "유저 id"),
-            @Parameter(name = "pageCount", description = "페이지")
+            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "userIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "쿠키에 들어있는 유저 정보와, 프론트에서 보낸 userIndex가 다름.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/users/{userIndex}/favorite-jokbos")
@@ -388,13 +395,15 @@ public class UserApiController {
      */
     @Operation(summary = "닉네임 변경 API", description = "닉네임 변경을 수행합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "userIndex", description = "유저 id")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "userIndex 또는 nickname 누락 OR 닉네임 최대 길이 초과.", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "쿠키에 들어있는 유저 정보와, 프론트에서 보낸 userIndex가 다름.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> 닉네임 30자 초과(INVALID_NICKNAME_FORMAT)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "409", description = "중복된 닉네임(DUPLICATED_NICKNAME)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @PutMapping("/users/{userIndex}/nickname")
@@ -413,14 +422,15 @@ public class UserApiController {
      */
     @Operation(summary = "내가 쓴 모든 족보 조회 API", description = "내가 작성한 모든 족보를 조회합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "userIndex", description = "유저 id"),
-            @Parameter(name = "pageCount", description = "페이지")
+            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "userIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "쿠키에 들어있는 유저 정보와, 프론트에서 보낸 userIndex가 다름.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/users/{userIndex}/jokbos")
@@ -484,8 +494,9 @@ public class UserApiController {
     @Operation(summary = "비밀번호 찾기 API", description = "로그인이 되지 않은 상태에서 비밀번호 찾기를 수행합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)"),
-            @ApiResponse(responseCode = "401", description = "이메일 인증 누락(INCOMPLETE_EMAIL_VERIFICATION)"),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> 잘못된 비밀번호 형식(INVALID_PASSWORD_FORMAT) ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION) <br> 이메일 인증 누락(INCOMPLETE_EMAIL_VERIFICATION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @Parameters({
