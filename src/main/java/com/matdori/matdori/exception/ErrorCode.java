@@ -21,12 +21,12 @@ public enum ErrorCode {
     DUPLICATED_NICKNAME(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
     INVALID_NICKNAME_FORMAT(HttpStatus.BAD_REQUEST, "잘못된 이메일 형식입니다."),
     NOT_EXISTED_JOKBO(HttpStatus.NOT_FOUND, "존재하지 않는 족보입니다."),
-    NOT_EXISTED_JOKBO_COMMENT(HttpStatus.BAD_REQUEST, "존재하지 않는 댓글입니다."),
-    NOT_EXISTED_JOKBO_IMG(HttpStatus.BAD_REQUEST, "존재하지 않는 족보 이미지입니다."),
+    NOT_EXISTED_JOKBO_COMMENT(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다."),
+    NOT_EXISTED_JOKBO_IMG(HttpStatus.NOT_FOUND, "존재하지 않는 족보 이미지입니다."),
     NOT_EXISTED_NOTICE(HttpStatus.BAD_REQUEST, "존재하지 않는 공지사항입니다."),
     NOT_EXISTED_STORE(HttpStatus.NOT_FOUND, "존재하지 않는 가게입니다."),
     NOT_EXISTED_STORE_CATEGORY(HttpStatus.BAD_REQUEST, "존재하지 않는 가게 카테고리입니다."),
-    NOT_EXISTED_DEPARTMENT(HttpStatus.BAD_REQUEST, "존재하지 않는 학과입니다."),
+    NOT_EXISTED_DEPARTMENT(HttpStatus.NOT_FOUND, "존재하지 않는 학과입니다."),
     NOT_EXISTED_JOKBO_FAVORITE(HttpStatus.NOT_FOUND, "존재하지 않는 족보 좋아요입니다.");
 
     private HttpStatus status;

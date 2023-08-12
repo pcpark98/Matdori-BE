@@ -58,10 +58,23 @@ public class JokboApiController {
      * 5. 족보 테이블에 저장, S3에 이미지 저장, 족보 이미지 테이블에 저장 -> 이 세가지를 한 트랜젝션에 묶어라.
      */
     @Operation(summary = "족보 작성하기 API", description = "족보를 작성합니다.")
+    @Parameters({
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "userIndex", description = "유저 id", required = true),
+            @Parameter(name = "flavorRating", description = "맛 평점", required = true),
+            @Parameter(name = "underPricedRating", description = "가성비 평점", required = true),
+            @Parameter(name = "cleanRating", description = "청결 평점", required = true),
+            @Parameter(name = "storeIndex", description = "가게 id", required = true),
+            @Parameter(name = "title", description = "족보 제목", required = true),
+            @Parameter(name = "contents", description = "족보 내용", required = true),
+            @Parameter(name = "images", description = "이미지", required = true),
+    })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "백엔드 쿠키에 들어있는 유저 정보와 프론트에서 보낸 userIndex가 다른 경우", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 가게(NOT_EXISTED_STORE)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class))),
     })
     @PostMapping("/users/{userIndex}/jokbo")
@@ -116,11 +129,11 @@ public class JokboApiController {
      * 1. 이미지 url들 조회할 때, service 한 번 더 호출하지 말고, jokbo.get 해서 가져오기.
      */
     @Operation(summary = "족보 내용 조회하기", description = "단일 족보의 상세 내용을 조회합니다.")
-    @Parameter(name = "jokboIndex", description = "족보 id")
+    @Parameter(name = "jokboIndex", description = "족보 id", required = true)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "jokboIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 족보에 대한 조회 시도. jokboIndex 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 족보(NOT_EXISTED_JOKBO)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/jokbos/{jokboIndex}")
@@ -153,15 +166,16 @@ public class JokboApiController {
      */
     @Operation(summary = "내가 쓴 족보 삭제 API", description = "족보 게시글을 삭제합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "userIndex", description = "유저 id"),
             @Parameter(name = "jokboIndex", description = "족보 id")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "userIndex 혹은 jokboIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "쿠키에 들어있는 유저 정보와, 프론트에서 보낸 userIndex가 다름.", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 족보에 대한 삭제 시도, jokboIndex 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 족보(NOT_EXISTED_JOKBO) <br> 존재하지 않는 족보 이미지(NOT_EXISTED_JOKBO_IMG)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @DeleteMapping("/users/{userIndex}/jokbos/{jokboIndex}")
@@ -192,14 +206,15 @@ public class JokboApiController {
      */
     @Operation(summary = "족보 댓글 작성 API", description = "족보에 댓글을 작성합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
             @Parameter(name = "jokboIndex", description = "족보 id")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "jokboIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "쿠키에 들어있는 유저 정보와, 프론트에서 보낸 userIndex가 다름.", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 족보에 댓글 작성 시도. jokboIndex 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 족보(NOT_EXISTED_JOKBO)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @PostMapping("/jokbos/{jokboIndex}/comment")
@@ -236,11 +251,15 @@ public class JokboApiController {
      * 2. 정렬 처리 구현 필요
      */
     @Operation(summary = "족보에 달린 모든 댓글 조회 API", description = "족보 게시글에 달린 모든 댓글들을 조회합니다.")
-    @Parameter(name = "jokboIndex", description = "족보 id")
+    @Parameters({
+            @Parameter(name = "jokboIndex", description = "족보 id", required = true),
+            @Parameter(name = "order", description = "정렬값", required = true),
+            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true)
+    })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "jokboIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 족보에 대한 댓글 조회 시도. jokboIndex 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 족보(NOT_EXISTED_JOKBO)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/jokbos/{jokboIndex}/comments")
@@ -272,15 +291,16 @@ public class JokboApiController {
      */
     @Operation(summary = "내가 쓴 댓글 삭제 API", description = "유저 본인이 작성한 댓글을 삭제합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
-            @Parameter(name = "jokboIndex", description = "족보 id"),
-            @Parameter(name = "commentIndex", description = "댓글 id")
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "jokboIndex", description = "족보 id", required = true),
+            @Parameter(name = "commentIndex", description = "댓글 id", required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "jokboIndex 또는 commentIndex 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "401", description = "쿠키에 들어있는 유저 정보와, 프론트에서 보낸 userIndex가 다름.", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 족보, 또는 존재하지 않는 댓글에 대한 삭제 시도. jokboIndex 또는 commentIndex 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 족보(?) <br> 존재하지 않는 댓글(NOT_EXISTED_JOKBO_COMMENT)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @DeleteMapping("/jokbos/{jokboIndex}/comments/{commentIndex}")
@@ -324,11 +344,11 @@ public class JokboApiController {
      * 1. department가 유효한지 확인하기. -> 논의 필요. 유효한 department인지 확인하려면 모든 department를 DB에 따로 저장해야 하지 않을까?
      */
     @Operation(summary = "학과별 추천 식당 조회 API", description = "유저가 소속된 학과의 학생들이 족보를 많이 작성한 식당들을 조회합니다.")
-    @Parameter(name = "department", description = "학과")
+    @Parameter(name = "department", description = "학과", required = true)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "department 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 학과에 대한 조회 시도. department 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 학과(NOT_EXISTED_DEPARTMENT)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/stores/department")
@@ -358,11 +378,11 @@ public class JokboApiController {
      * 1. department가 유효한지 확인. -> 논의 필요.
      */
     @Operation(summary = "맛도리 픽 가게 리스트 조회 API", description = "맛도리 픽이라는 이름으로 학과별 추천으로 선정되지 않은 가게들 중에서 랜덤으로 세 곳을 조회합니다.")
-    @Parameter(name = "department", description = "학과")
+    @Parameter(name = "department", description = "학과", required = true)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "department 누락", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 학과. department 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 학과(NOT_EXISTED_DEPARTMENT)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/stores/matdori-pick")
