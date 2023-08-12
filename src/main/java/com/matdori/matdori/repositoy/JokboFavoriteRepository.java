@@ -43,6 +43,6 @@ public class JokboFavoriteRepository {
                 .setMaxResults(15)
                 .getResultList();
     }
-
+    public JokboFavorite findOne(Long jokboFavoriteId) { return em.find(JokboFavorite.class, jokboFavoriteId);}
 
 }

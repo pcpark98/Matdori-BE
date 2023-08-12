@@ -81,7 +81,13 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteFavoriteJokbo(Long favoriteJokboId) { jokboFavoriteRepository.delete(favoriteJokboId);}
+    public void deleteFavoriteJokbo(Long favoriteJokboId, Long userId) {
+        JokboFavorite jokboFavorite = jokboFavoriteRepository.findOne(favoriteJokboId);
+        if(jokboFavorite == null)
+            throw new NotExisitedJokboFavoriteException(ErrorCode.NOT_EXISTED_JOKBO_FAVORITE);
+        if(jokboFavorite.getUser().getId() != userId)
+            throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
+        jokboFavoriteRepository.delete(favoriteJokboId);}
 
     /**
      * 가게에 좋아요 누르기
@@ -154,6 +160,9 @@ public class UserService {
     @Transactional
     public void updateNickname(Long userId, String nickname){
 
+        // 닉네임 길이 체크
+        if(nickname.length() > 30)
+            throw new InvalidNicknameFormatExceition(ErrorCode.INVALID_NICKNAME_FORMAT);
         // 변경하려는 닉네임이 이미 존재하는 닉네임인지 확인
         checkNicknameExistence(nickname);
 
