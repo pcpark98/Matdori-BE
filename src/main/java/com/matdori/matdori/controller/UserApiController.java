@@ -93,7 +93,7 @@ public class UserApiController {
                                     @RequestBody @Valid CreateFavoriteStoreRequest request){
 
         // 세션 체크
-        //AuthorizationService.checkSession(userId);
+        AuthorizationService.checkSession(userId);
 
         Long favoriteStoreIndex  = userService.createFavoriteStore(request.storeId, userId);
         return ResponseEntity.ok()
