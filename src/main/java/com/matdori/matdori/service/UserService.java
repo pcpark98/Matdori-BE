@@ -185,6 +185,16 @@ public class UserService {
         if(user.isPresent()) throw new DuplicatedNicknameException(ErrorCode.DUPLICATED_NICKNAME);
     }
 
+    /**
+     * 유저가 족보에 좋아요를 눌렀는지 확인하기.
+     */
+    public Long getFavoriteJokboId(Long userId, Long jokboId) {
+
+        Optional<JokboFavorite> jokboFavorite = jokboFavoriteRepository.findByIds(userId, jokboId);
+        if(!jokboFavorite.isPresent()) return null;
+        else return jokboFavorite.get().getId();
+    }
+
     // 개발 시에 사용할 유저삭제 api
     @Transactional
     public void deleteUser(Long userId){
