@@ -15,7 +15,7 @@ public class StoreFavoriteRepository {
     private final EntityManager em;
 
     public StoreFavorite findOne(Long favoriteStoreId) { return em.find(StoreFavorite.class, favoriteStoreId);}
-    public void saveStoreFavorite(StoreFavorite storeFavorite){ em.persist(storeFavorite);}
+    public Long saveStoreFavorite(StoreFavorite storeFavorite){ em.persist(storeFavorite); return storeFavorite.getId();}
 
     public void deleteStoreFavorite(Long id) { em.remove(em.find(StoreFavorite.class, id));}
 

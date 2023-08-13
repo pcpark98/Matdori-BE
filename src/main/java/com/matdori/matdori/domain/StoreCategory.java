@@ -27,7 +27,7 @@ public enum StoreCategory {
         this.name = name;
     }
 
-    private String getName(){ return this.name;}
+    public String getName(){ return this.name;}
 
     // 한글명을 enum 명으로 바꿔주는 함수
     public static StoreCategory nameOf(String name){

@@ -56,4 +56,10 @@ public class StoreService {
         return jokboRepository.countAllAtStore(id);
     }
 
+    /**
+     * 카테고리 별 총 가게 수
+     */
+
+    public Long CountStoresByCategory(String category) { return storeRepository.countStoresByCategory(StoreCategory.nameOf(category));}
+
 }
