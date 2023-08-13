@@ -140,6 +140,7 @@ public class JokboApiController {
                     @PathVariable("jokboIndex") @NotNull Long jokboId) {
         Jokbo jokbo = jokboService.findOne(jokboId);
         Long jokboFavoriteId = userService.getFavoriteJokboId(userId, jokboId);
+        com.matdori.matdori.repositoy.Dto.StoreRatings ratings = storeService.getAllRatings(jokbo.getStore());
         List<String> jokboImgUrls = jokboService.getImageUrls(jokbo.getJokboImgs());
 
         return ResponseEntity.ok().body(
@@ -148,10 +149,15 @@ public class JokboApiController {
                                 jokbo.getStore().getId(),
                                 jokbo.getStore().getName(),
                                 jokbo.getStore().getImgUrl(),
+                                Math.round(ratings.getTotalRating() * 100) / 100.0,
+                                Math.round(ratings.getFlavorRating() * 100) / 100.0,
+                                Math.round(ratings.getUnderPricedRating() * 100) / 100.0,
+                                Math.round(ratings.getCleanRating() * 100) / 100.0,
                                 jokbo.getTitle(),
                                 jokbo.getUser().getNickname(),
                                 jokbo.getContents(),
                                 jokboFavoriteId,
+                                jokbo.getCreatedAt(),
                                 jokboImgUrls
                         )
                 )
@@ -453,11 +459,16 @@ public class JokboApiController {
         Long storeIndex;
         String storeName;
         String storeImgUrl;
+        double totalRating;
+        double flavorRating;
+        double underPricedRating;
+        double cleanRating;
 
         String title;
         String nickname;
         String contents;
         Long jokboFavoriteId;
+        LocalDateTime createdAt;
 
         List<String> jokboImgUrlList;
     }

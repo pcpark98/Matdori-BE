@@ -56,4 +56,11 @@ public class StoreService {
         return jokboRepository.countAllAtStore(id);
     }
 
+    /**
+     * 해당 가게의 모든 별점별 평균 구하기
+     */
+    public com.matdori.matdori.repositoy.Dto.StoreRatings getAllRatings(Store store) {
+
+        return storeRepository.getAllRatings(store);
+    }
 }
