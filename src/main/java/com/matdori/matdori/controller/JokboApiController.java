@@ -51,11 +51,9 @@ public class JokboApiController {
      * 족보 작성하기.
      *
      * 고쳐야 할 부분
-     * 1. 세션 체크하고 시작하기.
-     * 2. storeIndex 유효한지 확인.
-     * 3. 족보 테이블에 넣고 이미지를 넣을 차례에 이미지를 넣다가 에러가 발생한 경우, 족보 테이블 롤백이 필요하다.
-     * 4. S3에 이미지 넣고, 족보 이미지 테이블에 넣을 차례에 에러가 발생하면, 족보 이미지 테이블에 롤백이 필요하다.
-     * 5. 족보 테이블에 저장, S3에 이미지 저장, 족보 이미지 테이블에 저장 -> 이 세가지를 한 트랜젝션에 묶어라.
+     * 1. 족보 테이블에 넣고 이미지를 넣을 차례에 이미지를 넣다가 에러가 발생한 경우, 족보 테이블 롤백이 필요하다.
+     * 2. S3에 이미지 넣고, 족보 이미지 테이블에 넣을 차례에 에러가 발생하면, 족보 이미지 테이블에 롤백이 필요하다.
+     * 3. 족보 테이블에 저장, S3에 이미지 저장, 족보 이미지 테이블에 저장 -> 이 세가지를 한 트랜젝션에 묶어라.
      */
     @Operation(summary = "족보 작성하기 API", description = "족보를 작성합니다.")
     @Parameters({
@@ -78,10 +76,12 @@ public class JokboApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class))),
     })
     @PostMapping("/users/{userIndex}/jokbo")
-    public ResponseEntity<Response<Void>> createJokbo(@PathVariable("userIndex") Long userIndex,
-                            @RequestBody @Valid CreateJokboRequest request) throws IOException {
+    public ResponseEntity<Response<Void>> createJokbo(
+            @PathVariable("userIndex") @NotNull Long userIndex,
+            @RequestBody @Valid CreateJokboRequest request) throws IOException {
 
         // 세션 체크하기.
+        AuthorizationService.checkSession(userIndex);
 
         Jokbo jokbo = new Jokbo();
         User user = userService.findOne(userIndex);
@@ -124,9 +124,6 @@ public class JokboApiController {
 
     /**
      * 족보 내용 조회하기
-     *
-     * 고쳐야 할 부분
-     * 1. 이미지 url들 조회할 때, service 한 번 더 호출하지 말고, jokbo.get 해서 가져오기.
      */
     @Operation(summary = "족보 내용 조회하기", description = "단일 족보의 상세 내용을 조회합니다.")
     @Parameter(name = "jokboIndex", description = "족보 id", required = true)
@@ -138,8 +135,12 @@ public class JokboApiController {
     })
     @GetMapping("/jokbos/{jokboIndex}")
     public ResponseEntity<Response<JokboContentsResponse>>
-            readJokbo(@PathVariable("jokboIndex") Long id) {
-        Jokbo jokbo = jokboService.findOne(id);
+            readJokbo(
+                    @RequestHeader("userIndex") @NotNull Long userId,
+                    @PathVariable("jokboIndex") @NotNull Long jokboId) {
+        Jokbo jokbo = jokboService.findOne(jokboId);
+        Long jokboFavoriteId = userService.getFavoriteJokboId(userId, jokboId);
+        com.matdori.matdori.repositoy.Dto.StoreRatings ratings = storeService.getAllRatings(jokbo.getStore());
         List<String> jokboImgUrls = jokboService.getImageUrls(jokbo.getJokboImgs());
 
         return ResponseEntity.ok().body(
@@ -148,9 +149,15 @@ public class JokboApiController {
                                 jokbo.getStore().getId(),
                                 jokbo.getStore().getName(),
                                 jokbo.getStore().getImgUrl(),
+                                Math.round(ratings.getTotalRating() * 100) / 100.0,
+                                Math.round(ratings.getFlavorRating() * 100) / 100.0,
+                                Math.round(ratings.getUnderPricedRating() * 100) / 100.0,
+                                Math.round(ratings.getCleanRating() * 100) / 100.0,
                                 jokbo.getTitle(),
                                 jokbo.getUser().getNickname(),
                                 jokbo.getContents(),
+                                jokboFavoriteId,
+                                jokbo.getCreatedAt(),
                                 jokboImgUrls
                         )
                 )
@@ -452,10 +459,16 @@ public class JokboApiController {
         Long storeIndex;
         String storeName;
         String storeImgUrl;
+        double totalRating;
+        double flavorRating;
+        double underPricedRating;
+        double cleanRating;
 
         String title;
         String nickname;
         String contents;
+        Long jokboFavoriteId;
+        LocalDateTime createdAt;
 
         List<String> jokboImgUrlList;
     }

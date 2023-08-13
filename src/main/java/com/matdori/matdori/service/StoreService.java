@@ -58,10 +58,7 @@ public class StoreService {
         return jokboRepository.countAllAtStore(id);
     }
 
-    /**
-     * 카테고리 별 총 가게 수
-     */
-    public Long CountStoresByCategory(String category) { return storeRepository.countStoresByCategory(StoreCategory.nameOf(category));}
+
 
     /**
      * 가게에서 가장 인기있는 족보 조회
@@ -75,4 +72,18 @@ public class StoreService {
         else
             return null;
     }
+ 
+    /**
+     * 해당 가게의 모든 별점별 평균 구하기
+     */
+    public com.matdori.matdori.repositoy.Dto.StoreRatings getAllRatings(Store store) {
+
+        return storeRepository.getAllRatings(store);
+    }
+
+    /**
+     * 카테고리 별 총 가게 수
+     */
+    public Long CountStoresByCategory(String category) { return storeRepository.countStoresByCategory(StoreCategory.nameOf(category));}
+
 }
