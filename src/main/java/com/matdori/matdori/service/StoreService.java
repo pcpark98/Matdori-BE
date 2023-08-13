@@ -4,6 +4,7 @@ import com.matdori.matdori.domain.*;
 import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.exception.NotExistStoreException;
 import com.matdori.matdori.repositoy.Dto.StoreInformationHeader;
+import com.matdori.matdori.repositoy.JokboFavoriteRepository;
 import com.matdori.matdori.repositoy.JokboRepository;
 import com.matdori.matdori.repositoy.StoreRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final JokboRepository jokboRepository;
+    private final JokboFavoriteRepository jokboFavoriteRepository;
     public List<Store> findAll() { return storeRepository.findAll(); }
     public Store findOne(Long id) {
         Store store = storeRepository.findOne(id);
@@ -56,6 +58,21 @@ public class StoreService {
         return jokboRepository.countAllAtStore(id);
     }
 
+
+
+    /**
+     * 가게에서 가장 인기있는 족보 조회
+     */
+    public Optional<Jokbo> readPopularJokboAtStore(Long storeId) {return jokboRepository.readPopularJokboatStore(storeId);}
+
+    public Long readFavoriteStoreIndex(Long userId, Long storeId) {
+        Optional<Long> favoriteStoreIndex = jokboFavoriteRepository.readFavoriteStoreIndex(userId, storeId);
+        if(favoriteStoreIndex.isPresent())
+            return favoriteStoreIndex.get();
+        else
+            return null;
+    }
+ 
     /**
      * 해당 가게의 모든 별점별 평균 구하기
      */
@@ -68,4 +85,5 @@ public class StoreService {
      * 카테고리 별 총 가게 수
      */
     public Long CountStoresByCategory(String category) { return storeRepository.countStoresByCategory(StoreCategory.nameOf(category));}
+
 }

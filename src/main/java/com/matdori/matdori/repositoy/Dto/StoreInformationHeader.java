@@ -1,8 +1,12 @@
 package com.matdori.matdori.repositoy.Dto;
 
+import com.matdori.matdori.domain.Jokbo;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.Optional;
+
 @Getter
 @NoArgsConstructor
 public class StoreInformationHeader{

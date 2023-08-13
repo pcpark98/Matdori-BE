@@ -46,6 +46,16 @@ public class JokboFavoriteRepository {
     }
     public JokboFavorite findOne(Long jokboFavoriteId) { return em.find(JokboFavorite.class, jokboFavoriteId);}
 
+
+    public Optional<Long> readFavoriteStoreIndex(Long userId, Long storeId) {
+        return em.createQuery(
+                "SELECT j.id FROM JokboFavorite j " +
+                        "WHERE j.user.id =: userId AND j.jokbo.store.id =: storeId", Long.class)
+                .setParameter("userId", userId)
+                .setParameter("storeId", storeId)
+                .getResultList()
+                .stream().findAny();
+
     /**
      * 유저가 족보에 좋아요를 눌렀는지 여부 확인
      */

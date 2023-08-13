@@ -3,6 +3,7 @@ package com.matdori.matdori.controller;
 import com.matdori.matdori.domain.*;
 import com.matdori.matdori.repositoy.Dto.StoreInformationHeader;
 import com.matdori.matdori.repositoy.Dto.StoreListByCategory;
+import com.matdori.matdori.service.AuthorizationService;
 import com.matdori.matdori.service.StoreService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,8 +18,12 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Tag(name = "가게 API", description = "가게와 관련된 API들")
@@ -120,7 +125,10 @@ public class StoreApiController {
      * 상단 가게 이름 및 별점 표시 부분 조회하기.
      */
     @Operation(summary = "가게 이름 및 별점 표시 조회 API", description = "가게 정보 상단의 가게 이름 및 별점 표시 부분을 조회합니다.")
-    @Parameter(name = "storeIndex", description = "가게 id", required = true)
+    @Parameters({
+            @Parameter(name = "storeIndex", description = "가게 id", required = true),
+            @Parameter(name = "userIndex", description = "유저 id", required = true)
+    })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
             @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)", content = @Content(schema = @Schema(implementation = Error.class))),
@@ -128,10 +136,19 @@ public class StoreApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/stores/{storeIndex}/info-header")
-    public ResponseEntity<Response<StoreInformationHeader>> readStoreInformationHeader(@PathVariable("storeIndex") Long storeIndex){
-        StoreInformationHeader storeInformationHeader = storeService.readStoreInformationHeader(storeIndex);
+    public ResponseEntity<Response<StoreInformationHeaderResponse>> readStoreInformationHeader(@PathVariable("storeIndex") Long storeIndex,
+                                                                                       @RequestBody @Valid StoreInformationHeaderRequest request){
 
-        return ResponseEntity.ok().body(Response.success(storeInformationHeader));
+        AuthorizationService.checkSession(request.userIndex);
+        StoreInformationHeader storeInformationHeader = storeService.readStoreInformationHeader(storeIndex);
+        Optional<Jokbo> jokbo = storeService.readPopularJokboAtStore(storeIndex);
+        Long favoriteStoreIndex = storeService.readFavoriteStoreIndex(request.userIndex, storeIndex);
+
+        return ResponseEntity.ok().body(Response.success(
+                new StoreInformationHeaderResponse(
+                        storeInformationHeader,jokbo, favoriteStoreIndex
+                )
+        ));
     }
 
     /**
@@ -229,5 +246,27 @@ public class StoreApiController {
     static class StoreListByCategoryResponse{
         private Long totalCnt;
         private List<StoreListByCategory> storeList;
+    }
+
+    @Data
+    static class StoreInformationHeaderResponse{
+        private StoreInformationHeader storeInformationHeader;
+        private Long jokboId =null;
+        private String contents = null;
+        private Long favoriteStoreIndex;
+
+        public StoreInformationHeaderResponse(StoreInformationHeader storeInformationHeader, Optional<Jokbo> jokbo, Long favoriteStoreIndex) {
+            this.storeInformationHeader = storeInformationHeader;
+            if(jokbo.isPresent()){
+                this.jokboId = jokbo.get().getId();
+                this.contents = jokbo.get().getContents();
+            }
+            this.favoriteStoreIndex = favoriteStoreIndex;
+        }
+    }
+
+    @Data
+    static class StoreInformationHeaderRequest{
+        private Long userIndex;
     }
 }
