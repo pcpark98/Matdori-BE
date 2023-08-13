@@ -130,7 +130,7 @@ public class StoreRepository {
 
     public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(StoreCategory category, int startIndex){
         return em.createQuery(
-                        "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByCategory(s.id, s.name, " +
+                        "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByCategory(s.id, s.name, s.category, " +
                                 "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl, s.jokbos.size) " +
                                 "FROM Store s " +
                                 "LEFT JOIN s.jokbos j " +
@@ -141,6 +141,15 @@ public class StoreRepository {
                 .setFirstResult((startIndex-1)*15)
                 .setMaxResults(15)
                 .getResultList();
+    }
+
+    public Long countStoresByCategory(StoreCategory storeCategory) {
+        return em.createQuery(
+                "SELECT COUNT(*) " +
+                        "FROM Store s " +
+                        "WHERE s.category =: storeCategory", Long.class)
+                .setParameter("storeCategory", storeCategory)
+                .getSingleResult();
     }
 
     /*
