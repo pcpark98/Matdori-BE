@@ -124,7 +124,7 @@ public class UserApiController {
             @RequestParam int pageCount){
 
         // 세션 체크
-        AuthorizationService.checkSession(userId);
+        //AuthorizationService.checkSession(userId);
 
         List<StoreFavorite> favoriteStores = userService.findAllFavoriteStore(userId, pageCount);
         return ResponseEntity.ok().body(Response.success(favoriteStores.stream()
@@ -132,7 +132,7 @@ public class UserApiController {
                         s.getId(),
                         s.getStore().getId(),
                         s.getStore().getName(),
-                        s.getStore().getCategory(),
+                        s.getStore().getCategory().getName(),
                         s.getStore().getImgUrl()))
                 .collect(Collectors.toList())));
     }
@@ -593,7 +593,7 @@ public class UserApiController {
         private Long favoriteStoreId;
         private Long storeId;
         private String name;
-        private StoreCategory category;
+        private String category;
         private String imgUrl;
     }
 
