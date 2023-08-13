@@ -93,13 +93,13 @@ public class UserService {
      * 가게에 좋아요 누르기
      */
     @Transactional
-    public void createFavoriteStore(Long storeId, Long userId) {
+    public Long createFavoriteStore(Long storeId, Long userId) {
         User user = userRepository.findOne(userId);
         Store store = storeRepository.findOne(storeId);
         if(store == null)
             throw new NotExistStoreException(ErrorCode.NOT_EXISTED_STORE);
         StoreFavorite storeFavorite = new StoreFavorite(user, store);
-        storeFavoriteRepository.saveStoreFavorite(storeFavorite);
+        return storeFavoriteRepository.saveStoreFavorite(storeFavorite);
     }
 
     /**

@@ -77,7 +77,8 @@ public class UserApiController {
     @Operation(summary = "가게 좋아요 누르기 API", description = "유저가 가게에 대해 좋아요를 눌러 저장합니다.")
     @Parameters({
             @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
-            @Parameter(name = "userIndex", description = "유저 id", required = true)
+            @Parameter(name = "userIndex", description = "유저 id", required = true),
+            @Parameter(name = "storeId", description = "가게 id", required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -88,15 +89,15 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @PostMapping("/users/{userIndex}/favorite-store")
-    public ResponseEntity<Response<Void>> createFavoriteStore(@PathVariable("userIndex") @NotNull Long userId,
+    public ResponseEntity<Response<createFavoriteStoreResponse>> createFavoriteStore(@PathVariable("userIndex") @NotNull Long userId,
                                     @RequestBody @Valid CreateFavoriteStoreRequest request){
 
         // 세션 체크
         AuthorizationService.checkSession(userId);
 
-        userService.createFavoriteStore(request.storeId, userId);
+        Long favoriteStoreIndex  = userService.createFavoriteStore(request.storeId, userId);
         return ResponseEntity.ok()
-                .body(Response.success(null));
+                .body(Response.success(new createFavoriteStoreResponse(favoriteStoreIndex)));
     }
 
     /**
@@ -124,7 +125,7 @@ public class UserApiController {
             @RequestParam int pageCount){
 
         // 세션 체크
-        AuthorizationService.checkSession(userId);
+        //AuthorizationService.checkSession(userId);
 
         List<StoreFavorite> favoriteStores = userService.findAllFavoriteStore(userId, pageCount);
         return ResponseEntity.ok().body(Response.success(favoriteStores.stream()
@@ -132,7 +133,7 @@ public class UserApiController {
                         s.getId(),
                         s.getStore().getId(),
                         s.getStore().getName(),
-                        s.getStore().getCategory(),
+                        s.getStore().getCategory().getName(),
                         s.getStore().getImgUrl()))
                 .collect(Collectors.toList())));
     }
@@ -593,7 +594,7 @@ public class UserApiController {
         private Long favoriteStoreId;
         private Long storeId;
         private String name;
-        private StoreCategory category;
+        private String category;
         private String imgUrl;
     }
 
@@ -729,5 +730,11 @@ public class UserApiController {
     static class checkNicknameRequest{
         @NotBlank
         private String nickname;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class createFavoriteStoreResponse{
+        private Long favoriteStoreIndex;
     }
 }

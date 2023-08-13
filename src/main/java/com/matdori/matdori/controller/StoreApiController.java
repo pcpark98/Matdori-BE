@@ -79,7 +79,8 @@ public class StoreApiController {
     @Operation(summary = "가게 족보 탭 조회 API", description = "가게 정보의 족보 탭을 조회합니다.")
     @Parameters({
             @Parameter(name = "storeIndex", description = "가게 id", required = true),
-            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true)
+            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true),
+            @Parameter(name = "order", description = "최신순, 별점 높은 순", required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -139,7 +140,8 @@ public class StoreApiController {
     @Operation(summary = "카테고리별 가게 조회", description = "카테고리에 해당하는 가게들을 조회합니다.")
     @Parameters({
             @Parameter(name = "category", description = "카테고리", required = true),
-            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true)
+            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true),
+            @Parameter(name = "order", description = "정렬값 (기본순, 별점 높은 순, 족보 많은 순)", required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -147,11 +149,14 @@ public class StoreApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/stores")
-    public ResponseEntity<Response<List<StoreListByCategory>>> readStoresByCategory(@RequestParam("category")String category,
+    public ResponseEntity<Response<StoreListByCategoryResponse>> readStoresByCategory(@RequestParam("category")String category,
                                                                                     @RequestParam("pageCount")int startIndex){
         List<StoreListByCategory> stores = storeService.findByCategory(category, startIndex);
+        Long totalCnt = storeService.CountStoresByCategory(category);
 
-        return ResponseEntity.ok().body(Response.success(stores));
+        return ResponseEntity.ok().body(Response.success(
+                new StoreListByCategoryResponse(totalCnt, stores)
+        ));
     }
 
     @Data
@@ -219,4 +224,10 @@ public class StoreApiController {
         List<JokboResponse> jokboList;
     }
 
+    @Data
+    @AllArgsConstructor
+    static class StoreListByCategoryResponse{
+        private Long totalCnt;
+        private List<StoreListByCategory> storeList;
+    }
 }
