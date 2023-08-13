@@ -4,10 +4,7 @@ import com.matdori.matdori.domain.Category;
 import com.matdori.matdori.domain.Department;
 import com.matdori.matdori.domain.Store;
 import com.matdori.matdori.domain.StoreCategory;
-import com.matdori.matdori.repositoy.Dto.JokboRichStore;
-import com.matdori.matdori.repositoy.Dto.MatdoriPick;
-import com.matdori.matdori.repositoy.Dto.StoreListByCategory;
-import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
+import com.matdori.matdori.repositoy.Dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -143,6 +140,18 @@ public class StoreRepository {
                 .getResultList();
     }
 
+    public com.matdori.matdori.repositoy.Dto.StoreRatings getAllRatings(Store store) {
+        return em.createQuery(
+                "SELECT new com.matdori.matdori.repositoy.Dto.StoreRatings(" +
+                        "AVG(j.flavorRating), " +
+                        "AVG(j.underPricedRating), " +
+                        "AVG(j.cleanRating)) " +
+                        "FROM Jokbo j " +
+                        "WHERE j.store =: store ", StoreRatings.class)
+                .setParameter("store", store)
+                .getSingleResult();
+    }
+
     public Long countStoresByCategory(StoreCategory storeCategory) {
         return em.createQuery(
                 "SELECT COUNT(*) " +
@@ -151,9 +160,4 @@ public class StoreRepository {
                 .setParameter("storeCategory", storeCategory)
                 .getSingleResult();
     }
-
-    /*
-
-
-     */
 }

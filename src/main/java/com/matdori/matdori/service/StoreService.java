@@ -57,9 +57,15 @@ public class StoreService {
     }
 
     /**
+     * 해당 가게의 모든 별점별 평균 구하기
+     */
+    public com.matdori.matdori.repositoy.Dto.StoreRatings getAllRatings(Store store) {
+
+        return storeRepository.getAllRatings(store);
+    }
+
+    /**
      * 카테고리 별 총 가게 수
      */
-
     public Long CountStoresByCategory(String category) { return storeRepository.countStoresByCategory(StoreCategory.nameOf(category));}
-
 }
