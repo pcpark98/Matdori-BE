@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -45,4 +46,13 @@ public class JokboFavoriteRepository {
     }
     public JokboFavorite findOne(Long jokboFavoriteId) { return em.find(JokboFavorite.class, jokboFavoriteId);}
 
+    public Optional<Long> readFavoriteStoreIndex(Long userId, Long storeId) {
+        return em.createQuery(
+                "SELECT j.id FROM JokboFavorite j " +
+                        "WHERE j.user.id =: userId AND j.jokbo.store.id =: storeId", Long.class)
+                .setParameter("userId", userId)
+                .setParameter("storeId", storeId)
+                .getResultList()
+                .stream().findAny();
+    }
 }

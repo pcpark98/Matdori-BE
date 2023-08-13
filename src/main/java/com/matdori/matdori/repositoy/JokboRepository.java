@@ -88,4 +88,18 @@ public class JokboRepository {
                 .setParameter("storeId", storeId)
                 .getResultList().size();
     }
+
+    /**
+     * 가게에서 가장 인기 있는 족보
+     */
+    public Optional<Jokbo> readPopularJokboatStore(Long storeId){
+        return em.createQuery(
+                "SELECT j FROM Jokbo j " +
+                "WHERE j.store.id =: storeId " +
+                "ORDER BY j.jokboFavorites.size DESC ", Jokbo.class)
+                .setMaxResults(1)
+                .setParameter("storeId", storeId)
+                .getResultList()
+                .stream().findAny();
+    }
 }
