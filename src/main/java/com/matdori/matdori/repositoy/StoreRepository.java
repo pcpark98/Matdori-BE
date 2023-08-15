@@ -150,7 +150,7 @@ public class StoreRepository {
                                 "GROUP BY s.name,s.category, s.id, s.imgUrl " +
                                 "ORDER BY s.id DESC ", StoreListByCategory.class)
                 .setParameter("category" , category)
-                .setMaxResults(15)
+                .setMaxResults(14)
                 .getResultList();
     }
 
