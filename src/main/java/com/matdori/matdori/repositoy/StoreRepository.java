@@ -125,20 +125,35 @@ public class StoreRepository {
                 .getResultList();
     }
 
-    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(StoreCategory category, int startIndex){
+    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(StoreCategory category, Long cursor){
         return em.createQuery(
                         "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByCategory(s.id, s.name, s.category, " +
                                 "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl, s.jokbos.size) " +
                                 "FROM Store s " +
                                 "LEFT JOIN s.jokbos j " +
+                                "WHERE s.category =:category AND s.id < :cursor " +
                                 "GROUP BY s.name,s.category, s.id, s.imgUrl " +
-                                "HAVING s.category =:category " +
-                                "ORDER BY s.id", StoreListByCategory.class)
+                                "ORDER BY s.id DESC ", StoreListByCategory.class)
                 .setParameter("category" , category)
-                .setFirstResult((startIndex-1)*15)
+                .setParameter("cursor", cursor)
                 .setMaxResults(15)
                 .getResultList();
     }
+
+    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> getCategoryStoresDescendingById(StoreCategory category){
+        return em.createQuery(
+                        "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByCategory(s.id, s.name, s.category, " +
+                                "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl, s.jokbos.size) " +
+                                "FROM Store s " +
+                                "LEFT JOIN s.jokbos j " +
+                                "WHERE s.category =:category " +
+                                "GROUP BY s.name,s.category, s.id, s.imgUrl " +
+                                "ORDER BY s.id DESC ", StoreListByCategory.class)
+                .setParameter("category" , category)
+                .setMaxResults(15)
+                .getResultList();
+    }
+
 
     public com.matdori.matdori.repositoy.Dto.StoreRatings getAllRatings(Store store) {
         return em.createQuery(
