@@ -136,7 +136,7 @@ public class StoreRepository {
                                 "ORDER BY s.id DESC ", StoreListByCategory.class)
                 .setParameter("category" , category)
                 .setParameter("cursor", cursor)
-                .setMaxResults(15)
+                .setMaxResults(14)
                 .getResultList();
     }
 
