@@ -48,7 +48,12 @@ public class StoreService {
         return storeRepository.getTotalRating(store);
     }
 
-    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(String category, int startIndex) { return storeRepository.findByCategory(StoreCategory.nameOf(category), startIndex);}
+    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(String category, Long cursor) {
+        if(cursor == null) // 커서값이 없는 경우 
+            return storeRepository.getCategoryStoresDescendingById(StoreCategory.nameOf(category));
+        else // 커서값이 있는 경우
+            return storeRepository.findByCategory(StoreCategory.nameOf(category), cursor);
+    }
 
     /**
      * 가게에 매핑된 족보의 총 개수 조회하기.
