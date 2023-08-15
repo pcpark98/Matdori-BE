@@ -173,7 +173,7 @@ public class StoreApiController {
                                                                                       @RequestParam("order")String order){
         List<StoreListByCategory> stores = storeService.findByCategory(category, cursor);
         Boolean hasNext = true;
-        if(stores.size() != 15) hasNext = false;
+        if(stores.size() != 14) hasNext = false;
 
         return ResponseEntity.ok().body(Response.success(
                 new StoreListByCategoryResponse(hasNext, stores)
