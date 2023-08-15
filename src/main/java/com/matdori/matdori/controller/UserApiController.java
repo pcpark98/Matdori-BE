@@ -52,9 +52,9 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러"),
     })
     @Parameters({
-            @Parameter(name = "email", description = "사용자 이메일",required = true),
-            @Parameter(name = "password", description = "비밀번호" , required = true),
-            @Parameter(name = "department", description = "학과명", required = true)
+            @Parameter(name = "email", description = "사용자 이메일"),
+            @Parameter(name = "password", description = "비밀번호" ),
+            @Parameter(name = "department", description = "학과명")
     })
     @PostMapping("/sign-up")
     public ResponseEntity<Response<Void>> createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
@@ -76,9 +76,9 @@ public class UserApiController {
      */
     @Operation(summary = "가게 좋아요 누르기 API", description = "유저가 가게에 대해 좋아요를 눌러 저장합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = false),
             @Parameter(name = "userIndex", description = "유저 id", required = true),
-            @Parameter(name = "storeId", description = "가게 id", required = true)
+            @Parameter(name = "storeId", description = "가게 id")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -108,7 +108,7 @@ public class UserApiController {
      */
     @Operation(summary = "내가 좋아요 누른 가게 리스트 조회 API", description = "유저가 좋아요를 누른 가게의 리스트를 조회합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id"),
             @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답")
     })
@@ -143,7 +143,7 @@ public class UserApiController {
      */
     @Operation(summary = "내가 좋아요 누른 가게 삭제 API", description = "유저가 가게에 좋아요 누른 것을 취소합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id", required = true),
             @Parameter(name = "favoriteStoreIndex", description = "좋아요한 가게 id", required = true)
     })
@@ -174,7 +174,7 @@ public class UserApiController {
      */
     @Operation(summary = "내가 좋아요 누른 족보 삭제 API", description = "유저가 족보에 좋아요 누른 것을 취소합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id"),
             @Parameter(name = "favoriteJokboIndex", description = "족보 id")
     })
@@ -210,8 +210,8 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @Parameters({
-            @Parameter(name = "email", description = "이메일", required = true),
-            @Parameter(name = "password", description = "비밀번호", required = true)
+            @Parameter(name = "email", description = "이메일"),
+            @Parameter(name = "password", description = "비밀번호")
     })
     @PostMapping("/login")
     public ResponseEntity<Response<LoginResponse>> login(@Valid @RequestBody LoginRequest request) throws NoSuchAlgorithmException {
@@ -240,7 +240,7 @@ public class UserApiController {
             @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_EMAIL_FORMAT)"),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
-    @Parameter(name ="sessionId", in = ParameterIn.COOKIE, required = true)
+    @Parameter(name ="세션 id", in = ParameterIn.COOKIE)
     @PostMapping("/logout")
     public ResponseEntity<Response<Void>> logout() {
 
@@ -263,8 +263,8 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class))),
     })
     @Parameters({
-            @Parameter(name = "email", description = "이메일", required = true),
-            @Parameter(name = "type", description = "인증타입 (SIGNUP/UPDATEPASSWORD)", required = true)
+            @Parameter(name = "email", description = "이메일", required = false),
+            @Parameter(name = "type", description = "인증타입 (SIGNUP/UPDATEPASSWORD)", required = false)
     })
     @PostMapping("/email-authentication")
     public ResponseEntity<Response<Void>> authenticateEmail(@RequestBody @Valid AuthenticateEmailRequest request){
@@ -284,8 +284,8 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @Parameters({
-            @Parameter(name = "number", description = "인증번호", required = true),
-            @Parameter(name = "type", description = "인증타입 (SIGNUP/UPDATEPASSWORD)", required = true)
+            @Parameter(name = "number", description = "인증번호", required = false),
+            @Parameter(name = "type", description = "인증타입 (SIGNUP/UPDATEPASSWORD)", required = false)
     })
     @PostMapping("/authentication-number")
     public ResponseEntity<Response<Void>> authenticateNumber(@RequestBody @Valid AuthenticateNumberRequest request){
@@ -300,7 +300,7 @@ public class UserApiController {
      */
     @Operation(summary = "족보에 좋아요 누르기 API", description = "유저가 족보에 대해 좋아요를 눌러 저장합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id", required = true)
     })
     @ApiResponses({
@@ -327,7 +327,7 @@ public class UserApiController {
      */
     @Operation(summary = "내가 좋아요 한 족보 리스트 조회 API", description = "유저가 좋아요를 눌러 저장한 족보들을 조회합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id"),
             @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답")
     })
@@ -371,8 +371,9 @@ public class UserApiController {
      */
     @Operation(summary = "비밀번호 변경 API", description = "유저의 비밀번호 변경을 수행합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true),
-            @Parameter(name = "userIndex", description = "유저 id")
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE),
+            @Parameter(name = "userIndex", description = "유저 id"),
+            @Parameter(name = "password", description = "비밀번호")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -396,8 +397,9 @@ public class UserApiController {
      */
     @Operation(summary = "닉네임 변경 API", description = "닉네임 변경을 수행합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
-            @Parameter(name = "userIndex", description = "유저 id")
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
+            @Parameter(name = "userIndex", description = "유저 id"),
+            @Parameter(name ="nickname", description = "닉네임")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -423,7 +425,7 @@ public class UserApiController {
      */
     @Operation(summary = "내가 쓴 모든 족보 조회 API", description = "내가 작성한 모든 족보를 조회합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = false),
             @Parameter(name = "userIndex", description = "유저 id"),
             @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답")
     })
@@ -461,7 +463,7 @@ public class UserApiController {
      */
     @Operation(summary = "내가 쓴 모든 댓글 조회 API", description = "내가 족보에 작성한 모든 댓글들을 조회합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id", required = true),
             @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true)
     })
@@ -501,8 +503,8 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @Parameters({
-            @Parameter(name = "email", description = "이메일", required = true),
-            @Parameter(name = "password", description = "변경할 비밀번호", required = true)
+            @Parameter(name = "email", description = "이메일"),
+            @Parameter(name = "password", description = "변경할 비밀번호")
     })
     @PutMapping("/password")
     public ResponseEntity<Response<Void>> updatePasswordWithoutLogin(@RequestBody updatePasswordWithoutLoginRequest request) throws NoSuchAlgorithmException {
@@ -524,8 +526,8 @@ public class UserApiController {
     })
     @Parameter(name = "nickname",description = "변경할 닉네임",required = true)
     @GetMapping("/nickname")
-    public ResponseEntity<Response<Void>> checkNicknameExistence(@RequestBody @Valid checkNicknameRequest request){
-        userService.checkNicknameExistence(request.nickname);
+    public ResponseEntity<Response<Void>> checkNicknameExistence(@RequestParam("nickname") String nickname){
+        userService.checkNicknameExistence(nickname);
 
         return ResponseEntity.ok()
                 .body(Response.success(null));
@@ -562,9 +564,11 @@ public class UserApiController {
     @Data
     static class LoginRequest{
         @NotNull
+        @Schema(description = "이메일")
         private String email;
 
         @NotNull
+        @Schema(description = "비밀번호")
         private String password;
     }
 

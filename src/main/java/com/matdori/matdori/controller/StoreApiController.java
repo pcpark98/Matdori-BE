@@ -129,7 +129,7 @@ public class StoreApiController {
     @Parameters({
             @Parameter(name = "storeIndex", description = "가게 id", required = true),
             @Parameter(name = "userIndex", description = "유저 id", required = true),
-            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true)
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = false)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),

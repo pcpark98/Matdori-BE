@@ -57,15 +57,15 @@ public class JokboApiController {
      */
     @Operation(summary = "족보 작성하기 API", description = "족보를 작성합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id", required = true),
-            @Parameter(name = "flavorRating", description = "맛 평점", required = true),
-            @Parameter(name = "underPricedRating", description = "가성비 평점", required = true),
-            @Parameter(name = "cleanRating", description = "청결 평점", required = true),
-            @Parameter(name = "storeIndex", description = "가게 id", required = true),
-            @Parameter(name = "title", description = "족보 제목", required = true),
-            @Parameter(name = "contents", description = "족보 내용", required = true),
-            @Parameter(name = "images", description = "이미지", required = true),
+            @Parameter(name = "flavorRating", description = "맛 평점"),
+            @Parameter(name = "underPricedRating", description = "가성비 평점"),
+            @Parameter(name = "cleanRating", description = "청결 평점"),
+            @Parameter(name = "storeIndex", description = "가게 id"),
+            @Parameter(name = "title", description = "족보 제목"),
+            @Parameter(name = "contents", description = "족보 내용"),
+            @Parameter(name = "images", description = "이미지"),
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -173,7 +173,7 @@ public class JokboApiController {
      */
     @Operation(summary = "내가 쓴 족보 삭제 API", description = "족보 게시글을 삭제합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id"),
             @Parameter(name = "jokboIndex", description = "족보 id")
     })
@@ -213,8 +213,10 @@ public class JokboApiController {
      */
     @Operation(summary = "족보 댓글 작성 API", description = "족보에 댓글을 작성합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
-            @Parameter(name = "jokboIndex", description = "족보 id")
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
+            @Parameter(name = "jokboIndex", description = "족보 id"),
+            @Parameter(name ="userIndex", description = "유저 id"),
+            @Parameter(name ="contents", description = "댓글")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -298,9 +300,10 @@ public class JokboApiController {
      */
     @Operation(summary = "내가 쓴 댓글 삭제 API", description = "유저 본인이 작성한 댓글을 삭제합니다.")
     @Parameters({
-            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = true),
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "jokboIndex", description = "족보 id", required = true),
-            @Parameter(name = "commentIndex", description = "댓글 id", required = true)
+            @Parameter(name = "commentIndex", description = "댓글 id", required = true),
+            @Parameter(name = "userIndex", description = "유저 id")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
