@@ -27,7 +27,8 @@ public enum ErrorCode {
     NOT_EXISTED_STORE(HttpStatus.NOT_FOUND, "존재하지 않는 가게입니다."),
     NOT_EXISTED_STORE_CATEGORY(HttpStatus.BAD_REQUEST, "존재하지 않는 가게 카테고리입니다."),
     NOT_EXISTED_DEPARTMENT(HttpStatus.NOT_FOUND, "존재하지 않는 학과입니다."),
-    NOT_EXISTED_JOKBO_FAVORITE(HttpStatus.NOT_FOUND, "존재하지 않는 족보 좋아요입니다.");
+    NOT_EXISTED_JOKBO_FAVORITE(HttpStatus.NOT_FOUND, "존재하지 않는 족보 좋아요입니다."),
+    INVALID_STORE_LISTING_ORDER(HttpStatus.BAD_REQUEST, "잘못된 정렬값입니다.");
 
     private HttpStatus status;
     private String message;

@@ -159,7 +159,7 @@ public class StoreApiController {
     @Operation(summary = "카테고리별 가게 조회", description = "카테고리에 해당하는 가게들을 조회합니다.")
     @Parameters({
             @Parameter(name = "category", description = "카테고리", required = true),
-            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true),
+            @Parameter(name = "cursor", description = "첫 요청 시엔 null, 이후 요청 시 마지막 row값의 id"),
             @Parameter(name = "order", description = "정렬값 (기본순, 별점 높은 순, 족보 많은 순)", required = true)
     })
     @ApiResponses({
@@ -169,12 +169,14 @@ public class StoreApiController {
     })
     @GetMapping("/stores")
     public ResponseEntity<Response<StoreListByCategoryResponse>> readStoresByCategory(@RequestParam("category")String category,
-                                                                                    @RequestParam("pageCount")int startIndex){
-        List<StoreListByCategory> stores = storeService.findByCategory(category, startIndex);
-        Long totalCnt = storeService.CountStoresByCategory(category);
+                                                                                    @RequestParam(value = "cursor", required = false)Long cursor,
+                                                                                      @RequestParam("order")String order){
+        List<StoreListByCategory> stores = storeService.findByCategory(category, cursor);
+        Boolean hasNext = true;
+        if(stores.size() != 15) hasNext = false;
 
         return ResponseEntity.ok().body(Response.success(
-                new StoreListByCategoryResponse(totalCnt, stores)
+                new StoreListByCategoryResponse(hasNext, stores)
         ));
     }
 
@@ -246,7 +248,7 @@ public class StoreApiController {
     @Data
     @AllArgsConstructor
     static class StoreListByCategoryResponse{
-        private Long totalCnt;
+        private Boolean hasNext;
         private List<StoreListByCategory> storeList;
     }
 

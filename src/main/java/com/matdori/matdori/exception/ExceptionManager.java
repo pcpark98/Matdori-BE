@@ -144,4 +144,10 @@ public class ExceptionManager {
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(Response.error(e.getErrorCode().name()));
     }
+
+    @ExceptionHandler(InvalidStoreListingOrderException.class)
+    public ResponseEntity<?> invalidStoreListingOrderException(InvalidStoreListingOrderException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
 }
