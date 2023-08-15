@@ -180,6 +180,26 @@ public class StoreApiController {
         ));
     }
 
+    /**
+     * 카테고리별 총 가게 수 조회하기
+     */
+    @Operation(summary = "카테고리별 총 가게 수 조회", description = "카테고리에 해당하는 가게들의 수를 조회합니다.")
+    @Parameters({
+            @Parameter(name = "category", description = "카테고리", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)<br> 유효하지 않은 카테고리(NOT_EXISTED_STORE_CATEGORY)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
+    })
+    @GetMapping("/store-count")
+    public ResponseEntity<Response<TotalStoreCntByCategoryResponse>> readStoreJokboCnt(@RequestParam("category")String category){
+        Long totalCount = storeService.CountStoresByCategory(category);
+        return ResponseEntity.ok().body(Response.success(
+                new TotalStoreCntByCategoryResponse(totalCount)
+        ));
+    }
+
     @Data
     @AllArgsConstructor
     static class StoreMenuResponse{
@@ -272,5 +292,11 @@ public class StoreApiController {
     @Data
     static class StoreInformationHeaderRequest{
         private Long userIndex;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class TotalStoreCntByCategoryResponse{
+        private Long totalCount;
     }
 }
