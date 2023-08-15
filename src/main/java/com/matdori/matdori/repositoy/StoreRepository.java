@@ -113,12 +113,11 @@ public class StoreRepository {
      * 족보 부자 가게 리스트 조회하기
      */
     public List<JokboRichStore> getJokboRichStores() {
-        return em.createQuery("SELECT new com.matdori.matdori.repositoy.Dto.JokboRichStore(s.id, s.name, s.imgUrl, s.jokbos.size) " +
+        return em.createQuery("SELECT new com.matdori.matdori.repositoy.Dto.JokboRichStore(s.id, s.name, s.imgUrl, COUNT(j)) " +
                         "FROM Jokbo j " +
-                        "JOIN j.store s " +
-                        "WHERE j.createdAt between :startTime and :endTime " +
-                        "GROUP BY s.id, s.name, s.imgUrl, s.jokbos.size " +
-                        "ORDER BY s.jokbos.size DESC ", JokboRichStore.class)
+                        "JOIN j.store s ON j.createdAt BETWEEN :startTime and : endTime " +
+                        "GROUP BY s.id, s.name, s.imgUrl " +
+                        "ORDER BY COUNT(j) DESC ", JokboRichStore.class)
                 .setParameter("startTime", LocalDateTime.now().minusDays(30))
                 .setParameter("endTime", LocalDateTime.now())
                 .setMaxResults(3)
