@@ -8,6 +8,7 @@ import com.matdori.matdori.service.StoreService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -127,7 +128,8 @@ public class StoreApiController {
     @Operation(summary = "가게 이름 및 별점 표시 조회 API", description = "가게 정보 상단의 가게 이름 및 별점 표시 부분을 조회합니다.")
     @Parameters({
             @Parameter(name = "storeIndex", description = "가게 id", required = true),
-            @Parameter(name = "userIndex", description = "유저 id", required = true)
+            @Parameter(name = "userIndex", description = "유저 id", required = true),
+            @Parameter(name = "sessionId", description = "쿠키에 들어있는 세션 id", in = ParameterIn.COOKIE, required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -137,12 +139,12 @@ public class StoreApiController {
     })
     @GetMapping("/stores/{storeIndex}/info-header")
     public ResponseEntity<Response<StoreInformationHeaderResponse>> readStoreInformationHeader(@PathVariable("storeIndex") Long storeIndex,
-                                                                                       @RequestBody @Valid StoreInformationHeaderRequest request){
+                                                                                       @RequestParam("userIndex")Long userId){
 
-        AuthorizationService.checkSession(request.userIndex);
+        AuthorizationService.checkSession(userId);
         StoreInformationHeader storeInformationHeader = storeService.readStoreInformationHeader(storeIndex);
         Optional<Jokbo> jokbo = storeService.readPopularJokboAtStore(storeIndex);
-        Long favoriteStoreIndex = storeService.readFavoriteStoreIndex(request.userIndex, storeIndex);
+        Long favoriteStoreIndex = storeService.readFavoriteStoreIndex(userId, storeIndex);
 
         return ResponseEntity.ok().body(Response.success(
                 new StoreInformationHeaderResponse(

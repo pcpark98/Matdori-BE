@@ -49,8 +49,8 @@ public class JokboFavoriteRepository {
 
     public Optional<Long> readFavoriteStoreIndex(Long userId, Long storeId) {
         return em.createQuery(
-                        "SELECT j.id FROM JokboFavorite j " +
-                                "WHERE j.user.id =: userId AND j.jokbo.store.id =: storeId", Long.class)
+                        "SELECT s.id FROM StoreFavorite s " +
+                                "WHERE s.user.id =: userId AND s.store.id =: storeId", Long.class)
                 .setParameter("userId", userId)
                 .setParameter("storeId", storeId)
                 .getResultList()

@@ -125,7 +125,7 @@ public class UserApiController {
             @RequestParam int pageCount){
 
         // 세션 체크
-        //AuthorizationService.checkSession(userId);
+        AuthorizationService.checkSession(userId);
 
         List<StoreFavorite> favoriteStores = userService.findAllFavoriteStore(userId, pageCount);
         return ResponseEntity.ok().body(Response.success(favoriteStores.stream()
