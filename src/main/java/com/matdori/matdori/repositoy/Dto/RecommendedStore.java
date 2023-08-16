@@ -11,7 +11,7 @@ public class RecommendedStore {
         this.name = name;
         this.imgUrl = imgUrl;
         this.totalRating = getScore(flavorRating) + getScore(underPricedRating) + getScore(cleanRating);
-        if(totalRating != 0.0) this.totalRating = Math.ceil(totalRating/3);
+        if(totalRating != 0.0) this.totalRating = Math.ceil(totalRating/3 * 100)/ 100;
         else this.totalRating = 0.0;
 
     }
