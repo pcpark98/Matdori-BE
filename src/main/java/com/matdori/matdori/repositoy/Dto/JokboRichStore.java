@@ -9,9 +9,9 @@ public class JokboRichStore {
     private Long storeIndex;
     private String name;
     private String imgUrl;
-    private Long jokboCnt;
+    private Integer jokboCnt;
 
-    public JokboRichStore(Long storeIndex, String name, String imgUrl, Long jokboCnt) {
+    public JokboRichStore(Long storeIndex, String name, String imgUrl, Integer jokboCnt) {
         this.storeIndex = storeIndex;
         this.name = name;
         this.imgUrl = imgUrl;
