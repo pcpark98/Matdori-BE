@@ -1,6 +1,7 @@
 package com.matdori.matdori.controller;
 
 import com.matdori.matdori.domain.*;
+import com.matdori.matdori.repositoy.Dto.RecommendedStore;
 import com.matdori.matdori.repositoy.Dto.StoreInformationHeader;
 import com.matdori.matdori.repositoy.Dto.StoreListByCategory;
 import com.matdori.matdori.service.AuthorizationService;
@@ -197,6 +198,22 @@ public class StoreApiController {
         Long totalCount = storeService.CountStoresByCategory(category);
         return ResponseEntity.ok().body(Response.success(
                 new TotalStoreCntByCategoryResponse(totalCount)
+        ));
+    }
+
+    /**
+     * 가게 추천 받기
+     */
+    @Operation(summary = "가게 추천 받기", description = "랜덤한 가게를 추천받습니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
+    })
+    @GetMapping("/recommended-store")
+    public ResponseEntity<Response<List<RecommendedStore>>> getRecommendedStore(){
+        List<RecommendedStore> RecommendedStore = storeService.getRecommendedStore();
+        return ResponseEntity.ok().body(Response.success(
+                RecommendedStore
         ));
     }
 
