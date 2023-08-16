@@ -11,9 +11,8 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -173,5 +172,19 @@ public class StoreRepository {
                         "WHERE s.category =: storeCategory", Long.class)
                 .setParameter("storeCategory", storeCategory)
                 .getSingleResult();
+    }
+
+    public List<RecommendedStore> getRecommendedStore(){
+        return em.createQuery(
+                        "SELECT new com.matdori.matdori.repositoy.Dto.RecommendedStore(s.id, s.name, s.imgUrl, AVG(j.flavorRating), AVG(j.underPricedRating),AVG(j.cleanRating)) " +
+                                "FROM Store s JOIN s.jokbos j " +
+                                "WHERE s.category NOT IN :categories " +
+                                "GROUP BY s.id, s.name, s.imgUrl " +
+                                "ORDER BY RANDOM()", RecommendedStore.class)
+                .setParameter("categories", Arrays.asList(StoreCategory.ETC, StoreCategory.DESSERT_COFFEE, StoreCategory.MEAL_KIT, StoreCategory.PUB))
+                .setMaxResults(3)
+                .getResultList();
+
+
     }
 }
