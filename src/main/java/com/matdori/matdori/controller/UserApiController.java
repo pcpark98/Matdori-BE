@@ -89,7 +89,7 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @PostMapping("/users/{userIndex}/favorite-store")
-    public ResponseEntity<Response<createFavoriteStoreResponse>> createFavoriteStore(@PathVariable("userIndex") @NotNull Long userId,
+    public ResponseEntity<Response<CreateFavoriteStoreResponse>> createFavoriteStore(@PathVariable("userIndex") @NotNull Long userId,
                                     @RequestBody @Valid CreateFavoriteStoreRequest request){
 
         // 세션 체크
@@ -97,7 +97,7 @@ public class UserApiController {
 
         Long favoriteStoreIndex  = userService.createFavoriteStore(request.storeId, userId);
         return ResponseEntity.ok()
-                .body(Response.success(new createFavoriteStoreResponse(favoriteStoreIndex)));
+                .body(Response.success(new CreateFavoriteStoreResponse(favoriteStoreIndex)));
     }
 
     /**
@@ -507,7 +507,7 @@ public class UserApiController {
             @Parameter(name = "password", description = "변경할 비밀번호")
     })
     @PutMapping("/password")
-    public ResponseEntity<Response<Void>> updatePasswordWithoutLogin(@RequestBody updatePasswordWithoutLoginRequest request) throws NoSuchAlgorithmException {
+    public ResponseEntity<Response<Void>> updatePasswordWithoutLogin(@RequestBody UpdatePasswordWithoutLoginRequest request) throws NoSuchAlgorithmException {
         userService.updatePasswordWithoutLogin(request.email, request.password);
 
         return ResponseEntity.ok()
@@ -560,6 +560,24 @@ public class UserApiController {
         userService.deleteUser(userIndex);
         return ResponseEntity.ok().body(null);
     }
+
+    /**
+     * 이메일 조회
+     */
+    @Operation(summary = "이메일 조회", description = "이메일을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class))),
+    })
+    @Parameter(name = "userIndex", description = "유저 index")
+    @GetMapping("/users/{userIndex}/email")
+    public ResponseEntity<Response<ReadUserEmailResponse>> readUserEmail(@PathVariable("userIndex") Long userIndex){
+        AuthorizationService.checkSession(userIndex);
+        User user = userService.findOne(userIndex);
+        return ResponseEntity.ok().body(Response.success(new ReadUserEmailResponse(user.getEmail())));
+    }
+
+
 
     @Data
     static class LoginRequest{
@@ -722,7 +740,7 @@ public class UserApiController {
     }
 
     @Data
-    static class updatePasswordWithoutLoginRequest{
+    static class UpdatePasswordWithoutLoginRequest{
         @NotBlank
         private String email;
 
@@ -731,14 +749,20 @@ public class UserApiController {
     }
 
     @Data
-    static class checkNicknameRequest{
+    static class CheckNicknameRequest{
         @NotBlank
         private String nickname;
     }
 
     @Data
     @AllArgsConstructor
-    static class createFavoriteStoreResponse{
+    static class CreateFavoriteStoreResponse{
         private Long favoriteStoreIndex;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class ReadUserEmailResponse{
+        private String email;
     }
 }
