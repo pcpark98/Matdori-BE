@@ -18,7 +18,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,7 +26,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,7 +43,6 @@ public class JokboApiController {
     private final JokboService jokboService;
     private final StoreService storeService;
     private final UserService userService;
-    private final S3UploadService s3UploadService;
 
     /**
      * 족보 작성하기.
@@ -145,10 +142,6 @@ public class JokboApiController {
 
     /**
      * 내가 쓴 족보 삭제하기
-     *
-     * 고쳐야 할 부분
-     * 1. imgUrls 가져올 때, jokboService 호출하지 말고, jokboImgs.get(index).~ 로 가져오기.
-     * 2. 족보를 삭제한 이후에, S3에 저장된 이미지를 삭제하려다가 오류가 발생하면 롤백이 필요함. -> 한 트랜젝션으로 묶기
      */
     @Operation(summary = "내가 쓴 족보 삭제 API", description = "족보 게시글을 삭제합니다.")
     @Parameters({
@@ -176,11 +169,7 @@ public class JokboApiController {
         List<JokboImg> jokboImgs = jokbo.getJokboImgs();
         List<String> imgUrls = jokboService.getImageUrls(jokboImgs);
 
-        jokboService.deleteJokbo(jokbo, userId, jokboImgs);
-
-        // 족보를 삭제한 이후에, S3에 저장된 이미지를 삭제하려다가 오류가 발생하면 롤백이 필요함.
-
-        s3UploadService.deleteFile(imgUrls);
+        jokboService.deleteJokbo(jokbo, userId, imgUrls);
 
         return ResponseEntity.ok().body(
                 Response.success(null)

@@ -157,27 +157,31 @@ public class JokboService {
      * 족보 삭제하기
      */
     @Transactional
-    public void deleteJokbo(Jokbo jokbo, Long userId, List<JokboImg> jokboImgs) {
+    public void deleteJokbo(Jokbo jokbo, Long userId, List<String> imgUrls) {
+
         if(jokbo.getUser().getId() != userId) {
             // 다른 사람이 작성한 족보를 삭제하려고 하는 경우.
             throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
         }
 
-        if(!CollectionUtils.isEmpty(jokboImgs)) {
-            for(JokboImg jokboImg : jokboImgs) {
-                // 족보에 첨부된 이미지들 삭제.
-                Optional<JokboImg> currentImage = jokboImgRepository.findOne(jokboImg.getId());
+        jokboRepository.delete(jokbo.getId());
 
-                if(currentImage.isPresent()) jokboImgRepository.delete(jokboImg.getId());
-                else throw new NotExistedJokboImgException(ErrorCode.NOT_EXISTED_JOKBO_IMG);
+
+        // S3에 저장된 족보 이미지 삭제.
+        if(!CollectionUtils.isEmpty(imgUrls)) {
+
+            // 이미지 url을 파싱해서 이미지의 UniqueFileName을 얻어옴.
+            List<String> uniqueFileNames = new ArrayList<>();
+            for(String imgUrl : imgUrls) {
+                String[] splitedUrl = imgUrl.split("/");
+                uniqueFileNames.add(splitedUrl[splitedUrl.length-1]);
+            }
+
+            // S3에서 해당 파일을 삭제.
+            for(String uniqueFileName : uniqueFileNames) {
+                amazonS3.deleteObject(bucket, uniqueFileName);
             }
         }
-
-        // 존재하는 족보인지 확인
-        Optional<Jokbo> jokboToDelete = jokboRepository.findOne(jokbo.getId());
-
-        if(jokboToDelete.isPresent()) jokboRepository.delete(jokbo.getId()); // 족보 삭제
-        else throw new NotExistedJokboException(ErrorCode.NOT_EXISTED_JOKBO);
     }
 
     /**
