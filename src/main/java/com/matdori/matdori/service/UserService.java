@@ -68,7 +68,11 @@ public class UserService {
      */
     public List<StoreFavorite> findAllFavoriteStore(Long userId, int pageCount) { return storeFavoriteRepository.findAllFavoriteStore(userId, pageCount);}
 
-    public List<JokboFavorite> findAllFavoriteJokbo(Long userId, int pageCount) { return jokboFavoriteRepository.findAllFavoriteJokbo(userId, pageCount);}
+    public List<JokboFavorite> findAllFavoriteJokbo(Long userId, Long cursor) {
+        if(cursor == null)
+            return jokboFavoriteRepository.findAllFavoriteJokbo(userId);
+        return jokboFavoriteRepository.getFavoriteStoresDescendingById(userId, cursor);
+    }
 
     /**
      * 내가 좋아요 누른 가게 삭제하기.
