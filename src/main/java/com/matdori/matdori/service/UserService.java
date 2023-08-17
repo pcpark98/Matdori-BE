@@ -178,7 +178,11 @@ public class UserService {
     /**
      * 내가 쓴 모든 족보 댓글 조회하기.
      */
-    public List<JokboComment> readAllMyJokboComment(Long userId, int pageCount){ return jokboCommentRepository.findByUserIndex(userId, pageCount);}
+    public List<JokboComment> readAllMyJokboComment(Long userId, Long cursor){
+        if(cursor == null)
+            return jokboCommentRepository.findByUserIndex(userId);
+        return jokboCommentRepository.findCommentsDescendingById(userId, cursor);
+    }
 
     public void checkNicknameExistence(String nickname) {
         Optional<User> user = userRepository.findByNickname(nickname);

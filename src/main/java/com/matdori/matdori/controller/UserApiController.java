@@ -465,7 +465,7 @@ public class UserApiController {
     @Parameters({
             @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id", required = true),
-            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true)
+            @Parameter(name = "cursor", description = "처음 null, 이후 요청부터 마지막 jokboId")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -475,20 +475,28 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/users/{userIndex}/comments")
-    public ResponseEntity<Response<List<AllMyJokboCommentResponse>>> readAllMyJokboComment(@PathVariable("userIndex") Long userId,
-                                                                                           @RequestParam int pageCount){
+    public ResponseEntity<Response<UserCommentsResponse>> readAllMyJokboComment(@PathVariable("userIndex") Long userId,
+                                                                                           @RequestParam(value = "cursor", required = false) Long cursor){
         // 세션 체크
         AuthorizationService.checkSession(userId);
-
-        List<JokboComment> comments = userService.readAllMyJokboComment(userId, pageCount);
-
-        return ResponseEntity.ok().body(Response.success(comments.stream()
+        Boolean hasNext = true;
+        List<JokboComment> jokboComments = userService.readAllMyJokboComment(userId, cursor);
+        List<AllMyJokboCommentResponse> comments = jokboComments.stream()
                 .map(c -> new AllMyJokboCommentResponse(
                         c.getJokbo().getId(),
+                        c.getId(),
                         c.getJokbo().getStore().getName(),
                         c.getContents(),
                         c.getCreatedAt()))
-                .collect(Collectors.toList())));
+                .collect(Collectors.toList());
+
+        if(jokboComments.size() != 14)
+            hasNext = false;
+
+
+        return ResponseEntity.ok().body(Response.success(
+                new UserCommentsResponse(hasNext, comments)
+        ));
     }
 
     /**
@@ -734,6 +742,7 @@ public class UserApiController {
     @AllArgsConstructor
     static class AllMyJokboCommentResponse{
         private Long jokboId;
+        private Long commentId;
         private String storeName;
         private String contents;
         private LocalDateTime writtenAt;
@@ -764,5 +773,12 @@ public class UserApiController {
     @AllArgsConstructor
     static class ReadUserEmailResponse{
         private String email;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class UserCommentsResponse{
+        private Boolean hasNext;
+        private List<AllMyJokboCommentResponse> comments;
     }
 }
