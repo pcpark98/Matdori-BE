@@ -1,6 +1,7 @@
 package com.matdori.matdori.controller;
 
 import com.matdori.matdori.domain.*;
+import com.matdori.matdori.repositoy.Dto.RecommendedMenu;
 import com.matdori.matdori.repositoy.Dto.RecommendedStore;
 import com.matdori.matdori.repositoy.Dto.StoreInformationHeader;
 import com.matdori.matdori.repositoy.Dto.StoreListByCategory;
@@ -214,6 +215,22 @@ public class StoreApiController {
         List<RecommendedStore> RecommendedStore = storeService.getRecommendedStore();
         return ResponseEntity.ok().body(Response.success(
                 RecommendedStore
+        ));
+    }
+
+    /**
+     * 메뉴 추천 받기
+     */
+    @Operation(summary = "메뉴 추천 받기", description = "랜덤한 메뉴를 추천받습니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
+    })
+    @GetMapping("/recommended-menu")
+    public ResponseEntity<Response<List<RecommendedMenu>>> getRecommendedMenu(){
+        List<RecommendedMenu> recommendedMenu = storeService.getRecommendedMenu();
+        return ResponseEntity.ok().body(Response.success(
+                recommendedMenu
         ));
     }
 

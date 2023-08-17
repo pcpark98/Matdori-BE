@@ -3,6 +3,7 @@ package com.matdori.matdori.service;
 import com.matdori.matdori.domain.*;
 import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.exception.NotExistStoreException;
+import com.matdori.matdori.repositoy.Dto.RecommendedMenu;
 import com.matdori.matdori.repositoy.Dto.RecommendedStore;
 import com.matdori.matdori.repositoy.Dto.StoreInformationHeader;
 import com.matdori.matdori.repositoy.JokboFavoriteRepository;
@@ -96,4 +97,9 @@ public class StoreService {
      * 가게 추천 받기
      */
     public List<RecommendedStore> getRecommendedStore(){ return storeRepository.getRecommendedStore();}
+
+    /**
+     * 메뉴 추천 받기
+     */
+    public List<RecommendedMenu> getRecommendedMenu() {return storeRepository.getRecommendedMenu();}
 }
