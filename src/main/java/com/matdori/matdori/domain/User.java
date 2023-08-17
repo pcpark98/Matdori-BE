@@ -28,7 +28,6 @@ public class User {
     private String email;
 
     @NotBlank
-    @Column(length = 255)
     private String password;
 
     @NotBlank

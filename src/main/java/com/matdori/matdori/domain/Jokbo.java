@@ -56,12 +56,12 @@ public class Jokbo {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "jokbo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "jokbo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JokboImg> jokboImgs = new ArrayList<>();
 
-    @OneToMany(mappedBy = "jokbo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "jokbo")
     private List<JokboComment> jokboComments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "jokbo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "jokbo")
     private List<JokboFavorite> jokboFavorites = new ArrayList<>();
 }
