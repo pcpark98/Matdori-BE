@@ -110,7 +110,7 @@ public class UserApiController {
     @Parameters({
             @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id"),
-            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답")
+            @Parameter(name = "cursor", description = "마지막 row의 favoriteStoreId")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -120,22 +120,30 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/users/{userIndex}/favorite-stores")
-    public ResponseEntity<Response<List<readFavoriteStoresResponse>>> readFavoriteStores(
+    public ResponseEntity<Response<ReadFavoriteStoresResponse>> readFavoriteStores(
             @PathVariable("userIndex") Long userId,
-            @RequestParam int pageCount){
+            @RequestParam(required = false) Long cursor){
 
         // 세션 체크
         AuthorizationService.checkSession(userId);
+        Boolean hasNext = true;
 
-        List<StoreFavorite> favoriteStores = userService.findAllFavoriteStore(userId, pageCount);
-        return ResponseEntity.ok().body(Response.success(favoriteStores.stream()
-                .map(s -> new readFavoriteStoresResponse(
+        List<StoreFavorite> favoriteStores = userService.findAllFavoriteStore(userId, cursor);
+        List<FavoriteStoresResponse> favoriteStoresList = favoriteStores.stream()
+                .map(s -> new FavoriteStoresResponse(
                         s.getId(),
                         s.getStore().getId(),
                         s.getStore().getName(),
                         s.getStore().getCategory().getName(),
                         s.getStore().getImgUrl()))
-                .collect(Collectors.toList())));
+                .collect(Collectors.toList());
+
+        if(favoriteStores.size() != 14)
+            hasNext = false;
+
+        return ResponseEntity.ok().body(Response.success(
+                new ReadFavoriteStoresResponse(hasNext, favoriteStoresList)
+        ));
     }
 
     /**
@@ -329,7 +337,7 @@ public class UserApiController {
     @Parameters({
             @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id"),
-            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답")
+            @Parameter(name = "cursor", description = "마지막 row의 favoriteJokboId")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -339,31 +347,37 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/users/{userIndex}/favorite-jokbos")
-    public ResponseEntity<Response<List<ReadFavoriteJokbosResponse>>> readFavoriteJokbos(
+    public ResponseEntity<Response<ReadFavoriteJokbosResponse>> readFavoriteJokbos(
             @PathVariable("userIndex") Long userId,
-            @RequestParam int pageCount){
+            @RequestParam(required = false) Long cursor){
 
+        Boolean hasNext = true;
         // 세션 체크
         AuthorizationService.checkSession(userId);
+        List<JokboFavorite> jokboFavorites = userService.findAllFavoriteJokbo(userId, cursor);
+        if(jokboFavorites.size() != 14)
+            hasNext = false;
 
-        List<JokboFavorite> jokboFavorites = userService.findAllFavoriteJokbo(userId, pageCount);
+        List<FavoriteJokbosResponse> favoriteJokbos = jokboFavorites.stream()
+                .map(j -> {
+                    Jokbo jokbo = j.getJokbo();
+                    Double totalRating = (double) ((jokbo.getCleanRating() + jokbo.getFlavorRating() + jokbo.getUnderPricedRating()) / 3);
+                    return new FavoriteJokbosResponse(
+                            j.getId(),
+                            jokbo.getId(),
+                            jokbo.getTitle(),
+                            totalRating,
+                            jokbo.getJokboImgs(),
+                            jokbo.getContents(),
+                            jokbo.getJokboComments().size(),
+                            jokbo.getJokboFavorites().size());
+                })
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok().body(
-                Response.success(jokboFavorites.stream()
-                        .map(j -> {
-                            Jokbo jokbo = j.getJokbo();
-                            Double totalRating = (double) ((jokbo.getCleanRating() + jokbo.getFlavorRating() + jokbo.getUnderPricedRating())/3);
-                            return new ReadFavoriteJokbosResponse(
-                                    j.getId(),
-                                    jokbo.getId(),
-                                    jokbo.getTitle(),
-                                    totalRating,
-                                    jokbo.getJokboImgs(),
-                                    jokbo.getContents(),
-                                    jokbo.getJokboFavorites().size(),
-                                    jokbo.getJokboComments().size());
-                        })
-                        .collect(Collectors.toList())));
+                Response.success(
+                        new ReadFavoriteJokbosResponse(hasNext, favoriteJokbos)
+                ));
     }
 
     /**
@@ -427,7 +441,7 @@ public class UserApiController {
     @Parameters({
             @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE, required = false),
             @Parameter(name = "userIndex", description = "유저 id"),
-            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답")
+            @Parameter(name = "cursor", description = "마지막 row의 jokboId")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -437,16 +451,16 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/users/{userIndex}/jokbos")
-    public ResponseEntity<Response<List<AllMyJokboResponse>>> readAllMyJokbo(@PathVariable("userIndex") Long userId,
-                                                                             @RequestParam int pageCount){
+    public ResponseEntity<Response<AllMyJokboResponse>> readAllMyJokbo(@PathVariable("userIndex") Long userId,
+                                                                             @RequestParam(required = false) Long cursor){
         // 세션 체크
         AuthorizationService.checkSession(userId);
-
-        List<Jokbo> jokbos = userService.readAllMyJokbo(userId, pageCount);
-        return ResponseEntity.ok().body(Response.success(jokbos.stream()
-                .map(j ->{
-                    Double totalRating = (double) (j.getCleanRating() + j.getFlavorRating() + j.getUnderPricedRating())/3;
-                    return new AllMyJokboResponse(
+        Boolean hasNext = true;
+        List<Jokbo> jokbos = userService.readAllMyJokbo(userId, cursor);
+        List<JokboResponse> myJokbo = jokbos.stream()
+                .map(j -> {
+                    Double totalRating = (double) (j.getCleanRating() + j.getFlavorRating() + j.getUnderPricedRating()) / 3;
+                    return new JokboResponse(
                             j.getId(),
                             j.getTitle(),
                             j.getContents(),
@@ -455,7 +469,14 @@ public class UserApiController {
                             j.getJokboComments().size(),
                             j.getJokboFavorites().size());
                 })
-                .collect(Collectors.toList())));
+                .collect(Collectors.toList());
+        if(jokbos.size() != 14)
+            hasNext = false;
+
+
+        return ResponseEntity.ok().body(Response.success(
+                new AllMyJokboResponse(hasNext, myJokbo)
+        ));
     }
 
     /**
@@ -465,7 +486,7 @@ public class UserApiController {
     @Parameters({
             @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id", required = true),
-            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true)
+            @Parameter(name = "cursor", description = "처음 null, 이후 요청부터 마지막 jokboId")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -475,20 +496,28 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/users/{userIndex}/comments")
-    public ResponseEntity<Response<List<AllMyJokboCommentResponse>>> readAllMyJokboComment(@PathVariable("userIndex") Long userId,
-                                                                                           @RequestParam int pageCount){
+    public ResponseEntity<Response<UserCommentsResponse>> readAllMyJokboComment(@PathVariable("userIndex") Long userId,
+                                                                                           @RequestParam(value = "cursor", required = false) Long cursor){
         // 세션 체크
         AuthorizationService.checkSession(userId);
-
-        List<JokboComment> comments = userService.readAllMyJokboComment(userId, pageCount);
-
-        return ResponseEntity.ok().body(Response.success(comments.stream()
+        Boolean hasNext = true;
+        List<JokboComment> jokboComments = userService.readAllMyJokboComment(userId, cursor);
+        List<AllMyJokboCommentResponse> comments = jokboComments.stream()
                 .map(c -> new AllMyJokboCommentResponse(
                         c.getJokbo().getId(),
+                        c.getId(),
                         c.getJokbo().getStore().getName(),
                         c.getContents(),
                         c.getCreatedAt()))
-                .collect(Collectors.toList())));
+                .collect(Collectors.toList());
+
+        if(jokboComments.size() != 14)
+            hasNext = false;
+
+
+        return ResponseEntity.ok().body(Response.success(
+                new UserCommentsResponse(hasNext, comments)
+        ));
     }
 
     /**
@@ -612,7 +641,7 @@ public class UserApiController {
 
     @Data
     @AllArgsConstructor
-    static class readFavoriteStoresResponse{
+    static class FavoriteStoresResponse{
         private Long favoriteStoreId;
         private Long storeId;
         private String name;
@@ -622,7 +651,7 @@ public class UserApiController {
 
     @Data
     @NoArgsConstructor
-    static class ReadFavoriteJokbosResponse{
+    static class FavoriteJokbosResponse{
         private Long favoriteJokboId;
         private Long jokboId;
         private String title;
@@ -632,7 +661,7 @@ public class UserApiController {
         private int commentCnt;
         private int favoriteCnt;
 
-        public ReadFavoriteJokbosResponse(Long favoriteJokboId,
+        public FavoriteJokbosResponse(Long favoriteJokboId,
                                           Long jokboId,
                                           String title,
                                           Double totalRating,
@@ -703,7 +732,7 @@ public class UserApiController {
 
     @Data
     @AllArgsConstructor
-    static class AllMyJokboResponse{
+    static class JokboResponse{
         private Long jokboId;
         private String title;
         private String contents;
@@ -712,7 +741,7 @@ public class UserApiController {
         private int commentCnt;
         private int favoriteCnt;
 
-        public AllMyJokboResponse(Long jokboId,
+        public JokboResponse(Long jokboId,
                                   String title,
                                   String contents,
                                   Double totalRating,
@@ -734,6 +763,7 @@ public class UserApiController {
     @AllArgsConstructor
     static class AllMyJokboCommentResponse{
         private Long jokboId;
+        private Long commentId;
         private String storeName;
         private String contents;
         private LocalDateTime writtenAt;
@@ -764,5 +794,33 @@ public class UserApiController {
     @AllArgsConstructor
     static class ReadUserEmailResponse{
         private String email;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class UserCommentsResponse{
+        private Boolean hasNext;
+        private List<AllMyJokboCommentResponse> comments;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class ReadFavoriteJokbosResponse{
+        private Boolean hasNext;
+        private List<FavoriteJokbosResponse> favoriteJokbos;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class ReadFavoriteStoresResponse{
+        private Boolean hasNext;
+        private List<FavoriteStoresResponse> favoriteStores;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class AllMyJokboResponse{
+        private Boolean hasNext;
+        private List<JokboResponse> jokbos;
     }
 }

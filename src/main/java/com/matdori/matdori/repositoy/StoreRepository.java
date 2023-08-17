@@ -150,6 +150,14 @@ public class StoreRepository {
                 .getResultList();
     }
 
+    public Long countStoreJokbo(Long storeId){
+        return em.createQuery(
+                        "SELECT COUNT(*) " +
+                                "FROM Jokbo j " +
+                                "WHERE j.store.id =: storeId", Long.class)
+                .setParameter("storeId", storeId)
+                .getSingleResult();
+    }
 
     public com.matdori.matdori.repositoy.Dto.StoreRatings getAllRatings(Store store) {
         return em.createQuery(
@@ -182,7 +190,19 @@ public class StoreRepository {
                 .setParameter("categories", Arrays.asList(StoreCategory.ETC, StoreCategory.DESSERT_COFFEE, StoreCategory.MEAL_KIT, StoreCategory.PUB))
                 .setMaxResults(3)
                 .getResultList();
+    }
 
+    public List<RecommendedMenu> getRecommendedMenu(){
 
+        return em.createQuery(
+                        "SELECT new com.matdori.matdori.repositoy.Dto.RecommendedMenu(s.id, s.name,  m.name, s.imgUrl, AVG(j.flavorRating), AVG(j.underPricedRating),AVG(j.cleanRating)) " +
+                                "FROM Store s JOIN s.jokbos j ON s.category NOT IN :categories " +
+                                "JOIN FETCH Category c ON c.store.id = s.id " +
+                                "JOIN FETCH Menu m ON c.id = m.category.id " +
+                                "GROUP BY s.id, s.name, s.imgUrl, m.name " +
+                                "ORDER BY RANDOM()", RecommendedMenu.class)
+                .setParameter("categories", Arrays.asList(StoreCategory.ETC, StoreCategory.DESSERT_COFFEE, StoreCategory.MEAL_KIT, StoreCategory.PUB))
+                .setMaxResults(3)
+                .getResultList();
     }
 }

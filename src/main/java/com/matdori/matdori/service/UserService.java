@@ -66,9 +66,17 @@ public class UserService {
     /**
      * 내가 좋아요 누른 가게 리스트 조회하기.
      */
-    public List<StoreFavorite> findAllFavoriteStore(Long userId, int pageCount) { return storeFavoriteRepository.findAllFavoriteStore(userId, pageCount);}
+    public List<StoreFavorite> findAllFavoriteStore(Long userId, Long cursor) {
+        if(cursor == null)
+            return storeFavoriteRepository.findAllFavoriteStore(userId);
+        return storeFavoriteRepository.getFavoriteStoresDescendingById(userId, cursor);
+    }
 
-    public List<JokboFavorite> findAllFavoriteJokbo(Long userId, int pageCount) { return jokboFavoriteRepository.findAllFavoriteJokbo(userId, pageCount);}
+    public List<JokboFavorite> findAllFavoriteJokbo(Long userId, Long cursor) {
+        if(cursor == null)
+            return jokboFavoriteRepository.findAllFavoriteJokbo(userId);
+        return jokboFavoriteRepository.getFavoriteStoresDescendingById(userId, cursor);
+    }
 
     /**
      * 내가 좋아요 누른 가게 삭제하기.
@@ -173,12 +181,20 @@ public class UserService {
     /**
      * 내가 쓴 모든 족보 조회하기.
      */
-    public List<Jokbo> readAllMyJokbo(Long userId, int pageCount){ return jokboRepository.findByUserIndex(userId, pageCount);}
+    public List<Jokbo> readAllMyJokbo(Long userId, Long cursor){
+        if(cursor == null)
+            return jokboRepository.findByUserIndex(userId);
+        return jokboRepository.getJokboDescendingById(userId, cursor);
+    }
 
     /**
      * 내가 쓴 모든 족보 댓글 조회하기.
      */
-    public List<JokboComment> readAllMyJokboComment(Long userId, int pageCount){ return jokboCommentRepository.findByUserIndex(userId, pageCount);}
+    public List<JokboComment> readAllMyJokboComment(Long userId, Long cursor){
+        if(cursor == null)
+            return jokboCommentRepository.findByUserIndex(userId);
+        return jokboCommentRepository.findCommentsDescendingById(userId, cursor);
+    }
 
     public void checkNicknameExistence(String nickname) {
         Optional<User> user = userRepository.findByNickname(nickname);

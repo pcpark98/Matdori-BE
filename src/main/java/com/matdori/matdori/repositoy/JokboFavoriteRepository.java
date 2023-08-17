@@ -31,17 +31,30 @@ public class JokboFavoriteRepository {
     /**
      * 내가 좋아요 누른 모든 족보 가져오기.
      */
-    public List<JokboFavorite> findAllFavoriteJokbo(Long id, int pageCount) {
+    public List<JokboFavorite> findAllFavoriteJokbo(Long userId) {
         return em.createQuery(
                 "SELECT DISTINCT f FROM User u " +
                         "JOIN u.jokboFavorites f " +
                         "JOIN FETCH f.jokbo j " +
                         "LEFT JOIN FETCH j.jokboComments " +
                         "WHERE u.id =: id " +
-                        "ORDER BY f.id", JokboFavorite.class)
-                .setParameter("id", id)
-                .setFirstResult((pageCount-1)*15)
-                .setMaxResults(15)
+                        "ORDER BY f.id DESC ", JokboFavorite.class)
+                .setParameter("id", userId)
+                .setMaxResults(14)
+                .getResultList();
+    }
+
+    public List<JokboFavorite> getFavoriteStoresDescendingById(Long userId, Long favoriteJokboId) {
+        return em.createQuery(
+                        "SELECT DISTINCT f FROM User u " +
+                                "JOIN u.jokboFavorites f " +
+                                "JOIN FETCH f.jokbo j " +
+                                "LEFT JOIN FETCH j.jokboComments " +
+                                "WHERE u.id =: id AND f.id < :favoriteJokboId " +
+                                "ORDER BY f.id DESC ", JokboFavorite.class)
+                .setParameter("id", userId)
+                .setParameter("favoriteJokboId", favoriteJokboId)
+                .setMaxResults(14)
                 .getResultList();
     }
     public JokboFavorite findOne(Long jokboFavoriteId) { return em.find(JokboFavorite.class, jokboFavoriteId);}

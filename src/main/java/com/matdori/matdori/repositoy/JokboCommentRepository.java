@@ -36,17 +36,30 @@ public class JokboCommentRepository {
     /**
      * 내가 쓴 모든 댓글 조회하기.
      */
-    public List<JokboComment> findByUserIndex(Long userId, int pageCount){
+    public List<JokboComment> findByUserIndex(Long userId){
         return em.createQuery(
                         "SELECT c FROM JokboComment c " +
                                 "JOIN c.user u ON u.id =: userId AND u.id = c.user.id " +
                                 "JOIN FETCH c.jokbo j " +
                                 "JOIN FETCH j.store " +
                                 "WHERE c.isDeleted = false " +
-                                "ORDER BY c.id", JokboComment.class)
+                                "ORDER BY c.id DESC", JokboComment.class)
                 .setParameter("userId", userId)
-                .setFirstResult((pageCount-1)*15)
-                .setMaxResults(15)
+                .setMaxResults(14)
+                .getResultList();
+    }
+
+    public List<JokboComment> findCommentsDescendingById(Long userId, Long cursor) {
+        return em.createQuery(
+                        "SELECT c FROM JokboComment c " +
+                                "JOIN c.user u ON u.id =: userId AND u.id = c.user.id " +
+                                "JOIN FETCH c.jokbo j " +
+                                "JOIN FETCH j.store " +
+                                "WHERE c.isDeleted = false AND c.id < :cursor " +
+                                "ORDER BY c.id DESC", JokboComment.class)
+                .setParameter("userId", userId)
+                .setParameter("cursor" ,cursor)
+                .setMaxResults(14)
                 .getResultList();
     }
 
