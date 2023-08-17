@@ -49,11 +49,6 @@ public class JokboApiController {
 
     /**
      * 족보 작성하기.
-     *
-     * 고쳐야 할 부분
-     * 1. 족보 테이블에 넣고 이미지를 넣을 차례에 이미지를 넣다가 에러가 발생한 경우, 족보 테이블 롤백이 필요하다.
-     * 2. S3에 이미지 넣고, 족보 이미지 테이블에 넣을 차례에 에러가 발생하면, 족보 이미지 테이블에 롤백이 필요하다.
-     * 3. 족보 테이블에 저장, S3에 이미지 저장, 족보 이미지 테이블에 저장 -> 이 세가지를 한 트랜젝션에 묶어라.
      */
     @Operation(summary = "족보 작성하기 API", description = "족보를 작성합니다.")
     @Parameters({
@@ -78,10 +73,10 @@ public class JokboApiController {
     @PostMapping("/users/{userIndex}/jokbo")
     public ResponseEntity<Response<Void>> createJokbo(
             @PathVariable("userIndex") @NotNull Long userIndex,
-            @Valid CreateJokboRequest request) throws IOException {
+            @RequestBody @Valid CreateJokboRequest request) throws IOException {
 
         // 세션 체크하기.
-        //AuthorizationService.checkSession(userIndex);
+        AuthorizationService.checkSession(userIndex);
 
         // 족보에 대한 기본 정보 생성
         Jokbo jokbo = new Jokbo();
