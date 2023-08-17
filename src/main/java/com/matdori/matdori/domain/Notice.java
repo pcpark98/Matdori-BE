@@ -30,7 +30,7 @@ public class Notice {
     @Column(columnDefinition = "TEXT")
     private String contents;
 
-    @Column(name = "img_url", length = 255)
+    @Column(name = "img_url")
     private String imgUrl;
 
     @CreationTimestamp

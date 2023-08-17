@@ -31,7 +31,5 @@ public class Menu {
     @Size(max =20)
     private String price;
 
-
-    @Column(length = 255)
     private String imgUrl;
 }

@@ -59,9 +59,9 @@ public class Jokbo {
     @OneToMany(mappedBy = "jokbo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JokboImg> jokboImgs = new ArrayList<>();
 
-    @OneToMany(mappedBy = "jokbo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "jokbo")
     private List<JokboComment> jokboComments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "jokbo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "jokbo")
     private List<JokboFavorite> jokboFavorites = new ArrayList<>();
 }
