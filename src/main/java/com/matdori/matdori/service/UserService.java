@@ -66,7 +66,11 @@ public class UserService {
     /**
      * 내가 좋아요 누른 가게 리스트 조회하기.
      */
-    public List<StoreFavorite> findAllFavoriteStore(Long userId, int pageCount) { return storeFavoriteRepository.findAllFavoriteStore(userId, pageCount);}
+    public List<StoreFavorite> findAllFavoriteStore(Long userId, Long cursor) {
+        if(cursor == null)
+            return storeFavoriteRepository.findAllFavoriteStore(userId);
+        return storeFavoriteRepository.getFavoriteStoresDescendingById(userId, cursor);
+    }
 
     public List<JokboFavorite> findAllFavoriteJokbo(Long userId, Long cursor) {
         if(cursor == null)

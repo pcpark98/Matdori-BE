@@ -110,7 +110,7 @@ public class UserApiController {
     @Parameters({
             @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id"),
-            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답")
+            @Parameter(name = "cursor", description = "마지막 row의 favoriteStoreId")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -120,22 +120,30 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/users/{userIndex}/favorite-stores")
-    public ResponseEntity<Response<List<readFavoriteStoresResponse>>> readFavoriteStores(
+    public ResponseEntity<Response<ReadFavoriteStoresResponse>> readFavoriteStores(
             @PathVariable("userIndex") Long userId,
-            @RequestParam int pageCount){
+            @RequestParam(required = false) Long cursor){
 
         // 세션 체크
         AuthorizationService.checkSession(userId);
+        Boolean hasNext = true;
 
-        List<StoreFavorite> favoriteStores = userService.findAllFavoriteStore(userId, pageCount);
-        return ResponseEntity.ok().body(Response.success(favoriteStores.stream()
-                .map(s -> new readFavoriteStoresResponse(
+        List<StoreFavorite> favoriteStores = userService.findAllFavoriteStore(userId, cursor);
+        List<FavoriteStoresResponse> favoriteStoresList = favoriteStores.stream()
+                .map(s -> new FavoriteStoresResponse(
                         s.getId(),
                         s.getStore().getId(),
                         s.getStore().getName(),
                         s.getStore().getCategory().getName(),
                         s.getStore().getImgUrl()))
-                .collect(Collectors.toList())));
+                .collect(Collectors.toList());
+
+        if(favoriteStores.size() != 14)
+            hasNext = false;
+
+        return ResponseEntity.ok().body(Response.success(
+                new ReadFavoriteStoresResponse(hasNext, favoriteStoresList)
+        ));
     }
 
     /**
@@ -626,7 +634,7 @@ public class UserApiController {
 
     @Data
     @AllArgsConstructor
-    static class readFavoriteStoresResponse{
+    static class FavoriteStoresResponse{
         private Long favoriteStoreId;
         private Long storeId;
         private String name;
@@ -793,5 +801,12 @@ public class UserApiController {
     static class ReadFavoriteJokbosResponse{
         private Boolean hasNext;
         private List<FavoriteJokbosResponse> favoriteJokbos;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class ReadFavoriteStoresResponse{
+        private Boolean hasNext;
+        private List<FavoriteStoresResponse> favoriteStores;
     }
 }
