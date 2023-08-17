@@ -55,16 +55,30 @@ public class JokboRepository {
     /**
      * 내가 쓴 모든 족보 조회하기.
      */
-    public List<Jokbo> findByUserIndex(Long userId, int pageCount){
+    public List<Jokbo> findByUserIndex(Long userId){
         return em.createQuery(
                         "SELECT j FROM Jokbo j " +
                                 "JOIN FETCH j.user u " +
                                 "LEFT JOIN j.jokboImgs " +
                                 "LEFT JOIN FETCH j.jokboComments c " +
-                                "WHERE u.id =: userId", Jokbo.class)
+                                "WHERE u.id =: userId " +
+                                "ORDER BY j.id DESC", Jokbo.class)
                 .setParameter("userId", userId)
-                .setFirstResult((pageCount-1)*15)
-                .setMaxResults(15)
+                .setMaxResults(14)
+                .getResultList();
+    }
+
+    public List<Jokbo> getJokboDescendingById(Long userId, Long cursor){
+        return em.createQuery(
+                        "SELECT j FROM Jokbo j " +
+                                "JOIN FETCH j.user u " +
+                                "LEFT JOIN j.jokboImgs " +
+                                "LEFT JOIN FETCH j.jokboComments c " +
+                                "WHERE u.id =: userId AND j.id < : cursor " +
+                                "ORDER BY j.id DESC", Jokbo.class)
+                .setParameter("userId", userId)
+                .setParameter("cursor", cursor)
+                .setMaxResults(14)
                 .getResultList();
     }
 

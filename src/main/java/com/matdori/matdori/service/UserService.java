@@ -181,7 +181,11 @@ public class UserService {
     /**
      * 내가 쓴 모든 족보 조회하기.
      */
-    public List<Jokbo> readAllMyJokbo(Long userId, int pageCount){ return jokboRepository.findByUserIndex(userId, pageCount);}
+    public List<Jokbo> readAllMyJokbo(Long userId, Long cursor){
+        if(cursor == null)
+            return jokboRepository.findByUserIndex(userId);
+        return jokboRepository.getJokboDescendingById(userId, cursor);
+    }
 
     /**
      * 내가 쓴 모든 족보 댓글 조회하기.
