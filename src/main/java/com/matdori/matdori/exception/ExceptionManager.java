@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
@@ -147,6 +146,18 @@ public class ExceptionManager {
 
     @ExceptionHandler(InvalidStoreListingOrderException.class)
     public ResponseEntity<?> invalidStoreListingOrderException(InvalidStoreListingOrderException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(UnsupportedFileExtensionException.class)
+    public ResponseEntity<?> unsupportedFileExtensionException(UnsupportedFileExtensionException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(NotExistedFileExtensionException.class)
+    public ResponseEntity<?> notExistedFileExtension(NotExistedFileExtensionException e) {
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(Response.error(e.getErrorCode().name()));
     }

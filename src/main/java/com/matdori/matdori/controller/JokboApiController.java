@@ -78,11 +78,12 @@ public class JokboApiController {
     @PostMapping("/users/{userIndex}/jokbo")
     public ResponseEntity<Response<Void>> createJokbo(
             @PathVariable("userIndex") @NotNull Long userIndex,
-            @RequestBody @Valid CreateJokboRequest request) throws IOException {
+            @Valid CreateJokboRequest request) throws IOException {
 
         // 세션 체크하기.
-        AuthorizationService.checkSession(userIndex);
+        //AuthorizationService.checkSession(userIndex);
 
+        // 족보에 대한 기본 정보 생성
         Jokbo jokbo = new Jokbo();
         User user = userService.findOne(userIndex);
         jokbo.setUser(user);
@@ -97,26 +98,9 @@ public class JokboApiController {
         jokbo.setTitle(request.getTitle());
         jokbo.setContents(request.getContents());
 
-        jokboService.createJokbo(jokbo);
-
-        // 족보 테이블에 넣고 이미지를 넣을 차례에 이미지를 넣다가 에러가 발생한 경우, 족보 테이블 롤백이 필요하다.
-
         List<MultipartFile> images = request.getImages();
-        List<String> imageUrls = s3UploadService.uploadFiles(images);
 
-        // S3에 이미지 넣고, 족보 이미지 테이블에 넣을 차례에 에러가 발생하면, 족보 이미지 테이블에 롤백이 필요하다.
-
-        if(!CollectionUtils.isEmpty(imageUrls)) {
-            List<JokboImg> jokboImgs = new ArrayList<>();
-            for(String imgUrl : imageUrls) {
-                JokboImg jokboImg = new JokboImg();
-                jokboImg.setJokbo(jokbo);
-                jokboImg.setImgUrl(imgUrl);
-
-                jokboImgs.add(jokboImg);
-            }
-            jokboService.createJokboImg(jokboImgs);
-        }
+        jokboService.createJokbo(jokbo, images);
 
         return ResponseEntity.ok()
                 .body(Response.success(null));
