@@ -152,6 +152,14 @@ public class StoreRepository {
                 .getResultList();
     }
 
+    public Long countStoreJokbo(Long storeId){
+        return em.createQuery(
+                        "SELECT COUNT(*) " +
+                                "FROM Jokbo j " +
+                                "WHERE j.store.id =: storeId", Long.class)
+                .setParameter("storeId", storeId)
+                .getSingleResult();
+    }
 
     public com.matdori.matdori.repositoy.Dto.StoreRatings getAllRatings(Store store) {
         return em.createQuery(

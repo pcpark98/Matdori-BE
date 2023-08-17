@@ -33,7 +33,14 @@ public class StoreService {
 
     public List<Category> findAllCategoryWithMenu (Long id) { return storeRepository.findAllCategoryWithMenu(id);}
 
-    public List<Jokbo> findAllJokbo(Long storeId, int startIndex) { return jokboRepository.findByStoreIndex(storeId, startIndex);}
+    public List<Jokbo> findAllJokbo(Long storeId, Long cursor) {
+        if(cursor == null)
+            return jokboRepository.findByStoreIndex(storeId);
+
+        return jokboRepository.findJokbosDescendingById(storeId, cursor);
+    }
+
+    public Long countStoreJokbo(Long storeId) { return storeRepository.countStoreJokbo(storeId);}
 
     public com.matdori.matdori.repositoy.Dto.StoreInformationHeader readStoreInformationHeader(Long storeId) {
         Optional<StoreInformationHeader> storeInformationHeader = storeRepository.readStoreInformationHeader(storeId);

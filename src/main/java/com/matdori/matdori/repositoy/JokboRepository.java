@@ -68,14 +68,23 @@ public class JokboRepository {
                 .getResultList();
     }
 
-    public List<Jokbo> findByStoreIndex(Long storeId, int pageCount){
+    public List<Jokbo> findByStoreIndex(Long storeId){
         return em.createQuery(
                 "SELECT j FROM Jokbo j " +
                         "WHERE j.store.id =: storeId " +
-                        "ORDER BY j.id", Jokbo.class)
+                        "ORDER BY j.id DESC ", Jokbo.class)
                 .setParameter("storeId", storeId)
-                .setFirstResult((pageCount-1)*15)
-                .setMaxResults(15)
+                .setMaxResults(14)
+                .getResultList();
+    }
+    public List<Jokbo> findJokbosDescendingById(Long storeId, Long cursor){
+        return em.createQuery(
+                        "SELECT j FROM Jokbo j " +
+                                "WHERE j.store.id =: storeId AND j.id < :cursor " +
+                                "ORDER BY j.id DESC ", Jokbo.class)
+                .setParameter("storeId", storeId)
+                .setParameter("cursor", cursor)
+                .setMaxResults(14)
                 .getResultList();
     }
 
