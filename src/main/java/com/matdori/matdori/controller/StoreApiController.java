@@ -74,7 +74,7 @@ public class StoreApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/stores/{storeIndex}/menu")
-    public ResponseEntity<Response<List<StoreMenuResponse>>> readStoreMenu(@PathVariable("storeIndex") Long id){
+    public ResponseEntity<Response<List<StoreMenuResponse>>> readStoreJokboCnt(@PathVariable("storeIndex") Long id){
         List<Category> categories = storeService.findAllCategoryWithMenu(id);
 
         return ResponseEntity.ok().body(Response.success(categories.stream().map(c -> new StoreMenuResponse(c))
@@ -82,12 +82,31 @@ public class StoreApiController {
     }
 
     /**
+     * 가게에 달린 족보 개수 조회하기
+     */
+    @Operation(summary = "가게 족보 개수 조회", description = "가게에 달린 족보 개수 조회")
+    @Parameter(name = "storeIndex", description = "가게 id", required = true)
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)"),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
+    })
+    @GetMapping("/stores/{storeIndex}/jokbo-count")
+    public ResponseEntity<Response<TotalJokboCntByStore>> readStoreMenu(@PathVariable("storeIndex") Long storeId){
+        Long jokboCnt = storeService.countStoreJokbo(storeId);
+
+        return ResponseEntity.ok().body(Response.success(
+                new TotalJokboCntByStore(jokboCnt)));
+    }
+
+
+    /**
      * 가게 족보 탭 조회하기.
      */
     @Operation(summary = "가게 족보 탭 조회 API", description = "가게 정보의 족보 탭을 조회합니다.")
     @Parameters({
             @Parameter(name = "storeIndex", description = "가게 id", required = true),
-            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true),
+            @Parameter(name = "cursor", description = "첫 요청 시엔 null, 이후 요청 시 마지막 row값의 id", required = false),
             @Parameter(name = "order", description = "최신순, 별점 높은 순", required = true)
     })
     @ApiResponses({
@@ -98,9 +117,11 @@ public class StoreApiController {
     })
     @GetMapping("/stores/{storeIndex}/jokbos")
     public ResponseEntity<Response<ReadAllJokboResponse>> readAllJokbo(@PathVariable("storeIndex") Long storeIndex,
-                                                                      @RequestParam int pageCount){
-        int jokboCount = storeService.countAllJokbos(storeIndex);
-        List<Jokbo> jokbos = storeService.findAllJokbo(storeIndex, pageCount);
+                                                                      @RequestParam(value = "cursor", required = false) Long cursor,
+                                                                       @RequestParam ("order") String order){
+        Boolean hasNext = true;
+        // 총 족보수 api 만들어야 됨
+        List<Jokbo> jokbos = storeService.findAllJokbo(storeIndex, cursor);
         List<JokboResponse> jokboList = jokbos.stream()
                 .map(j -> {
                     Double totalRating = (double) ((j.getCleanRating() + j.getFlavorRating() + j.getUnderPricedRating())/3);
@@ -114,12 +135,13 @@ public class StoreApiController {
                             totalRating);
                 })
                 .collect(Collectors.toList());
-
+        if(jokbos.size() != 14)
+            hasNext = false;
         return ResponseEntity.ok()
                 .body(
                         Response.success(
                                 new ReadAllJokboResponse(
-                                        jokboCount,
+                                        hasNext,
                                         jokboList
                                 )));
     }
@@ -162,7 +184,7 @@ public class StoreApiController {
     @Parameters({
             @Parameter(name = "category", description = "카테고리", required = true),
             @Parameter(name = "cursor", description = "첫 요청 시엔 null, 이후 요청 시 마지막 row값의 id"),
-            @Parameter(name = "order", description = "정렬값 (기본순, 별점 높은 순, 족보 많은 순)", required = true)
+            @Parameter(name = "order", description = "정렬값 (최신순, 별점 높은 순, 족보 많은 순)", required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -195,7 +217,7 @@ public class StoreApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/store-count")
-    public ResponseEntity<Response<TotalStoreCntByCategoryResponse>> readStoreJokboCnt(@RequestParam("category")String category){
+    public ResponseEntity<Response<TotalStoreCntByCategoryResponse>> readStoreCnt(@RequestParam("category")String category){
         Long totalCount = storeService.CountStoresByCategory(category);
         return ResponseEntity.ok().body(Response.success(
                 new TotalStoreCntByCategoryResponse(totalCount)
@@ -295,7 +317,7 @@ public class StoreApiController {
     @Data
     @AllArgsConstructor
     static class ReadAllJokboResponse {
-        private int jokboCnt;
+        Boolean hasNext;
         List<JokboResponse> jokboList;
     }
 
@@ -331,6 +353,12 @@ public class StoreApiController {
     @Data
     @AllArgsConstructor
     static class TotalStoreCntByCategoryResponse{
+        private Long totalCount;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class TotalJokboCntByStore{
         private Long totalCount;
     }
 }
