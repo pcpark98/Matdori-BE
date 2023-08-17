@@ -251,7 +251,7 @@ public class JokboService {
      */
     public List<MatdoriPick> getMatdoriPick(String department) {
 
-        return storeRepository.getMatdoriPick(department);
+        return storeRepository.getMatdoriPick(Department.nameOf(department));
     }
 
     /**

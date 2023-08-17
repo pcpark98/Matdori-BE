@@ -317,9 +317,6 @@ public class JokboApiController {
 
     /**
      * 학과별 추천 식당 조회하기
-     *
-     * 고쳐야 할 부분
-     * 1. department가 유효한지 확인하기. -> 논의 필요. 유효한 department인지 확인하려면 모든 department를 DB에 따로 저장해야 하지 않을까?
      */
     @Operation(summary = "학과별 추천 식당 조회 API", description = "유저가 소속된 학과의 학생들이 족보를 많이 작성한 식당들을 조회합니다.")
     @Parameter(name = "department", description = "학과", required = true)
@@ -353,7 +350,7 @@ public class JokboApiController {
      * 맛도리 픽 가게 리스트 조회하기.
      *
      * 고쳐야 할 부분
-     * 1. department가 유효한지 확인. -> 논의 필요.
+     * 1. 랜덤이 아님
      */
     @Operation(summary = "맛도리 픽 가게 리스트 조회 API", description = "맛도리 픽이라는 이름으로 학과별 추천으로 선정되지 않은 가게들 중에서 랜덤으로 세 곳을 조회합니다.")
     @Parameter(name = "department", description = "학과", required = true)

@@ -79,8 +79,7 @@ public class StoreRepository {
     /**
      * 맛도리 픽 가게 리스트 조회하기.
      */
-    public List<MatdoriPick> getMatdoriPick(String department) {
-        // 없는 학과에 대한 예외처리 필요.
+    public List<MatdoriPick> getMatdoriPick(Department department) {
 
         String sql = "(SELECT store_index, name, img_url " +
                 "FROM store " +
@@ -92,11 +91,10 @@ public class StoreRepository {
                 "JOIN users u ON j.user_index = u.user_index " +
                 "WHERE u.department = ? " +
                 "GROUP BY s.store_index, s.name, s.img_url, u.department " +
-                "ORDER BY COUNT(j.jokbo_index) DESC)" +
-                "LIMIT 3";
+                "ORDER BY COUNT(j.jokbo_index) DESC)";
 
         Query nativeQuery = em.createNativeQuery(sql)
-                .setParameter(1, department);
+                .setParameter(1, department.getName());
 
         List<Object[]> resultList = nativeQuery.getResultList();
         List<MatdoriPick> matdoriPicks = new ArrayList<>();
