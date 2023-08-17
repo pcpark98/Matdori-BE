@@ -329,7 +329,7 @@ public class UserApiController {
     @Parameters({
             @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id"),
-            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답")
+            @Parameter(name = "cursor", description = "마지막 row의 favoriteJokboId")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -339,31 +339,37 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/users/{userIndex}/favorite-jokbos")
-    public ResponseEntity<Response<List<ReadFavoriteJokbosResponse>>> readFavoriteJokbos(
+    public ResponseEntity<Response<ReadFavoriteJokbosResponse>> readFavoriteJokbos(
             @PathVariable("userIndex") Long userId,
-            @RequestParam int pageCount){
+            @RequestParam(required = false) Long cursor){
 
+        Boolean hasNext = true;
         // 세션 체크
         AuthorizationService.checkSession(userId);
+        List<JokboFavorite> jokboFavorites = userService.findAllFavoriteJokbo(userId, cursor);
+        if(jokboFavorites.size() != 14)
+            hasNext = false;
 
-        List<JokboFavorite> jokboFavorites = userService.findAllFavoriteJokbo(userId, pageCount);
+        List<FavoriteJokbosResponse> favoriteJokbos = jokboFavorites.stream()
+                .map(j -> {
+                    Jokbo jokbo = j.getJokbo();
+                    Double totalRating = (double) ((jokbo.getCleanRating() + jokbo.getFlavorRating() + jokbo.getUnderPricedRating()) / 3);
+                    return new FavoriteJokbosResponse(
+                            j.getId(),
+                            jokbo.getId(),
+                            jokbo.getTitle(),
+                            totalRating,
+                            jokbo.getJokboImgs(),
+                            jokbo.getContents(),
+                            jokbo.getJokboComments().size(),
+                            jokbo.getJokboFavorites().size());
+                })
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok().body(
-                Response.success(jokboFavorites.stream()
-                        .map(j -> {
-                            Jokbo jokbo = j.getJokbo();
-                            Double totalRating = (double) ((jokbo.getCleanRating() + jokbo.getFlavorRating() + jokbo.getUnderPricedRating())/3);
-                            return new ReadFavoriteJokbosResponse(
-                                    j.getId(),
-                                    jokbo.getId(),
-                                    jokbo.getTitle(),
-                                    totalRating,
-                                    jokbo.getJokboImgs(),
-                                    jokbo.getContents(),
-                                    jokbo.getJokboFavorites().size(),
-                                    jokbo.getJokboComments().size());
-                        })
-                        .collect(Collectors.toList())));
+                Response.success(
+                        new ReadFavoriteJokbosResponse(hasNext, favoriteJokbos)
+                ));
     }
 
     /**
@@ -630,7 +636,7 @@ public class UserApiController {
 
     @Data
     @NoArgsConstructor
-    static class ReadFavoriteJokbosResponse{
+    static class FavoriteJokbosResponse{
         private Long favoriteJokboId;
         private Long jokboId;
         private String title;
@@ -640,7 +646,7 @@ public class UserApiController {
         private int commentCnt;
         private int favoriteCnt;
 
-        public ReadFavoriteJokbosResponse(Long favoriteJokboId,
+        public FavoriteJokbosResponse(Long favoriteJokboId,
                                           Long jokboId,
                                           String title,
                                           Double totalRating,
@@ -780,5 +786,12 @@ public class UserApiController {
     static class UserCommentsResponse{
         private Boolean hasNext;
         private List<AllMyJokboCommentResponse> comments;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class ReadFavoriteJokbosResponse{
+        private Boolean hasNext;
+        private List<FavoriteJokbosResponse> favoriteJokbos;
     }
 }
