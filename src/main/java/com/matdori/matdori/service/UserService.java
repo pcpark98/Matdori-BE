@@ -115,11 +115,11 @@ public class UserService {
      * 족보에 좋아요 누르기
      */
     @Transactional
-    public void createFavoriteJokbo(Long jokboId, Long userId){
+    public Long createFavoriteJokbo(Long jokboId, Long userId){
         User user = userRepository.findOne(userId);
 
         Optional<Jokbo> jokbo = jokboRepository.findOne(jokboId);
-        if(jokbo.isPresent()) jokboFavoriteRepository.save(new JokboFavorite(jokbo.get(), user));
+        if(jokbo.isPresent()) return jokboFavoriteRepository.save(new JokboFavorite(jokbo.get(), user));
         else throw new NotExistedJokboException(ErrorCode.NOT_EXISTED_JOKBO);
     }
 

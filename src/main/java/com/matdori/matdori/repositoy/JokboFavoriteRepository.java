@@ -17,8 +17,9 @@ public class JokboFavoriteRepository {
     /**
      * 족보 좋아요 정보 저장하기.
      */
-    public void save(JokboFavorite jokboFavorite) {
+    public Long save(JokboFavorite jokboFavorite) {
         em.persist(jokboFavorite);
+        return jokboFavorite.getId();
     }
 
     /**
