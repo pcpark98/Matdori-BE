@@ -314,14 +314,14 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @PostMapping("/users/{userIndex}/favorite-jokbo")
-    public ResponseEntity<Response<Void>> createFavoriteJokbo(@RequestBody @Valid CreateFavoriteJokboRequest request,
+    public ResponseEntity<Response<CreateFavoriteJokboResponse>> createFavoriteJokbo(@RequestBody @Valid CreateFavoriteJokboRequest request,
                                                               @PathVariable("userIndex") Long userId){
         // 세션 체크
         AuthorizationService.checkSession(userId);
 
-        userService.createFavoriteJokbo(request.jokboId, userId);
+        Long favoriteJokboId =  userService.createFavoriteJokbo(request.jokboId, userId);
         return ResponseEntity.ok()
-                .body(Response.success(null));
+                .body(Response.success(new CreateFavoriteJokboResponse(favoriteJokboId)));
     }
 
     /**
@@ -806,5 +806,11 @@ public class UserApiController {
     static class AllMyJokboResponse{
         private Boolean hasNext;
         private List<JokboResponse> jokbos;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class CreateFavoriteJokboResponse{
+        private Long favoriteJokboId;
     }
 }
