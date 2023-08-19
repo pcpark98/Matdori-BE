@@ -3,6 +3,7 @@ package com.matdori.matdori.controller;
 
 import com.matdori.matdori.domain.*;
 import com.matdori.matdori.exception.ErrorCode;
+import com.matdori.matdori.repositoy.Dto.FavoriteStore;
 import com.matdori.matdori.service.AuthorizationService;
 import com.matdori.matdori.service.MailService;
 import com.matdori.matdori.service.UserService;
@@ -128,21 +129,14 @@ public class UserApiController {
         AuthorizationService.checkSession(userId);
         Boolean hasNext = true;
 
-        List<StoreFavorite> favoriteStores = userService.findAllFavoriteStore(userId, cursor);
-        List<FavoriteStoresResponse> favoriteStoresList = favoriteStores.stream()
-                .map(s -> new FavoriteStoresResponse(
-                        s.getId(),
-                        s.getStore().getId(),
-                        s.getStore().getName(),
-                        s.getStore().getCategory().getName(),
-                        s.getStore().getImgUrl()))
-                .collect(Collectors.toList());
+        List<FavoriteStore> favoriteStores = userService.findAllFavoriteStore(userId, cursor);
+
 
         if(favoriteStores.size() != 14)
             hasNext = false;
 
         return ResponseEntity.ok().body(Response.success(
-                new ReadFavoriteStoresResponse(hasNext, favoriteStoresList)
+                new ReadFavoriteStoresResponse(hasNext, favoriteStores)
         ));
     }
 
@@ -640,16 +634,6 @@ public class UserApiController {
     }
 
     @Data
-    @AllArgsConstructor
-    static class FavoriteStoresResponse{
-        private Long favoriteStoreId;
-        private Long storeId;
-        private String name;
-        private String category;
-        private String imgUrl;
-    }
-
-    @Data
     @NoArgsConstructor
     static class FavoriteJokbosResponse{
         private Long favoriteJokboId;
@@ -814,7 +798,7 @@ public class UserApiController {
     @AllArgsConstructor
     static class ReadFavoriteStoresResponse{
         private Boolean hasNext;
-        private List<FavoriteStoresResponse> favoriteStores;
+        private List<FavoriteStore> favoriteStores;
     }
 
     @Data
