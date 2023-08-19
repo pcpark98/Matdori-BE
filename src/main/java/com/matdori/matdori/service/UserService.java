@@ -3,6 +3,7 @@ package com.matdori.matdori.service;
 import com.matdori.matdori.domain.*;
 import com.matdori.matdori.exception.*;
 import com.matdori.matdori.repositoy.*;
+import com.matdori.matdori.repositoy.Dto.FavoriteStore;
 import com.matdori.matdori.util.SessionUtil;
 import com.matdori.matdori.util.UserUtil;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +67,7 @@ public class UserService {
     /**
      * 내가 좋아요 누른 가게 리스트 조회하기.
      */
-    public List<StoreFavorite> findAllFavoriteStore(Long userId, Long cursor) {
+    public List<FavoriteStore> findAllFavoriteStore(Long userId, Long cursor) {
         if(cursor == null)
             return storeFavoriteRepository.findAllFavoriteStore(userId);
         return storeFavoriteRepository.getFavoriteStoresDescendingById(userId, cursor);
@@ -161,9 +162,6 @@ public class UserService {
 
     /**
      * 닉네임 변경
-     *
-     * 고쳐야 할 부분
-     * 1. checkNicknameExistence에서 중복 체크와 업데이트를 한 transaction에 묶기.
      */
     @Transactional
     public void updateNickname(Long userId, String nickname){

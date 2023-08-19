@@ -1,7 +1,7 @@
 package com.matdori.matdori.repositoy;
 
-import com.matdori.matdori.domain.Store;
 import com.matdori.matdori.domain.StoreFavorite;
+import com.matdori.matdori.repositoy.Dto.FavoriteStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -19,27 +19,31 @@ public class StoreFavoriteRepository {
 
     public void deleteStoreFavorite(Long id) { em.remove(em.find(StoreFavorite.class, id));}
 
-    public List<StoreFavorite> findAllFavoriteStore(Long userId) {
+    public List<FavoriteStore> findAllFavoriteStore(Long userId) {
         return em.createQuery(
-                "SELECT f FROM User u " +
+                "SELECT new com.matdori.matdori.repositoy.Dto.FavoriteStore(f.id, s.id, s.jokbos.size," +
+                        "(SELECT (AVG(j.flavorRating) + AVG(j.cleanRating) + AVG(j.underPricedRating)) /3  FROM Jokbo j WHERE j.store.id = s.id)," +
+                        " s.name, s.category, s.imgUrl) FROM User u " +
                         "JOIN u.storeFavorites f " +
-                        "JOIN FETCH f.store s " +
+                        "JOIN f.store s " +
                         "WHERE u.id =: id " +
-                        "ORDER BY f.id DESC ", StoreFavorite.class)
+                        "ORDER BY f.id DESC ", FavoriteStore.class)
                 .setParameter("id",userId)
                 .setMaxResults(14)
                 .getResultList();
     }
 
-    public List<StoreFavorite> getFavoriteStoresDescendingById(Long userId, Long favoriteStoreId) {
+    public List<FavoriteStore> getFavoriteStoresDescendingById(Long userId, Long favoriteStoreId) {
         return em.createQuery(
-                        "SELECT f FROM User u " +
+                        "SELECT new com.matdori.matdori.repositoy.Dto.FavoriteStore(f.id, s.id, s.jokbos.size," +
+                                "(SELECT (AVG(j.flavorRating) + AVG(j.cleanRating) + AVG(j.underPricedRating)) /3  FROM Jokbo j WHERE j.store.id = s.id)," +
+                                " s.name, s.category, s.imgUrl) FROM User u " +
                                 "JOIN u.storeFavorites f " +
-                                "JOIN FETCH f.store s " +
+                                "JOIN f.store s " +
                                 "WHERE u.id =: id AND f.id < :favoriteStoreId " +
-                                "ORDER BY f.id DESC ", StoreFavorite.class)
+                                "ORDER BY f.id DESC ", FavoriteStore.class)
                 .setParameter("id",userId)
-                .setParameter("favoriteStoreId", favoriteStoreId)
+                .setParameter("favoriteStoreId",favoriteStoreId)
                 .setMaxResults(14)
                 .getResultList();
     }
