@@ -243,9 +243,10 @@ public class JokboApiController {
     public ResponseEntity<Response<ReadJokboCommentResponse>> getAllJokboComments (
             @PathVariable("jokboIndex") Long jokboId,
             @RequestParam(value = "order", required = false) String order,
-            @RequestParam(value = "pageCount", required = false) Long pageCount) {
+            @RequestParam(value = "pageCount", required = false) Long cursor) {
 
-        List<JokboComment> jokboComments = jokboService.getAllJokboComments(jokboId);
+        Boolean hasNext = true;
+        List<JokboComment> jokboComments = jokboService.getAllJokboComments(jokboId, cursor);
         List<JokboCommentResponse> comment_list = jokboComments.stream()
                 .map(c -> new JokboCommentResponse(
                         c.getId(),
@@ -256,10 +257,15 @@ public class JokboApiController {
                         c.getUser().getNickname()))
                 .collect(Collectors.toList());
 
+        if(comment_list.size() != 14) {
+            hasNext = false;
+        }
+
         return ResponseEntity.ok()
                 .body(Response.success(new ReadJokboCommentResponse(
                         comment_list,
-                        comment_list.size()
+                        comment_list.size(),
+                        hasNext
                 )));
     }
 
@@ -271,7 +277,7 @@ public class JokboApiController {
             @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "jokboIndex", description = "족보 id", required = true),
             @Parameter(name = "commentIndex", description = "댓글 id", required = true),
-            @Parameter(name = "userIndex", description = "유저 id")
+            @Parameter(name = "userIndex", description = "유저 id", required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -476,6 +482,7 @@ public class JokboApiController {
     static class ReadJokboCommentResponse {
         List<JokboCommentResponse> commentList;
         int commentCnt;
+        private Boolean hasNext;
     }
 
     /**
