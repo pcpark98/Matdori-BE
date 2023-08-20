@@ -196,13 +196,16 @@ public class JokboService {
     /**
      * 족보에 달린 모든 댓글 조회하기.
      */
-    public List<JokboComment> getAllJokboComments(Long jokboId) {
+    public List<JokboComment> getAllJokboComments(Long jokboId, Long cursor) {
 
         // 없는 족보에 대한 댓글을 조회하려고 하는 경우
         Optional<Jokbo> jokbo = jokboRepository.findOne(jokboId);
         if(!jokbo.isPresent()) throw new NotExistedJokboException(ErrorCode.NOT_EXISTED_JOKBO);
 
-        return jokboCommentRepository.findAllJokboComments(jokboId);
+        if(cursor == null) {
+            return jokboCommentRepository.findAllJokboComments(jokboId);
+        }
+        return jokboCommentRepository.findCommentsAtJokboDescendingById(jokboId, cursor);
     }
 
     /**

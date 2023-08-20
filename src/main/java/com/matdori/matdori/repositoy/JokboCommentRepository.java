@@ -49,6 +49,9 @@ public class JokboCommentRepository {
                 .getResultList();
     }
 
+    /**
+     * 내가 쓴 댓글 조회 페이징 처리하여 조회하기.
+     */
     public List<JokboComment> findCommentsDescendingById(Long userId, Long cursor) {
         return em.createQuery(
                         "SELECT c FROM JokboComment c " +
@@ -59,6 +62,20 @@ public class JokboCommentRepository {
                                 "ORDER BY c.id DESC", JokboComment.class)
                 .setParameter("userId", userId)
                 .setParameter("cursor" ,cursor)
+                .setMaxResults(14)
+                .getResultList();
+    }
+
+    /**
+     * 특정 족보에 달린 댓글 조회 페이징 처리하여 조회하기.
+     */
+    public List<JokboComment> findCommentsAtJokboDescendingById(Long jokboId, Long cursor) {
+        return em.createQuery(
+                "SELECT c FROM  JokboComment c " +
+                "WHERE c.jokbo.id =: jokboId AND c.id < :cursor " +
+                        "ORDER BY  c.id DESC", JokboComment.class)
+                .setParameter("jokboId" ,jokboId)
+                .setParameter("cursor", cursor)
                 .setMaxResults(14)
                 .getResultList();
     }
