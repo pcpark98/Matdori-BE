@@ -159,7 +159,7 @@ public class JokboService {
     @Transactional
     public void deleteJokbo(Jokbo jokbo, Long userId, List<String> imgUrls) {
 
-        if(jokbo.getUser().getId() != userId) {
+        if(!jokbo.getUser().getId().equals(userId)) {
             // 다른 사람이 작성한 족보를 삭제하려고 하는 경우.
             throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
         }
