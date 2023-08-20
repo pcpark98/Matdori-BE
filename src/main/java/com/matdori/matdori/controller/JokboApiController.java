@@ -285,13 +285,13 @@ public class JokboApiController {
     public ResponseEntity<Response<Void>> deleteJokboComment (
             @PathVariable("jokboIndex") Long jokboId,
             @PathVariable("commentIndex") Long commentId,
-            @RequestBody @Valid DeleteJokboCommentRequest request) {
+            @RequestParam(value = "userIndex") Long userId) {
 
         // 세션 체크하기.
-        AuthorizationService.checkSession(request.getUserIndex());
+        AuthorizationService.checkSession(userId);
 
         JokboComment jokboComment = jokboService.getAJokboComment(commentId);
-        jokboService.deleteJokboComment(jokboComment, request.getUserIndex());
+        jokboService.deleteJokboComment(jokboComment, userId);
 
         return ResponseEntity.ok().body(
                 Response.success(null)
@@ -476,15 +476,6 @@ public class JokboApiController {
     static class ReadJokboCommentResponse {
         List<JokboCommentResponse> commentList;
         int commentCnt;
-    }
-
-    /**
-     * 족보에 달린 댓글을 삭제하기 위한 정보를 받을 DTO
-     */
-    @Data
-    static class DeleteJokboCommentRequest {
-        @NotNull
-        private Long userIndex;
     }
 
     /**
