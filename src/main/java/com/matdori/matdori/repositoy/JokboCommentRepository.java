@@ -28,8 +28,10 @@ public class JokboCommentRepository {
     public List<JokboComment> findAllJokboComments(Long id) {
         return em.createQuery(
                 "SELECT c FROM JokboComment c "+
-                        "WHERE c.jokbo.id = :id", JokboComment.class)
+                        "WHERE c.jokbo.id = :id " +
+                        "ORDER BY c.id DESC", JokboComment.class)
                 .setParameter("id", id)
+                .setMaxResults(14)
                 .getResultList();
     }
 
