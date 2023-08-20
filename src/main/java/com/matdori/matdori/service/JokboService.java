@@ -226,7 +226,6 @@ public class JokboService {
             throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
         }
 
-        // 여기 보던 중
         jokboCommentRepository.delete(jokboComment.getId());
     }
 
