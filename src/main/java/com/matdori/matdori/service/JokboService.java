@@ -221,7 +221,7 @@ public class JokboService {
      */
     @Transactional
     public void deleteJokboComment(JokboComment jokboComment, Long userId) {
-        if(jokboComment.getUser().getId() != userId) {
+        if(!jokboComment.getUser().getId().equals(userId)) {
             // 다른 사람이 작성한 댓글을 삭제하려고 하는 경우.
             throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
         }
