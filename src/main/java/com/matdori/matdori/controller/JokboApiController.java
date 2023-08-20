@@ -243,7 +243,7 @@ public class JokboApiController {
     public ResponseEntity<Response<ReadJokboCommentResponse>> getAllJokboComments (
             @PathVariable("jokboIndex") Long jokboId,
             @RequestParam(value = "order", required = false) String order,
-            @RequestParam(value = "pageCount", required = false) Long cursor) {
+            @RequestParam(value = "pageCount") Long cursor) {
 
         Boolean hasNext = true;
         List<JokboComment> jokboComments = jokboService.getAllJokboComments(jokboId, cursor);
