@@ -500,8 +500,9 @@ public class UserApiController {
                 .map(c -> new AllMyJokboCommentResponse(
                         c.getJokbo().getId(),
                         c.getId(),
-                        c.getJokbo().getStore().getName(),
+                        c.getJokbo().getTitle(),
                         c.getContents(),
+                        0,
                         c.getCreatedAt()))
                 .collect(Collectors.toList());
 
@@ -748,8 +749,9 @@ public class UserApiController {
     static class AllMyJokboCommentResponse{
         private Long jokboId;
         private Long commentId;
-        private String storeName;
+        private String title;
         private String contents;
+        private Integer favoriteCnt;
         private LocalDateTime writtenAt;
     }
 
