@@ -41,10 +41,8 @@ public class JokboCommentRepository {
     public List<JokboComment> findByUserIndex(Long userId){
         return em.createQuery(
                         "SELECT c FROM JokboComment c " +
-                                "JOIN c.user u ON u.id =: userId AND u.id = c.user.id " +
                                 "JOIN FETCH c.jokbo j " +
-                                "JOIN FETCH j.store " +
-                                "WHERE c.isDeleted = false " +
+                                "WHERE c.user.id = :userId AND c.isDeleted = false " +
                                 "ORDER BY c.id DESC", JokboComment.class)
                 .setParameter("userId", userId)
                 .setMaxResults(14)
@@ -57,10 +55,8 @@ public class JokboCommentRepository {
     public List<JokboComment> findCommentsDescendingById(Long userId, Long cursor) {
         return em.createQuery(
                         "SELECT c FROM JokboComment c " +
-                                "JOIN c.user u ON u.id =: userId AND u.id = c.user.id " +
                                 "JOIN FETCH c.jokbo j " +
-                                "JOIN FETCH j.store " +
-                                "WHERE c.isDeleted = false AND c.id < :cursor " +
+                                "WHERE c.user.id = : userId AND  c.isDeleted = false AND c.id < :cursor " +
                                 "ORDER BY c.id DESC", JokboComment.class)
                 .setParameter("userId", userId)
                 .setParameter("cursor" ,cursor)
