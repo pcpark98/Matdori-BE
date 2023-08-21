@@ -27,14 +27,13 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 .anyRequest().permitAll()
+
                 .and()
                 .logout(logout -> logout.permitAll() // disable logout redirect
                         .logoutSuccessHandler((request, response, authentication) -> {
                             response.setStatus(HttpServletResponse.SC_OK);
-                        }
-                ));
-
-
+                        })
+                        .deleteCookies("JSESSIONID", "sessionId"));
 
         return http.build();
     }
