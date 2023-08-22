@@ -161,4 +161,10 @@ public class ExceptionManager {
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(Response.error(e.getErrorCode().name()));
     }
+
+    @ExceptionHandler(NotExistedSelectedJokboException.class)
+    public ResponseEntity<?> notExistedSelectedJokboException(NotExistedSelectedJokboException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
 }

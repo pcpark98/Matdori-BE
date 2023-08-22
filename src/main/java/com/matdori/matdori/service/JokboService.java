@@ -141,6 +141,42 @@ public class JokboService {
     }
 
     /**
+     * 선택된 id들에 해당하는 족보 조회하기
+     */
+    public List<Jokbo> findAllById(List<Long> jokboIdList) {
+
+        List<Jokbo> selectedJokboList = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(jokboIdList)) {
+            for(Long jokboId : jokboIdList) {
+                Optional<Jokbo> jokbo = jokboRepository.findOne(jokboId);
+                if(!jokbo.isPresent()) throw new NotExistedJokboException(ErrorCode.NOT_EXISTED_JOKBO);
+
+                selectedJokboList.add(jokbo.get());
+            }
+        }
+
+        // 선택된 족보가 없는 경우
+        if(CollectionUtils.isEmpty(selectedJokboList)) throw new NotExistedSelectedJokboException(ErrorCode.NOT_EXISTED_SELECTED_JOKBO);
+
+        return selectedJokboList;
+    }
+
+    /**
+     * 삭제하기 위해 선택된 족보들에 딸린 이미지들 조회하기
+     */
+    public List<JokboImg> findAllImgById(List<Jokbo> jokboList) {
+
+        List<JokboImg> jokboImgs = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(jokboList)) {
+            for(Jokbo jokbo : jokboList) {
+                List<JokboImg> currentImgs = jokbo.getJokboImgs();
+                jokboImgs.addAll(currentImgs);
+            }
+        }
+        return jokboImgs;
+    }
+
+    /**
      * 족보에 매핑된 모든 이미지 url들을 조회하기
      */
     public List<String> getImageUrls(List<JokboImg> jokboImgs) {
@@ -157,15 +193,18 @@ public class JokboService {
      * 족보 삭제하기
      */
     @Transactional
-    public void deleteJokbo(Jokbo jokbo, Long userId, List<String> imgUrls) {
+    public void deleteJokbo(Long userId, List<Jokbo> selectedJokboList, List<String> imgUrls) {
 
-        if(!jokbo.getUser().getId().equals(userId)) {
-            // 다른 사람이 작성한 족보를 삭제하려고 하는 경우.
-            throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
+        if(!CollectionUtils.isEmpty(selectedJokboList)) {
+            for(Jokbo jokbo : selectedJokboList) {
+                if(!jokbo.getUser().getId().equals(userId)) {
+                    // 다른 사람이 작성한 족보를 삭제하려고 하는 경우.
+                    throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
+                }
+
+                jokboRepository.delete(jokbo.getId());
+            }
         }
-
-        jokboRepository.delete(jokbo.getId());
-
 
         // S3에 저장된 족보 이미지 삭제.
         if(!CollectionUtils.isEmpty(imgUrls)) {

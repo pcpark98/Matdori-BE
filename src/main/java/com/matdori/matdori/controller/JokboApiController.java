@@ -70,10 +70,10 @@ public class JokboApiController {
     @PostMapping("/users/{userIndex}/jokbo")
     public ResponseEntity<Response<Void>> createJokbo(
             @PathVariable("userIndex") @NotNull Long userIndex,
-            @RequestBody @Valid CreateJokboRequest request) throws IOException {
+            @Valid CreateJokboRequest request) throws IOException {
 
         // 세션 체크하기.
-        AuthorizationService.checkSession(userIndex);
+        //AuthorizationService.checkSession(userIndex);
 
         // 족보에 대한 기본 정보 생성
         Jokbo jokbo = new Jokbo();
@@ -157,19 +157,19 @@ public class JokboApiController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 족보(NOT_EXISTED_JOKBO) <br> 존재하지 않는 족보 이미지(NOT_EXISTED_JOKBO_IMG)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
-    @DeleteMapping("/users/{userIndex}/jokbos/{jokboIndex}")
+    @PostMapping("/users/{userIndex}/jokbos")
     public ResponseEntity<Response<Void>> deleteJokbo (
             @PathVariable("userIndex") Long userId,
-            @PathVariable("jokboIndex") Long jokboId) {
+            @RequestBody @Valid DeleteJokboRequest request) {
 
         // 세션 체크하기
-        AuthorizationService.checkSession(userId);
+        //AuthorizationService.checkSession(userId);
 
-        Jokbo jokbo = jokboService.findOne(jokboId);
-        List<JokboImg> jokboImgs = jokbo.getJokboImgs();
+        List<Jokbo> selectedJokboList = jokboService.findAllById(request.getJokboIdList());
+        List<JokboImg> jokboImgs = jokboService.findAllImgById(selectedJokboList);
         List<String> imgUrls = jokboService.getImageUrls(jokboImgs);
 
-        jokboService.deleteJokbo(jokbo, userId, imgUrls);
+        jokboService.deleteJokbo(userId, selectedJokboList, imgUrls);
 
         return ResponseEntity.ok().body(
                 Response.success(null)
@@ -504,5 +504,13 @@ public class JokboApiController {
         private String name;
         private String imgUrl;
         private Double totalRating;
+    }
+
+    /**
+     * 족보 삭제 요청을 위한 DTO
+     */
+    @Data
+    static class DeleteJokboRequest {
+        private List<Long> jokboIdList;
     }
 }
