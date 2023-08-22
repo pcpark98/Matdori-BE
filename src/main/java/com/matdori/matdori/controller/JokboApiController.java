@@ -70,10 +70,10 @@ public class JokboApiController {
     @PostMapping("/users/{userIndex}/jokbo")
     public ResponseEntity<Response<Void>> createJokbo(
             @PathVariable("userIndex") @NotNull Long userIndex,
-            @Valid CreateJokboRequest request) throws IOException {
+            @RequestBody @Valid CreateJokboRequest request) throws IOException {
 
         // 세션 체크하기.
-        //AuthorizationService.checkSession(userIndex);
+        AuthorizationService.checkSession(userIndex);
 
         // 족보에 대한 기본 정보 생성
         Jokbo jokbo = new Jokbo();
@@ -163,7 +163,7 @@ public class JokboApiController {
             @RequestBody @Valid DeleteJokboRequest request) {
 
         // 세션 체크하기
-        //AuthorizationService.checkSession(userId);
+        AuthorizationService.checkSession(userId);
 
         List<Jokbo> selectedJokboList = jokboService.findAllById(request.getJokboIdList());
         List<JokboImg> jokboImgs = jokboService.findAllImgById(selectedJokboList);
