@@ -25,8 +25,14 @@ public class JokboFavoriteRepository {
     /**
      * 족보 좋아요 정보 삭제하기.
      */
-    public void delete(Long id) {
-        em.remove(em.find(JokboFavorite.class, id));
+    public void delete(List<Long> jokboIndices , Long userId){
+        em.createQuery(
+                        "DELETE FROM JokboFavorite f " +
+                                "WHERE f.id IN :jokboIndices AND f.user.id = :userId"
+                )
+                .setParameter("jokboIndices", jokboIndices)
+                .setParameter("userId", userId)
+                .executeUpdate();
     }
 
     /**
