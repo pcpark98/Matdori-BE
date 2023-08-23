@@ -66,7 +66,7 @@ public class StoreRepository {
 
     public Optional<com.matdori.matdori.repositoy.Dto.StoreInformationHeader> readStoreInformationHeader(Long storeId){
         return em.createQuery(
-                        "SELECT new com.matdori.matdori.repositoy.Dto.StoreInformationHeader(s.name, " +
+                        "SELECT new com.matdori.matdori.repositoy.Dto.StoreInformationHeader(s.name, s.category, " +
                                 "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl) " +
                                 "FROM Store s " +
                                 "LEFT JOIN s.jokbos j " +

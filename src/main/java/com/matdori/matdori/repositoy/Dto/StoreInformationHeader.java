@@ -1,6 +1,7 @@
 package com.matdori.matdori.repositoy.Dto;
 
 import com.matdori.matdori.domain.Jokbo;
+import com.matdori.matdori.domain.StoreCategory;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import java.util.Optional;
 @NoArgsConstructor
 public class StoreInformationHeader{
     private String name;
+    private String category;
     private Double totalRating;
     private Double flavorRating;
     private Double underPricedRating;
@@ -18,8 +20,9 @@ public class StoreInformationHeader{
     private String imgUrl;
 
 
-    public StoreInformationHeader(String name, Double flavorRating, Double underPricedRating, Double cleanRating, String imgUrl) {
+    public StoreInformationHeader(String name, StoreCategory category, Double flavorRating, Double underPricedRating, Double cleanRating, String imgUrl) {
         this.name = name;
+        this.category =category.getName();
         Double totalRating = getScore(flavorRating) +getScore(underPricedRating) + getScore(cleanRating);
         if(totalRating != 0.0) this.totalRating = totalRating/3;
         else this.totalRating = 0.0;
