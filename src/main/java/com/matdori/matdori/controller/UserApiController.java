@@ -188,15 +188,15 @@ public class UserApiController {
             @ApiResponse(responseCode = "404", description = "좋아요 하지 않은 족보에 대한 삭제(NOT_EXISTED_JOKBO_FAVORITE)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
-    @DeleteMapping("/users/{userIndex}/favorite-jokbos/{favoriteJokboIndex}")
+    @PostMapping("/users/{userIndex}/favorite-jokbos")
     public ResponseEntity<Response<Void>> deleteFavoriteJokbo(
             @PathVariable("userIndex") Long userId,
-            @PathVariable("favoriteJokboIndex") Long favoriteJokboId){
+            @RequestBody DeleteFavoriteJokboRequest request){
 
         // 세션 체크
         AuthorizationService.checkSession(userId);
 
-        userService.deleteFavoriteJokbo(favoriteJokboId, userId);
+        userService.deleteFavoriteJokbo(request.favoriteJokbosId, userId);
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
@@ -814,5 +814,10 @@ public class UserApiController {
     @AllArgsConstructor
     static class CreateFavoriteJokboResponse{
         private Long favoriteJokboId;
+    }
+
+    @Data
+    static class DeleteFavoriteJokboRequest{
+        private List<Long> favoriteJokbosId;
     }
 }

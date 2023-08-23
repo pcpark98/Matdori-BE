@@ -90,14 +90,9 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteFavoriteJokbo(Long favoriteJokboId, Long userId) {
-        JokboFavorite jokboFavorite = jokboFavoriteRepository.findOne(favoriteJokboId);
-
-        if(jokboFavorite == null)
-            throw new NotExisitedJokboFavoriteException(ErrorCode.NOT_EXISTED_JOKBO_FAVORITE);
-        if(!jokboFavorite.getUser().getId().equals(userId))
-            throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
-        jokboFavoriteRepository.delete(favoriteJokboId);}
+    public void deleteFavoriteJokbo(List<Long> favoriteJokboId, Long userId) {
+        jokboFavoriteRepository.delete(favoriteJokboId, userId);
+    }
 
     /**
      * 가게에 좋아요 누르기
