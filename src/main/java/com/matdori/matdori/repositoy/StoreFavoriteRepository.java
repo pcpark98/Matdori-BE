@@ -17,7 +17,14 @@ public class StoreFavoriteRepository {
     public StoreFavorite findOne(Long favoriteStoreId) { return em.find(StoreFavorite.class, favoriteStoreId);}
     public Long saveStoreFavorite(StoreFavorite storeFavorite){ em.persist(storeFavorite); return storeFavorite.getId();}
 
-    public void deleteStoreFavorite(Long id) { em.remove(em.find(StoreFavorite.class, id));}
+    public void deleteStoreFavorite(List<Long> favoriteStoresId, Long userId) {
+        em.createQuery(
+                "DELETE FROM StoreFavorite s " +
+                        "WHERE s.id IN :favoriteStoresId AND s.user.id = : userId")
+                .setParameter("favoriteStoresId", favoriteStoresId)
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
 
     public List<FavoriteStore> findAllFavoriteStore(Long userId) {
         return em.createQuery(

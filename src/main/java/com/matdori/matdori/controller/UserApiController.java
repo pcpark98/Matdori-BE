@@ -147,7 +147,7 @@ public class UserApiController {
     @Parameters({
             @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id", required = true),
-            @Parameter(name = "favoriteStoreIndex", description = "좋아요한 가게 id", required = true)
+            @Parameter(name = "favoriteStoresId", description = "좋아요한 가게 id 리스트")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -157,16 +157,16 @@ public class UserApiController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 가게(NOT_EXISTED_STORE)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
-    @DeleteMapping("/users/{userIndex}/favorite-stores/{favoriteStoreIndex}")
+    @PostMapping("/users/{userIndex}/favorite-stores")
     public ResponseEntity<Response<Void>> deleteFavoriteStore(
             @PathVariable("userIndex") Long userId,
-            @PathVariable("favoriteStoreIndex") Long favoriteStoreId){
+            @RequestBody DeleteFavoriteStoreRequest request){
 
         // 세션 체크
         AuthorizationService.checkSession(userId);
 
         // storeId가 유효한지 검증 필요.
-        userService.deleteFavoriteStore(favoriteStoreId);
+        userService.deleteFavoriteStore(request.favoriteStoresId, userId);
         return ResponseEntity.ok()
                 .body(Response.success(null));
     }
@@ -178,7 +178,7 @@ public class UserApiController {
     @Parameters({
             @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id"),
-            @Parameter(name = "favoriteJokboIndex", description = "족보 id")
+            @Parameter(name = "favoriteJokbosId", description = "족보 id 리스트")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -819,5 +819,10 @@ public class UserApiController {
     @Data
     static class DeleteFavoriteJokboRequest{
         private List<Long> favoriteJokbosId;
+    }
+
+    @Data
+    static class DeleteFavoriteStoreRequest{
+        private List<Long> favoriteStoresId;
     }
 }

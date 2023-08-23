@@ -83,10 +83,9 @@ public class UserService {
      * 내가 좋아요 누른 가게 삭제하기.
      */
     @Transactional
-    public void deleteFavoriteStore(Long favoriteStoreId) {
-        if(storeFavoriteRepository.findOne(favoriteStoreId) == null)
-            throw new NotExistStoreException(ErrorCode.NOT_EXISTED_STORE);
-        storeFavoriteRepository.deleteStoreFavorite(favoriteStoreId);
+    public void deleteFavoriteStore(List<Long> favoriteStoresId, Long userId) {
+
+        storeFavoriteRepository.deleteStoreFavorite(favoriteStoresId, userId);
     }
 
     @Transactional
