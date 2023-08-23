@@ -358,19 +358,15 @@ public class JokboApiController {
      * 고쳐야 할 부분
      * 1. 랜덤이 아님
      */
-    @Operation(summary = "맛도리 픽 가게 리스트 조회 API", description = "맛도리 픽이라는 이름으로 학과별 추천으로 선정되지 않은 가게들 중에서 랜덤으로 세 곳을 조회합니다.")
-    @Parameter(name = "department", description = "학과", required = true)
+    @Operation(summary = "맛도리 픽 가게 리스트 조회 API", description = "맛도리 픽이라는 이름으로 랜덤으로 세 곳을 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)", content = @Content(schema = @Schema(implementation = Error.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 학과(NOT_EXISTED_DEPARTMENT)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/stores/matdori-pick")
-    public ResponseEntity<Response<List<MatdoriPick>>> readMatdoriPick(
-            @RequestParam(value = "department") String department) {
+    public ResponseEntity<Response<List<MatdoriPick>>> readMatdoriPick() {
 
-        List<MatdoriPick> matdoriPick = jokboService.getMatdoriPick(department);
+        List<MatdoriPick> matdoriPick = jokboService.getMatdoriPick();
 
         return ResponseEntity.ok().body(
                 Response.success(

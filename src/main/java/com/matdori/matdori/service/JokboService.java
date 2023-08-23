@@ -316,9 +316,18 @@ public class JokboService {
     /**
      * 맛도리 픽 조회하기.
      */
-    public List<MatdoriPick> getMatdoriPick(String department) {
+    public List<MatdoriPick> getMatdoriPick() {
 
-        return storeRepository.getMatdoriPick(Department.nameOf(department));
+        List<MatdoriPick> matdoriPick = new ArrayList<>();
+
+        List<Store> randomStores = storeRepository.getMatdoriPick();
+        if(!CollectionUtils.isEmpty(randomStores)) {
+            for(Store store : randomStores) {
+                matdoriPick.add(new MatdoriPick(store.getId(), store.getName(), store.getImgUrl()));
+            }
+        }
+
+        return matdoriPick;
     }
 
     /**

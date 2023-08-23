@@ -38,7 +38,6 @@ public class StoreRepository {
      * 해당 학과의 족보가 가장 많은 가게 리스트 구하기.
      */
     public List<Store> getStoreListByDepartment(Department department) {
-        // 해당 학과의 족보가 달린 가게가 3개 이하일 경우에 대한 처리 필요.
 
         return em.createQuery(
                 "SELECT s FROM Store s " +
@@ -78,31 +77,13 @@ public class StoreRepository {
     /**
      * 맛도리 픽 가게 리스트 조회하기.
      */
-    public List<MatdoriPick> getMatdoriPick(Department department) {
+    public List<Store> getMatdoriPick() {
 
-        String sql = "(SELECT store_index, name, img_url " +
-                "FROM store " +
-                "ORDER BY RANDOM()) " +
-                "EXCEPT " +
-                "(SELECT s.store_index, s.name, s.img_url " +
-                "FROM jokbo j " +
-                "JOIN store s ON j.store_index = s.store_index " +
-                "JOIN users u ON j.user_index = u.user_index " +
-                "WHERE u.department = ? " +
-                "GROUP BY s.store_index, s.name, s.img_url, u.department " +
-                "ORDER BY COUNT(j.jokbo_index) DESC)";
-
-        Query nativeQuery = em.createNativeQuery(sql)
-                .setParameter(1, department.getName());
-
-        List<Object[]> resultList = nativeQuery.getResultList();
-        List<MatdoriPick> matdoriPicks = new ArrayList<>();
-        for(Object[] row : resultList) {
-            MatdoriPick matdoriPick = new MatdoriPick(Long.valueOf(row[0].toString()), row[1].toString(), row[2].toString());
-            matdoriPicks.add(matdoriPick);
-        }
-
-        return matdoriPicks;
+        return em.createQuery(
+                "SELECT s FROM Store s " +
+                        "ORDER BY RANDOM()", Store.class)
+                .setMaxResults(3)
+                .getResultList();
     }
 
     /**
