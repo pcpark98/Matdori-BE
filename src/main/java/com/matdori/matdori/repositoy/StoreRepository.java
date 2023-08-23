@@ -37,16 +37,15 @@ public class StoreRepository {
     /**
      * 해당 학과의 족보가 가장 많은 가게 리스트 구하기.
      */
-    public List<StoreListByDepartment> getStoreListByDepartment(Department department) {
+    public List<Store> getStoreListByDepartment(Department department) {
         // 해당 학과의 족보가 달린 가게가 3개 이하일 경우에 대한 처리 필요.
+
         return em.createQuery(
-                "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByDepartment(s.id, s.name, s.imgUrl) " +
-                        "FROM Jokbo j " +
-                        "JOIN j.store s " +
-                        "JOIN j.user u " +
-                        "GROUP BY s.id, s.name, s.imgUrl, u.department " +
-                        "HAVING u.department =: department " +
-                        "ORDER BY s.jokbos.size DESC ", StoreListByDepartment.class)
+                "SELECT s FROM Store s " +
+                        "JOIN Jokbo j ON j.store.id = s.id " +
+                        "WHERE j.user.department =: department " +
+                        "GROUP BY s.id " +
+                        "ORDER BY COUNT(j.id) DESC ", Store.class)
                 .setParameter("department", department)
                 .setMaxResults(10)
                 .getResultList();

@@ -226,8 +226,7 @@ public class JokboApiController {
      * 족보 글에 달린 모든 댓글 조회하기.
      *
      * 고쳐야 할 부분
-     * 1. 페이징 처리
-     * 2. 정렬 처리 구현 필요
+     * 1. 정렬 처리 구현 필요
      */
     @Operation(summary = "족보에 달린 모든 댓글 조회 API", description = "족보 게시글에 달린 모든 댓글들을 조회합니다.")
     @Parameters({
@@ -337,13 +336,13 @@ public class JokboApiController {
     public ResponseEntity<Response<List<DepartmentRecommendationResponse>>> readDepartmentRecommendation(
             @RequestParam(value = "department") String department) {
 
-        List<StoreListByDepartment> storeList = jokboService.getStoreListByDepartment(department);
+        List<Store> storeList = jokboService.getStoreListByDepartment(department);
         List<DepartmentRecommendationResponse> responseList = storeList.stream()
                 .map(s -> new DepartmentRecommendationResponse(
-                        s.getStoreIndex(),
+                        s.getId(),
                         s.getName(),
                         s.getImgUrl(),
-                        storeService.getTotalRating(s.getStoreIndex())
+                        storeService.getTotalRating(s.getId())
                 )).collect(Collectors.toList());
 
         return ResponseEntity.ok().body(

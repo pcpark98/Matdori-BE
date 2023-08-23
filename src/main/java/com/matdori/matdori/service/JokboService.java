@@ -2,10 +2,7 @@ package com.matdori.matdori.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.matdori.matdori.domain.Department;
-import com.matdori.matdori.domain.Jokbo;
-import com.matdori.matdori.domain.JokboComment;
-import com.matdori.matdori.domain.JokboImg;
+import com.matdori.matdori.domain.*;
 import com.matdori.matdori.exception.*;
 import com.matdori.matdori.repositoy.Dto.JokboRichStore;
 import com.matdori.matdori.repositoy.Dto.MatdoriPick;
@@ -311,7 +308,7 @@ public class JokboService {
     /**
      * 해당 학과의 족보가 가장 많은 가게 구하기
      */
-    public List<StoreListByDepartment> getStoreListByDepartment(String department) {
+    public List<Store> getStoreListByDepartment(String department) {
 
         return storeRepository.getStoreListByDepartment(Department.nameOf(department));
     }
