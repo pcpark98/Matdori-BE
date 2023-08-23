@@ -147,7 +147,7 @@ public class JokboApiController {
     @Parameters({
             @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
             @Parameter(name = "userIndex", description = "유저 id"),
-            @Parameter(name = "jokboIndex", description = "족보 id")
+            @Parameter(name = "DeleteJokboRequest", description = "삭제할 족보둘의 id 리스트")
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -275,9 +275,8 @@ public class JokboApiController {
     @Operation(summary = "내가 쓴 댓글 삭제 API", description = "유저 본인이 작성한 댓글을 삭제합니다.")
     @Parameters({
             @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
-            @Parameter(name = "jokboIndex", description = "족보 id", required = true),
-            @Parameter(name = "commentIndex", description = "댓글 id", required = true),
-            @Parameter(name = "userIndex", description = "유저 id", required = true)
+            @Parameter(name = "userIndex", description = "유저 id", required = true),
+            @Parameter(name = "jokboCommentIdList", description = "삭제할 댓글들의 id 리스트", required = true),
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -287,17 +286,17 @@ public class JokboApiController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 족보(?) <br> 존재하지 않는 댓글(NOT_EXISTED_JOKBO_COMMENT)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
-    @DeleteMapping("/jokbos/{jokboIndex}/comments/{commentIndex}")
+    @PostMapping("/users/{userIndex}/comments")
     public ResponseEntity<Response<Void>> deleteJokboComment (
-            @PathVariable("jokboIndex") Long jokboId,
-            @PathVariable("commentIndex") Long commentId,
-            @RequestParam(value = "userIndex") Long userId) {
+            @PathVariable("userIndex") Long userId,
+            @RequestBody @Valid DeleteJokboCommentRequest request) {
 
         // 세션 체크하기.
         AuthorizationService.checkSession(userId);
 
-        JokboComment jokboComment = jokboService.getAJokboComment(commentId);
-        jokboService.deleteJokboComment(jokboComment, userId);
+        List<JokboComment> selectedJokboCommentList = jokboService.getSelectedJokboComments(userId, request.getJokboCommentIdList());
+
+        jokboService.deleteJokboComment(userId, selectedJokboCommentList);
 
         return ResponseEntity.ok().body(
                 Response.success(null)
@@ -512,5 +511,13 @@ public class JokboApiController {
     @Data
     static class DeleteJokboRequest {
         private List<Long> jokboIdList;
+    }
+
+    /**
+     * 족보 댓글 삭제 요청을 위한 DTO
+     */
+    @Data
+    static class DeleteJokboCommentRequest {
+        private List<Long> jokboCommentIdList;
     }
 }

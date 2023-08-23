@@ -31,7 +31,8 @@ public enum ErrorCode {
     INVALID_STORE_LISTING_ORDER(HttpStatus.BAD_REQUEST, "잘못된 정렬값입니다."),
     UNSUPPORTED_FILE_EXTENSION(HttpStatus.BAD_REQUEST, "지원하지 않는 이미지 확장자입니다. jpg, jpeg, png 파일만 사용해주세요."),
     NOT_EXISTED_FILE_EXTENSION(HttpStatus.BAD_REQUEST, "이미지 확장자가 존재하지 않습니다."),
-    NOT_EXISTED_SELECTED_JOKBO(HttpStatus.BAD_REQUEST, "하나 이상의 족보를 선택해야 합니다.");
+    NOT_EXISTED_SELECTED_JOKBO(HttpStatus.BAD_REQUEST, "하나 이상의 족보를 선택해야 합니다."),
+    NOT_EXISTED_SELECTED_JOKBO_COMMENT(HttpStatus.BAD_REQUEST, "하나 이상의 댓글을 선택해야 합니다.");
 
     private HttpStatus status;
     private String message;

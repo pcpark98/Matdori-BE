@@ -28,7 +28,7 @@ public class JokboCommentRepository {
     public List<JokboComment> findAllJokboComments(Long id) {
         return em.createQuery(
                 "SELECT c FROM JokboComment c "+
-                        "WHERE c.jokbo.id = :id " +
+                        "WHERE c.jokbo.id = :id AND c.isDeleted = false " +
                         "ORDER BY c.id DESC", JokboComment.class)
                 .setParameter("id", id)
                 .setMaxResults(14)
