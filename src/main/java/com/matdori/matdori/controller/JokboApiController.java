@@ -231,7 +231,7 @@ public class JokboApiController {
     @Parameters({
             @Parameter(name = "jokboIndex", description = "족보 id", required = true),
             @Parameter(name = "order", description = "정렬값", required = true),
-            @Parameter(name = "pageCount", description = "시작페이지 : 1 , 한 페이지 당 15개씩 응답", required = true)
+            @Parameter(name = "cursor", description = "처음 null, 이후 요청부터 마지막 jokboId", required = true)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -243,7 +243,7 @@ public class JokboApiController {
     public ResponseEntity<Response<ReadJokboCommentResponse>> getAllJokboComments (
             @PathVariable("jokboIndex") Long jokboId,
             @RequestParam(value = "order", required = false) String order,
-            @RequestParam(value = "pageCount") Long cursor) {
+            @RequestParam(value = "cursor", required = false) Long cursor) {
 
         Boolean hasNext = true;
         List<JokboComment> jokboComments = jokboService.getAllJokboComments(jokboId, cursor);
