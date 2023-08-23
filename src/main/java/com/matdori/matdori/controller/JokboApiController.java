@@ -3,7 +3,6 @@ package com.matdori.matdori.controller;
 import com.matdori.matdori.domain.*;
 import com.matdori.matdori.repositoy.Dto.JokboRichStore;
 import com.matdori.matdori.repositoy.Dto.MatdoriPick;
-import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
 import com.matdori.matdori.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -102,7 +101,11 @@ public class JokboApiController {
      * 족보 내용 조회하기
      */
     @Operation(summary = "족보 내용 조회하기", description = "단일 족보의 상세 내용을 조회합니다.")
-    @Parameter(name = "jokboIndex", description = "족보 id", required = true)
+    @Parameters({
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
+            @Parameter(name = "userIndex", description = "유저 id", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "jokboIndex", description = "족보 id", required = true)
+    })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
             @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM)", content = @Content(schema = @Schema(implementation = Error.class))),
@@ -114,6 +117,10 @@ public class JokboApiController {
             readJokbo(
                     @RequestHeader("userIndex") @NotNull Long userId,
                     @PathVariable("jokboIndex") @NotNull Long jokboId) {
+
+        // 세션 체크하기.
+        AuthorizationService.checkSession(userId);
+
         Jokbo jokbo = jokboService.findOne(jokboId);
         Long jokboFavoriteId = userService.getFavoriteJokboId(userId, jokboId);
         com.matdori.matdori.repositoy.Dto.StoreRatings ratings = storeService.getAllRatings(jokbo.getStore());
