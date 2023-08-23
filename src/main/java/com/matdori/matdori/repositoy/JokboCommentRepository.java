@@ -70,6 +70,7 @@ public class JokboCommentRepository {
     public List<JokboComment> findCommentsAtJokboDescendingById(Long jokboId, Long cursor) {
         return em.createQuery(
                 "SELECT c FROM  JokboComment c " +
+                        "JOIN FETCH c.jokbo j " +
                         "WHERE c.isDeleted = false AND c.jokbo.id =: jokboId AND c.id < :cursor " +
                         "ORDER BY  c.id DESC", JokboComment.class)
                 .setParameter("jokboId" ,jokboId)
