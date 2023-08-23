@@ -118,6 +118,7 @@ public class JokboApiController {
         Long jokboFavoriteId = userService.getFavoriteJokboId(userId, jokboId);
         com.matdori.matdori.repositoy.Dto.StoreRatings ratings = storeService.getAllRatings(jokbo.getStore());
         List<String> jokboImgUrls = jokboService.getImageUrls(jokbo.getJokboImgs());
+        int jokboCommentCnt = jokbo.getJokboComments().size();
 
         return ResponseEntity.ok().body(
                 Response.success(
@@ -134,7 +135,8 @@ public class JokboApiController {
                                 jokbo.getContents(),
                                 jokboFavoriteId,
                                 jokbo.getCreatedAt(),
-                                jokboImgUrls
+                                jokboImgUrls,
+                                jokboCommentCnt
                         )
                 )
         );
@@ -444,6 +446,8 @@ public class JokboApiController {
         LocalDateTime createdAt;
 
         List<String> jokboImgUrlList;
+
+        int jokboCommentCnt;
     }
 
     /**
