@@ -190,7 +190,7 @@ public class JokboService {
     }
 
     /**
-     * 족보 삭제하기
+     * 선택된 족보들 삭제하기
      */
     @Transactional
     public void deleteJokbo(Long userId, List<Jokbo> selectedJokboList, List<String> imgUrls) {
@@ -253,22 +253,51 @@ public class JokboService {
     public JokboComment getAJokboComment(Long id) {
 
         Optional<JokboComment> jokboComment = jokboCommentRepository.findOne(id);
-        if(!jokboComment.isPresent()) throw new NotExistedJokboCommentException(ErrorCode.NOT_EXISTED_JOKBO_COMMENT);
+        if(!jokboComment.isPresent() || jokboComment.get().getIsDeleted() == true) throw new NotExistedJokboCommentException(ErrorCode.NOT_EXISTED_JOKBO_COMMENT);
 
         return jokboComment.get();
     }
 
     /**
-     * 댓글 삭제하기.
+     * 선택된 댓글들 조회하기.
      */
-    @Transactional
-    public void deleteJokboComment(JokboComment jokboComment, Long userId) {
-        if(!jokboComment.getUser().getId().equals(userId)) {
-            // 다른 사람이 작성한 댓글을 삭제하려고 하는 경우.
-            throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
+    public List<JokboComment> getSelectedJokboComments(Long userId, List<Long> jokboCommentIdList) {
+
+        List<JokboComment> selectedJokboCommentList = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(jokboCommentIdList)) {
+            for(Long jokboCommentId : jokboCommentIdList) {
+                Optional<JokboComment> jokboComment = jokboCommentRepository.findOne(jokboCommentId);
+                if(!jokboComment.isPresent() || jokboComment.get().getIsDeleted()) throw new NotExistedJokboCommentException(ErrorCode.NOT_EXISTED_JOKBO_COMMENT);
+
+                selectedJokboCommentList.add(jokboComment.get());
+            }
         }
 
-        jokboCommentRepository.delete(jokboComment.getId());
+        // 선택된 댓글이 없는 경우
+        if(CollectionUtils.isEmpty(selectedJokboCommentList)) throw new NotExistedSelectedJokboCommentException(ErrorCode.NOT_EXISTED_SELECTED_JOKBO_COMMENT);
+
+        return selectedJokboCommentList;
+    }
+
+    /**
+     * 선택된 댓글들 삭제하기. -> 진짜 삭제하지는 않고 is_deleted를 true로 바꿈.
+     */
+    public void deleteJokboComment(Long userId, List<JokboComment> selectedJokboCommentList) {
+
+        if(!CollectionUtils.isEmpty(selectedJokboCommentList)) {
+            for(JokboComment jokboComment : selectedJokboCommentList) {
+                if(!jokboComment.getUser().getId().equals(userId)) {
+                    // 다른 사람이 작성한 댓글을 삭제하려고 하는 경우.
+                    throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
+                }
+            }
+        }
+
+        if(!CollectionUtils.isEmpty(selectedJokboCommentList)) {
+            for(JokboComment jokboComment : selectedJokboCommentList) {
+                jokboComment.setIsDeleted(true);
+            }
+        }
     }
 
     /**
