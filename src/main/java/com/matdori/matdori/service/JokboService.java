@@ -279,6 +279,7 @@ public class JokboService {
     /**
      * 선택된 댓글들 삭제하기. -> 진짜 삭제하지는 않고 is_deleted를 true로 바꿈.
      */
+    @Transactional
     public void deleteJokboComment(Long userId, List<JokboComment> selectedJokboCommentList) {
 
         if(!CollectionUtils.isEmpty(selectedJokboCommentList)) {
