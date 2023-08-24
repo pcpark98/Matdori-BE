@@ -4,13 +4,10 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.matdori.matdori.domain.*;
 import com.matdori.matdori.exception.*;
+import com.matdori.matdori.repositoy.*;
 import com.matdori.matdori.repositoy.Dto.JokboRichStore;
 import com.matdori.matdori.repositoy.Dto.MatdoriPick;
 import com.matdori.matdori.repositoy.Dto.StoreListByDepartment;
-import com.matdori.matdori.repositoy.JokboCommentRepository;
-import com.matdori.matdori.repositoy.JokboImgRepository;
-import com.matdori.matdori.repositoy.JokboRepository;
-import com.matdori.matdori.repositoy.StoreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -34,6 +31,7 @@ public class JokboService {
     private final JokboImgRepository jokboImgRepository;
     private final JokboCommentRepository jokboCommentRepository;
     private final StoreRepository storeRepository;
+    private final JokboFavoriteRepository jokboFavoriteRepository;
 
     private final AmazonS3 amazonS3;
 
@@ -199,9 +197,19 @@ public class JokboService {
                     throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
                 }
 
+                // 족보에 매핑된 좋아요들 삭제
+                jokboFavoriteRepository.deleteAllByJokboId(jokbo.getId());
+
+                // 족보에 매핑된 댓글들의 좋아요들 삭제
+
+                // 족보에 매핑된 댓글들 삭제
+                jokboCommentRepository.deleteAllByJokboId(jokbo.getId());
+
+                // 족보 삭제
                 jokboRepository.delete(jokbo.getId());
             }
         }
+
 
         // S3에 저장된 족보 이미지 삭제.
         if(!CollectionUtils.isEmpty(imgUrls)) {

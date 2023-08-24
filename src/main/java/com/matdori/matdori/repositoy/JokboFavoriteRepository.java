@@ -92,4 +92,15 @@ public class JokboFavoriteRepository {
 
         return jokboFavorite.stream().findAny();
     }
+
+    /**
+     * 족보 삭제시 매핑된 모든 좋아요 정보 삭제
+     */
+    public void deleteAllByJokboId(Long jokboId) {
+        em.createQuery(
+                "DELETE FROM JokboFavorite f " +
+                        "WHERE f.jokbo.id =: jokboId")
+                .setParameter("jokboId", jokboId)
+                .executeUpdate();
+    }
 }
