@@ -93,4 +93,15 @@ public class JokboCommentRepository {
     public void delete(Long id) {
         em.remove(em.find(JokboComment.class, id));
     }
+
+    /**
+     * 족보 삭제시 매핑된 모든 댓글 삭제
+     */
+    public void deleteAllByJokboId(Long jokboId) {
+        em.createQuery(
+                        "DELETE FROM JokboComment c " +
+                                "WHERE c.jokbo.id =: jokboId")
+                .setParameter("jokboId", jokboId)
+                .executeUpdate();
+    }
 }
