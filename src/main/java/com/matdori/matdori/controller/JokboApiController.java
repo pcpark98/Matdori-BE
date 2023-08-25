@@ -90,6 +90,7 @@ public class JokboApiController {
         jokbo.setTitle(request.getTitle());
         jokbo.setContents(request.getContents());
 
+        System.out.println(images);
         List<MultipartFile> uploadImages = images;
 
         jokboService.createJokbo(jokbo, uploadImages);
