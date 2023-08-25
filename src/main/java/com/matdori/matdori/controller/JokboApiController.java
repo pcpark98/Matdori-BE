@@ -69,7 +69,7 @@ public class JokboApiController {
     @PostMapping("/users/{userIndex}/jokbo")
     public ResponseEntity<Response<Void>> createJokbo(
             @PathVariable("userIndex") @NotNull Long userIndex,
-            @RequestBody @Valid CreateJokboRequest request) throws IOException {
+            @RequestPart @Valid CreateJokboRequest request) throws IOException {
 
         // 세션 체크하기.
         AuthorizationService.checkSession(userIndex);
