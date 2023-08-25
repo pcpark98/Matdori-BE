@@ -67,7 +67,7 @@ public class JokboApiController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 가게(NOT_EXISTED_STORE)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class))),
     })
-    @PostMapping("/users/{userIndex}/jokbo", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PostMapping(value = "/users/{userIndex}/jokbo", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Response<Void>> createJokbo(
             @PathVariable("userIndex") @NotNull Long userIndex,
             @RequestPart(value = "request") @Valid CreateJokboRequest request,
