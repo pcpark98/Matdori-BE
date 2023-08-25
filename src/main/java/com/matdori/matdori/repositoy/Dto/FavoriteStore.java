@@ -20,7 +20,10 @@ public class FavoriteStore {
         this.favoriteStoreId = favoriteStoreId;
         this.storeId = storeId;
         this.jokboCnt = jokboCnt;
-        this.totalRating = Math.ceil(totalRating*10)/10;
+        if(!(totalRating == null || totalRating.equals(0)))
+            this.totalRating = Math.ceil(totalRating*10)/10;
+        else
+            this.totalRating = 0.0D;
         this.name = name;
         this.category = category.getName();
         this.imgUrl = imgUrl;

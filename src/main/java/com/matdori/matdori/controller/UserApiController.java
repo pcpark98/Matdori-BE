@@ -230,7 +230,7 @@ public class UserApiController {
         // 보내진 쿠키를 프론트에서 저장해서 다음 요청에 함께 보냄.
         return ResponseEntity.ok()
                 .header("set-cookie","sessionId="+uuid +"; Max-Age=2147483647; Path=/; Secure; HttpOnly; SameSite=None")
-                .body(Response.success(new LoginResponse(new LoginResult(user.getId(), user.getNickname(), user.getDepartment().getName()))));
+                .body(Response.success(new LoginResponse(new LoginResult(user.getId(), user.getEmail(), user.getNickname(), user.getDepartment().getName()))));
     }
 
     /**
@@ -418,14 +418,14 @@ public class UserApiController {
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @PutMapping("/users/{userIndex}/nickname")
-    public ResponseEntity<Response<Void>> updateNickname(@RequestBody @Valid UpdateNicknameRequest request,
+    public ResponseEntity<Response<UpdateNicknameResponse>> updateNickname(@RequestBody @Valid UpdateNicknameRequest request,
                                                          @PathVariable("userIndex") Long userId){
         // 세션 체크
         AuthorizationService.checkSession(userId);
 
         userService.updateNickname(userId, request.nickname);
         return ResponseEntity.ok()
-                .body(Response.success(null));
+                .body(Response.success(new UpdateNicknameResponse(request.nickname)));
     }
 
     /**
@@ -624,6 +624,7 @@ public class UserApiController {
     @AllArgsConstructor
     static class LoginResult{
         private Long userId;
+        private String email;
         private String nickname;
         private String department;
     }
@@ -712,6 +713,12 @@ public class UserApiController {
     @Data
     static class UpdateNicknameRequest{
         @NotBlank
+        private String nickname;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class UpdateNicknameResponse{
         private String nickname;
     }
 
