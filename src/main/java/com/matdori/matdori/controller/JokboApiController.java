@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,11 +67,11 @@ public class JokboApiController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 가게(NOT_EXISTED_STORE)", content = @Content(schema = @Schema(implementation = Error.class))),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class))),
     })
-    @PostMapping("/users/{userIndex}/jokbo")
+    @PostMapping("/users/{userIndex}/jokbo", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Response<Void>> createJokbo(
             @PathVariable("userIndex") @NotNull Long userIndex,
             @RequestPart(value = "request") @Valid CreateJokboRequest request,
-            @RequestPart(required = false) List<MultipartFile> images) throws IOException {
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws IOException {
 
         // 세션 체크하기.
         AuthorizationService.checkSession(userIndex);
@@ -90,6 +91,7 @@ public class JokboApiController {
         jokbo.setTitle(request.getTitle());
         jokbo.setContents(request.getContents());
 
+        System.out.println("여기야");
         System.out.println(images);
 
         jokboService.createJokbo(jokbo, images);
