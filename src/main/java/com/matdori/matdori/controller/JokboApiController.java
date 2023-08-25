@@ -70,7 +70,7 @@ public class JokboApiController {
     public ResponseEntity<Response<Void>> createJokbo(
             @PathVariable("userIndex") @NotNull Long userIndex,
             @RequestPart(value = "request") @Valid CreateJokboRequest request,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws IOException {
+            @RequestPart(required = false) List<MultipartFile> images) throws IOException {
 
         // 세션 체크하기.
         AuthorizationService.checkSession(userIndex);
@@ -91,9 +91,8 @@ public class JokboApiController {
         jokbo.setContents(request.getContents());
 
         System.out.println(images);
-        List<MultipartFile> uploadImages = images;
 
-        jokboService.createJokbo(jokbo, uploadImages);
+        jokboService.createJokbo(jokbo, images);
 
         return ResponseEntity.ok()
                 .body(Response.success(null));
