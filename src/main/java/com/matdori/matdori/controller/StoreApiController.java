@@ -1,10 +1,7 @@
 package com.matdori.matdori.controller;
 
 import com.matdori.matdori.domain.*;
-import com.matdori.matdori.repositoy.Dto.RecommendedMenu;
-import com.matdori.matdori.repositoy.Dto.RecommendedStore;
-import com.matdori.matdori.repositoy.Dto.StoreInformationHeader;
-import com.matdori.matdori.repositoy.Dto.StoreListByCategory;
+import com.matdori.matdori.repositoy.Dto.*;
 import com.matdori.matdori.service.AuthorizationService;
 import com.matdori.matdori.service.StoreService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -253,6 +250,23 @@ public class StoreApiController {
         List<RecommendedMenu> recommendedMenu = storeService.getRecommendedMenu();
         return ResponseEntity.ok().body(Response.success(
                 recommendedMenu
+        ));
+    }
+
+    /**
+     * 맛도리 top 3
+     */
+    @Operation(summary = "맛도리 top 3", description = "맛도리 top 3 리스트를 받습니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
+    })
+    @Parameter(name = "order", description = "정렬값 (별점, 음식 맛, 가성비, 청결)", required = true)
+    @GetMapping("/matdori-top3")
+    public ResponseEntity<Response<List<MatdoriTop3>>> getMatdoriTop3(@RequestParam("order")String order){
+        List<MatdoriTop3> matdoriTop3 = storeService.getMatdoriTop3(order);
+        return ResponseEntity.ok().body(Response.success(
+                matdoriTop3
         ));
     }
 

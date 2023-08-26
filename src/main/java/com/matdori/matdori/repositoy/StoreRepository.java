@@ -175,7 +175,7 @@ public class StoreRepository {
 
     public List<RecommendedMenu> getRecommendedMenu() {
         // 한 번에 가져오도록 쿼리를 날리면 불필요하게 join이 많이 돼서 쿼리를 쪼갰음.
-        
+
         // 첫 번째 쿼리: 가게와 메뉴를 가져오는 쿼리
         TypedQuery<Object[]> menuQuery = em.createQuery(
                         "SELECT s.id, s.name, m.name, s.imgUrl, m.category.id " +
@@ -227,5 +227,43 @@ public class StoreRepository {
 
         return recommendedMenus;
 
+    }
+
+    /***
+     * private Long storeIndex;
+     *     private String name;
+     *     private Double totalRating;
+     *     private Double flavorRating;
+     *     private Double cleanRating;
+     *     private Double underPricedRating;
+     *     private String imgUrl;
+     
+     */
+
+    public List<MatdoriTop3> getMatdoriTop3(String order){
+        // order를 enum으로 바꾸는 작업 필요
+        // 진짜 개별로군..
+        String orderByClause = "ORDER BY (AVG(j.flavorRating) + AVG(j.cleanRating) + AVG(j.underPricedRating)) / 3 DESC";
+
+        switch (order){
+            case "음식 맛" :
+                orderByClause = "ORDER BY AVG(j.flavorRating) DESC";
+                break;
+            case "가성비" :
+                orderByClause = "ORDER BY AVG(j.underPricedRating) DESC";
+                break;
+            case "청결" :
+                orderByClause = "ORDER BY AVG(j.cleanRating) DESC";
+        }
+
+        return em.createQuery(
+                "SELECT new com.matdori.matdori.repositoy.Dto.MatdoriTop3" +
+                        "(s.id, s.name, " +
+                        "AVG(j.flavorRating), AVG(j.cleanRating), AVG(j.underPricedRating), s.imgUrl) " +
+                        "FROM Store s LEFT JOIN s.jokbos j " +
+                        "GROUP BY s.id, s.name, s.imgUrl " +
+                        orderByClause + " NULLS LAST ", MatdoriTop3.class
+        ).setMaxResults(3)
+                .getResultList();
     }
 }
