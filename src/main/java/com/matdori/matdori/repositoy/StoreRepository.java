@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -163,7 +164,7 @@ public class StoreRepository {
     public List<RecommendedStore> getRecommendedStore(){
         return em.createQuery(
                         "SELECT new com.matdori.matdori.repositoy.Dto.RecommendedStore(s.id, s.name, s.imgUrl, AVG(j.flavorRating), AVG(j.underPricedRating),AVG(j.cleanRating)) " +
-                                "FROM Store s JOIN s.jokbos j " +
+                                "FROM Store s LEFT JOIN s.jokbos j " +
                                 "WHERE s.category NOT IN :categories " +
                                 "GROUP BY s.id, s.name, s.imgUrl " +
                                 "ORDER BY RANDOM()", RecommendedStore.class)
@@ -172,17 +173,59 @@ public class StoreRepository {
                 .getResultList();
     }
 
-    public List<RecommendedMenu> getRecommendedMenu(){
-
-        return em.createQuery(
-                        "SELECT new com.matdori.matdori.repositoy.Dto.RecommendedMenu(s.id, s.name,  m.name, s.imgUrl, AVG(j.flavorRating), AVG(j.underPricedRating),AVG(j.cleanRating)) " +
-                                "FROM Store s JOIN s.jokbos j ON s.category NOT IN :categories " +
-                                "JOIN FETCH Category c ON c.store.id = s.id " +
-                                "JOIN FETCH Menu m ON c.id = m.category.id " +
-                                "GROUP BY s.id, s.name, s.imgUrl, m.name " +
-                                "ORDER BY RANDOM()", RecommendedMenu.class)
+    public List<RecommendedMenu> getRecommendedMenu() {
+        // 한 번에 가져오도록 쿼리를 날리면 불필요하게 join이 많이 돼서 쿼리를 쪼갰음.
+        
+        // 첫 번째 쿼리: 가게와 메뉴를 가져오는 쿼리
+        TypedQuery<Object[]> menuQuery = em.createQuery(
+                        "SELECT s.id, s.name, m.name, s.imgUrl, m.category.id " +
+                                "FROM Store s " +
+                                "JOIN Category c ON c.store.id = s.id " +
+                                "JOIN Menu m ON c.id = m.category.id " +
+                                "WHERE s.category NOT IN :categories " +
+                                "ORDER BY RANDOM()",
+                        Object[].class)
                 .setParameter("categories", Arrays.asList(StoreCategory.ETC, StoreCategory.DESSERT_COFFEE, StoreCategory.MEAL_KIT, StoreCategory.PUB))
-                .setMaxResults(3)
-                .getResultList();
+                .setMaxResults(3);
+
+        // 첫 번째 쿼리 실행
+        List<Object[]> menuResults = menuQuery.getResultList();
+
+        // 두 번째 쿼리: 족보의 평균값을 가져오는 쿼리
+        TypedQuery<Object[]> jokboQuery = em.createQuery(
+                        "SELECT s.id, AVG(j.flavorRating), AVG(j.underPricedRating), AVG(j.cleanRating) " +
+                                "FROM Store s " +
+                                "LEFT JOIN s.jokbos j " +
+                                "WHERE s.id IN :storeIds " +
+                                "GROUP BY s.id",
+                        Object[].class)
+                .setParameter("storeIds", menuResults.stream()
+                        .map(data -> (Long) data[0])
+                        .collect(Collectors.toList()));
+
+        // 두 번째 쿼리 실행
+        List<Object[]> jokboResults = jokboQuery.getResultList();
+
+        // 결과를 합쳐서 RecommendedMenu 리스트 생성
+        List<RecommendedMenu> recommendedMenus = new ArrayList<>();
+        for (int i = 0; i < menuResults.size(); i++) {
+            Object[] menuData = menuResults.get(i);
+            Object[] jokboData = jokboResults.get(i);
+
+            RecommendedMenu recommendedMenu = new RecommendedMenu(
+                    (Long) menuData[0],
+                    (String) menuData[1],
+                    (String) menuData[2],
+                    (String) menuData[3],
+                    (Double) jokboData[1],
+                    (Double) jokboData[2],
+                    (Double) jokboData[3]
+            );
+
+            recommendedMenus.add(recommendedMenu);
+        }
+
+        return recommendedMenus;
+
     }
 }
