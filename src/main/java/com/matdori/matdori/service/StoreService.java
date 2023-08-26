@@ -3,6 +3,7 @@ package com.matdori.matdori.service;
 import com.matdori.matdori.domain.*;
 import com.matdori.matdori.exception.ErrorCode;
 import com.matdori.matdori.exception.NotExistStoreException;
+import com.matdori.matdori.repositoy.Dto.MatdoriTop3;
 import com.matdori.matdori.repositoy.Dto.RecommendedMenu;
 import com.matdori.matdori.repositoy.Dto.RecommendedStore;
 import com.matdori.matdori.repositoy.Dto.StoreInformationHeader;
@@ -109,4 +110,10 @@ public class StoreService {
      * 메뉴 추천 받기
      */
     public List<RecommendedMenu> getRecommendedMenu() {return storeRepository.getRecommendedMenu();}
+
+    /**
+     * 맛도리 top 3
+     */
+
+    public List<MatdoriTop3> getMatdoriTop3(String order) { return storeRepository.getMatdoriTop3(order);}
 }
