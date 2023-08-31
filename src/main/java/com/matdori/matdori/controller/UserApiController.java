@@ -653,7 +653,7 @@ public class UserApiController {
             @PathVariable("favoriteCommentIndex") Long favoriteCommentId){
 
         // 세션 체크
-        //AuthorizationService.checkSession(userId);
+        AuthorizationService.checkSession(userId);
 
         userService.deleteFavoriteComment(favoriteCommentId, userId);
         return ResponseEntity.ok()

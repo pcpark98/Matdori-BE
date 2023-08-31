@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -36,5 +37,21 @@ public class JokboCommentFavoriteRepository {
      */
     public void delete(Long id) {
         em.remove(em.find(JokboCommentFavorite.class, id));
+    }
+
+    /**
+     * 유저가 족보 댓글에 좋아요를 눌렀는지 여부 확인
+     */
+    public Optional<JokboCommentFavorite> findByIds(Long userId, Long commentId) {
+
+        List<JokboCommentFavorite> jokboCommentFavorite = em.createQuery(
+                        "SELECT f FROM JokboCommentFavorite f " +
+                                "WHERE f.user.id =: userId " +
+                                "AND f.jokboComment.id =: commentId ", JokboCommentFavorite.class)
+                .setParameter("userId", userId)
+                .setParameter("commentId", commentId)
+                .getResultList();
+
+        return jokboCommentFavorite.stream().findAny();
     }
 }

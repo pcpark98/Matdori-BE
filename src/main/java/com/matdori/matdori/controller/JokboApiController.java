@@ -254,7 +254,11 @@ public class JokboApiController {
     public ResponseEntity<Response<ReadJokboCommentResponse>> getAllJokboComments (
             @PathVariable("jokboIndex") Long jokboId,
             @RequestParam(value = "order", required = false) String order,
-            @RequestParam(value = "cursor", required = false) Long cursor) {
+            @RequestParam(value = "cursor", required = false) Long cursor,
+            @RequestBody @Valid GetAllJokboCommentsRequest request) {
+
+        // 세션 체크하기
+        AuthorizationService.checkSession(request.getUserIndex());
 
         Boolean hasNext = true;
         List<JokboComment> jokboComments = jokboService.getAllJokboComments(jokboId, cursor);
@@ -265,7 +269,9 @@ public class JokboApiController {
                         c.getContents(),
                         c.getIsDeleted(),
                         c.getUser().getId(),
-                        c.getUser().getNickname()))
+                        c.getUser().getNickname(),
+                        userService.getFavoriteCommentId(request.getUserIndex(), c.getId())
+                ))
                 .collect(Collectors.toList());
 
         if(comment_list.size() != 14) {
@@ -478,6 +484,8 @@ public class JokboApiController {
 
         Long userIndex;
         String nickname;
+
+        Long commentFavoriteId;
     }
 
     /**
@@ -526,5 +534,15 @@ public class JokboApiController {
     @Data
     static class DeleteJokboCommentRequest {
         private List<Long> jokboCommentIdList;
+    }
+
+    /**
+     * 족보 댓글 조회하기 요청을 위한 DTO
+     */
+    @Data
+    static class GetAllJokboCommentsRequest {
+
+        @NotNull
+        private Long userIndex;
     }
 }
