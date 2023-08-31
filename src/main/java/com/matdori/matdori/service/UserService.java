@@ -28,6 +28,7 @@ public class UserService {
     private final JokboFavoriteRepository jokboFavoriteRepository;
     private final TermsAgreementRepository termsAgreementRepository;
     private final TermsOfServiceRepository termsOfServiceRepository;
+    private final JokboCommentFavoriteRepository jokboCommentFavoriteRepository;
 
     public User findOne(Long userId) { return userRepository.findOne(userId); }
 
@@ -202,6 +203,18 @@ public class UserService {
         Optional<JokboFavorite> jokboFavorite = jokboFavoriteRepository.findByIds(userId, jokboId);
         if(!jokboFavorite.isPresent()) return null;
         else return jokboFavorite.get().getId();
+    }
+
+    /**
+     * 족보에 댓글에 좋아요 누르기
+     */
+    @Transactional
+    public Long createFavoriteComment(Long commentId, Long userId){
+        User user = userRepository.findOne(userId);
+
+        Optional<JokboComment> jokboComment = jokboCommentRepository.findOne(commentId);
+        if(jokboComment.isPresent()) return jokboCommentFavoriteRepository.save(new JokboCommentFavorite(jokboComment.get(), user));
+        else throw new NotExistedJokboCommentException(ErrorCode.NOT_EXISTED_JOKBO_COMMENT);
     }
 
     // 개발 시에 사용할 유저삭제 api
