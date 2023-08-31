@@ -217,6 +217,23 @@ public class UserService {
         else throw new NotExistedJokboCommentException(ErrorCode.NOT_EXISTED_JOKBO_COMMENT);
     }
 
+    /**
+     * 족보 댓글 좋아요 취소
+     */
+    @Transactional
+    public void deleteFavoriteComment(Long favoriteCommentId, Long userId) {
+
+        Optional<JokboCommentFavorite> jokboCommentFavorite = jokboCommentFavoriteRepository.findOne(favoriteCommentId);
+        if(!jokboCommentFavorite.isPresent()) throw new NotExistedJokboCommentFavoriteException(ErrorCode.NOT_EXISTED_JOKBO_COMMENT_FAVORITE);
+
+        if(!jokboCommentFavorite.get().getUser().getId().equals(userId)) {
+            // 다른 사람의 댓글 좋아요를 취소하려고 하는 경우.
+            throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
+        }
+
+        jokboCommentFavoriteRepository.delete(favoriteCommentId);
+    }
+
     // 개발 시에 사용할 유저삭제 api
     @Transactional
     public void deleteUser(Long userId){

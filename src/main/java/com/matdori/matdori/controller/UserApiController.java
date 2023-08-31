@@ -630,6 +630,36 @@ public class UserApiController {
                 ));
     }
 
+    /**
+     * 내가 좋아요한 족보 댓글 삭제하기.
+     */
+    @Operation(summary = "내가 좋아요 누른 댓글 삭제 API", description = "유저가 족보 댓글에 좋아요 누른 것을 취소합니다.")
+    @Parameters({
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
+            @Parameter(name = "userIndex", description = "유저 id"),
+            @Parameter(name = "favoriteCommentIndex", description = "족보 댓글 좋아요 id")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "좋아요 하지 않은 댓글에 대한 삭제(NOT_EXISTED_JOKBO_COMMENT_FAVORITE)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
+    })
+    @DeleteMapping("/users/{userIndex}/favorite-comment/{favoriteCommentIndex}")
+    public ResponseEntity<Response<Void>> deleteFavoriteJokbo(
+            @PathVariable("userIndex") Long userId,
+            @PathVariable("favoriteCommentIndex") Long favoriteCommentId){
+
+        // 세션 체크
+        //AuthorizationService.checkSession(userId);
+
+        userService.deleteFavoriteComment(favoriteCommentId, userId);
+        return ResponseEntity.ok()
+                .body(Response.success(null));
+    }
+
     @Data
     static class LoginRequest{
         @NotNull
