@@ -270,7 +270,8 @@ public class JokboApiController {
                         c.getIsDeleted(),
                         c.getUser().getId(),
                         c.getUser().getNickname(),
-                        userService.getFavoriteCommentId(request.getUserIndex(), c.getId())
+                        userService.getFavoriteCommentId(request.getUserIndex(), c.getId()),
+                        c.getJokboCommentFavorites().size()
                 ))
                 .collect(Collectors.toList());
 
@@ -486,6 +487,7 @@ public class JokboApiController {
         String nickname;
 
         Long commentFavoriteId;
+        int commentFavoriteCnt;
     }
 
     /**

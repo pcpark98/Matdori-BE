@@ -24,9 +24,9 @@ public class Store {
     @Size(max = 30)
     private String name;
 
-    @NotBlank
-    @Column(length =20)
-    @Size(max = 20)
+    //@NotBlank
+    //@Column(length =20)
+    //@Size(max = 20)
     @Enumerated(EnumType.STRING)
     private StoreCategory category;
 
