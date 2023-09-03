@@ -24,12 +24,8 @@ public class Store {
     @Size(max = 30)
     private String name;
 
-    //@NotBlank
-    //@Column(length =20)
-    //@Size(max = 20)
     @Enumerated(EnumType.STRING)
     private StoreCategory category;
-
 
     @Column(name = "phone_number", length = 15)
     private String phoneNumber;
