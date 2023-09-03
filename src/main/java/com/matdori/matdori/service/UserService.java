@@ -28,6 +28,7 @@ public class UserService {
     private final JokboFavoriteRepository jokboFavoriteRepository;
     private final TermsAgreementRepository termsAgreementRepository;
     private final TermsOfServiceRepository termsOfServiceRepository;
+    private final JokboCommentFavoriteRepository jokboCommentFavoriteRepository;
 
     public User findOne(Long userId) { return userRepository.findOne(userId); }
 
@@ -202,6 +203,45 @@ public class UserService {
         Optional<JokboFavorite> jokboFavorite = jokboFavoriteRepository.findByIds(userId, jokboId);
         if(!jokboFavorite.isPresent()) return null;
         else return jokboFavorite.get().getId();
+    }
+
+    /**
+     * 족보에 댓글에 좋아요 누르기
+     */
+    @Transactional
+    public Long createFavoriteComment(Long commentId, Long userId){
+        User user = userRepository.findOne(userId);
+
+        Optional<JokboComment> jokboComment = jokboCommentRepository.findOne(commentId);
+        if(jokboComment.isPresent()) return jokboCommentFavoriteRepository.save(new JokboCommentFavorite(jokboComment.get(), user));
+        else throw new NotExistedJokboCommentException(ErrorCode.NOT_EXISTED_JOKBO_COMMENT);
+    }
+
+    /**
+     * 족보 댓글 좋아요 취소
+     */
+    @Transactional
+    public void deleteFavoriteComment(Long favoriteCommentId, Long userId) {
+
+        Optional<JokboCommentFavorite> jokboCommentFavorite = jokboCommentFavoriteRepository.findOne(favoriteCommentId);
+        if(!jokboCommentFavorite.isPresent()) throw new NotExistedJokboCommentFavoriteException(ErrorCode.NOT_EXISTED_JOKBO_COMMENT_FAVORITE);
+
+        if(!jokboCommentFavorite.get().getUser().getId().equals(userId)) {
+            // 다른 사람의 댓글 좋아요를 취소하려고 하는 경우.
+            throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
+        }
+
+        jokboCommentFavoriteRepository.delete(favoriteCommentId);
+    }
+
+    /**
+     * 유저가 족보 댓글에 좋아요를 눌렀는지 확인하기.
+     */
+    public Long getFavoriteCommentId(Long userId, Long commentId) {
+
+        Optional<JokboCommentFavorite> jokboCommentFavorite = jokboCommentFavoriteRepository.findByIds(userId, commentId);
+        if(!jokboCommentFavorite.isPresent()) return null;
+        else return jokboCommentFavorite.get().getId();
     }
 
     // 개발 시에 사용할 유저삭제 api

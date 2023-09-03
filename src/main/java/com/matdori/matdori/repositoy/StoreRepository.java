@@ -7,6 +7,7 @@ import com.matdori.matdori.domain.StoreCategory;
 import com.matdori.matdori.repositoy.Dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -265,5 +266,9 @@ public class StoreRepository {
                         orderByClause + " NULLS LAST ", MatdoriTop3.class
         ).setMaxResults(3)
                 .getResultList();
+    }
+
+    public void save(Store store) {
+        em.persist(store);
     }
 }

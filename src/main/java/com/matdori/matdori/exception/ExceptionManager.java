@@ -173,4 +173,10 @@ public class ExceptionManager {
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(Response.error(e.getErrorCode().name()));
     }
+
+    @ExceptionHandler(NotExistedJokboCommentFavoriteException.class)
+    public ResponseEntity<?> notExistedJokboCommentFavoriteException(NotExistedJokboCommentFavoriteException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
 }

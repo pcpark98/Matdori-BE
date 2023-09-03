@@ -601,7 +601,64 @@ public class UserApiController {
         return ResponseEntity.ok().body(Response.success(new ReadUserEmailResponse(user.getEmail())));
     }
 
+    /**
+     * 족보 댓글에 좋아요 누르기.
+     */
+    @Operation(summary = "족보 댓글에 좋아요 누르기 API", description = "유저가 족보 댓글에 대해 좋아요를 눌러 저장합니다.")
+    @Parameters({
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
+            @Parameter(name = "userIndex", description = "유저 id", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 족보 댓글(NOT_EXISTED_JOKBO_COMMENT)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
+    })
+    @PostMapping("/users/{userIndex}/favorite-comment")
+    public ResponseEntity<Response<CreateFavoriteCommentResponse>> createFavoriteComment(@RequestBody @Valid CreateFavoriteCommentRequest request,
+                                                                                     @PathVariable("userIndex") Long userId){
+        // 세션 체크
+        AuthorizationService.checkSession(userId);
 
+        Long favoriteCommentId =  userService.createFavoriteComment(request.getCommentId(), userId);
+        return ResponseEntity.ok()
+                .body(Response.success(
+                        new CreateFavoriteCommentResponse(favoriteCommentId)
+                ));
+    }
+
+    /**
+     * 내가 좋아요한 족보 댓글 삭제하기.
+     */
+    @Operation(summary = "내가 좋아요 누른 댓글 삭제 API", description = "유저가 족보 댓글에 좋아요 누른 것을 취소합니다.")
+    @Parameters({
+            @Parameter(name = "sessionId", description = "세션 id", in = ParameterIn.COOKIE),
+            @Parameter(name = "userIndex", description = "유저 id"),
+            @Parameter(name = "favoriteCommentIndex", description = "족보 댓글 좋아요 id")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터 누락(INVALID_REQUIRED_PARAM) <br> 쿠키 누락(INVALID_REQUIRED_COOKIE) <br> ", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "401", description = "세션 만료(EXPIRED_SESSION)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "403", description = "접근할 수 없는 resource(INSUFFICIENT_PRIVILEGES)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "404", description = "좋아요 하지 않은 댓글에 대한 삭제(NOT_EXISTED_JOKBO_COMMENT_FAVORITE)", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
+    })
+    @DeleteMapping("/users/{userIndex}/favorite-comment/{favoriteCommentIndex}")
+    public ResponseEntity<Response<Void>> deleteFavoriteJokbo(
+            @PathVariable("userIndex") Long userId,
+            @PathVariable("favoriteCommentIndex") Long favoriteCommentId){
+
+        // 세션 체크
+        AuthorizationService.checkSession(userId);
+
+        userService.deleteFavoriteComment(favoriteCommentId, userId);
+        return ResponseEntity.ok()
+                .body(Response.success(null));
+    }
 
     @Data
     static class LoginRequest{
@@ -831,5 +888,17 @@ public class UserApiController {
     @Data
     static class DeleteFavoriteStoreRequest{
         private List<Long> favoriteStoresId;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class CreateFavoriteCommentResponse {
+        private Long favoriteCommentId;
+    }
+
+    @Data
+    static class CreateFavoriteCommentRequest{
+        @NotNull
+        private Long commentId;
     }
 }
