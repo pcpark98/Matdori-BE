@@ -1,5 +1,6 @@
 package com.matdori.matdori.config;
 
+import com.matdori.matdori.service.AuthorizationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -32,6 +33,7 @@ public class SecurityConfig {
                 .and()
                 .logout(logout -> logout.permitAll() // disable logout redirect
                         .addLogoutHandler((request, response, authentication) -> {
+                            AuthorizationService.logout();
                             // 사실 굳이 내가 세션 무효화하지 않아도 됨.
                             // LogoutFilter가 내부적으로 해줌.
                             HttpSession session = request.getSession();
