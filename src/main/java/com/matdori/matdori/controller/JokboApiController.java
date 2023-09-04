@@ -243,6 +243,7 @@ public class JokboApiController {
      */
     @Operation(summary = "족보에 달린 모든 댓글 조회 API", description = "족보 게시글에 달린 모든 댓글들을 조회합니다.")
     @Parameters({
+            @Parameter(name = "userIndex", description = "유저 id", required = true, in = ParameterIn.HEADER),
             @Parameter(name = "jokboIndex", description = "족보 id", required = true),
             @Parameter(name = "order", description = "정렬값", required = true),
             @Parameter(name = "cursor", description = "처음 null, 이후 요청부터 마지막 jokboId", required = true)
@@ -255,13 +256,13 @@ public class JokboApiController {
     })
     @GetMapping("/jokbos/{jokboIndex}/comments")
     public ResponseEntity<Response<ReadJokboCommentResponse>> getAllJokboComments (
+            @RequestHeader("userIndex") @NotNull Long userId,
             @PathVariable("jokboIndex") Long jokboId,
             @RequestParam(value = "order", required = false) String order,
-            @RequestParam(value = "cursor", required = false) Long cursor,
-            @RequestBody @Valid GetAllJokboCommentsRequest request) {
+            @RequestParam(value = "cursor", required = false) Long cursor) {
 
         // 세션 체크하기
-        AuthorizationService.checkSession(request.getUserIndex());
+        AuthorizationService.checkSession(userId);
 
         Boolean hasNext = true;
         List<JokboComment> jokboComments = jokboService.getAllJokboComments(jokboId, cursor);
@@ -273,9 +274,9 @@ public class JokboApiController {
                         c.getIsDeleted(),
                         c.getUser().getId(),
                         c.getUser().getNickname(),
-                        userService.getFavoriteCommentId(request.getUserIndex(), c.getId()),
+                        userService.getFavoriteCommentId(userId, c.getId()),
                         c.getJokboCommentFavorites().size(),
-                        userService.checkIsWritten(c.getUser().getId(), request.getUserIndex())
+                        userService.checkIsWritten(c.getUser().getId(), userId)
                 ))
                 .collect(Collectors.toList());
 
@@ -543,15 +544,5 @@ public class JokboApiController {
     @Data
     static class DeleteJokboCommentRequest {
         private List<Long> jokboCommentIdList;
-    }
-
-    /**
-     * 족보 댓글 조회하기 요청을 위한 DTO
-     */
-    @Data
-    static class GetAllJokboCommentsRequest {
-
-        @NotNull
-        private Long userIndex;
     }
 }
