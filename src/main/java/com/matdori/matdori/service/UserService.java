@@ -245,7 +245,7 @@ public class UserService {
     }
 
     /**
-     * 주어진 족보가 조회한 유저가 작성한 것인지 확인하기
+     * 유저가 작성한 것인지 확인하기
      */
     public boolean checkIsWritten(Long authorId, Long readerId) {
 

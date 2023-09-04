@@ -274,7 +274,8 @@ public class JokboApiController {
                         c.getUser().getId(),
                         c.getUser().getNickname(),
                         userService.getFavoriteCommentId(request.getUserIndex(), c.getId()),
-                        c.getJokboCommentFavorites().size()
+                        c.getJokboCommentFavorites().size(),
+                        userService.checkIsWritten(c.getUser().getId(), request.getUserIndex())
                 ))
                 .collect(Collectors.toList());
 
@@ -492,6 +493,8 @@ public class JokboApiController {
 
         Long commentFavoriteId;
         int commentFavoriteCnt;
+
+        boolean isWrittenBy;
     }
 
     /**
