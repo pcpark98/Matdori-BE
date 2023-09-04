@@ -244,6 +244,15 @@ public class UserService {
         else return jokboCommentFavorite.get().getId();
     }
 
+    /**
+     * 유저가 작성한 것인지 확인하기
+     */
+    public boolean checkIsWritten(Long authorId, Long readerId) {
+
+        if(!authorId.equals(readerId)) return false;
+        else return true;
+    }
+
     // 개발 시에 사용할 유저삭제 api
     @Transactional
     public void deleteUser(Long userId){

@@ -129,6 +129,8 @@ public class JokboApiController {
         com.matdori.matdori.repositoy.Dto.StoreRatings ratings = storeService.getAllRatings(jokbo.getStore());
         List<String> jokboImgUrls = jokboService.getImageUrls(jokbo.getJokboImgs());
         int jokboCommentCnt = jokbo.getJokboComments().size();
+        boolean isWrittenBy = userService.checkIsWritten(jokbo.getUser().getId(), userId);
+
 
         return ResponseEntity.ok().body(
                 Response.success(
@@ -146,7 +148,8 @@ public class JokboApiController {
                                 jokboFavoriteId,
                                 jokbo.getCreatedAt(),
                                 jokboImgUrls,
-                                jokboCommentCnt
+                                jokboCommentCnt,
+                                isWrittenBy
                         )
                 )
         );
@@ -271,7 +274,8 @@ public class JokboApiController {
                         c.getUser().getId(),
                         c.getUser().getNickname(),
                         userService.getFavoriteCommentId(request.getUserIndex(), c.getId()),
-                        c.getJokboCommentFavorites().size()
+                        c.getJokboCommentFavorites().size(),
+                        userService.checkIsWritten(c.getUser().getId(), request.getUserIndex())
                 ))
                 .collect(Collectors.toList());
 
@@ -458,6 +462,7 @@ public class JokboApiController {
         List<String> jokboImgUrlList;
 
         int jokboCommentCnt;
+        boolean isWrittenBy;
     }
 
     /**
@@ -488,6 +493,8 @@ public class JokboApiController {
 
         Long commentFavoriteId;
         int commentFavoriteCnt;
+
+        boolean isWrittenBy;
     }
 
     /**
