@@ -148,4 +148,56 @@ public class UserServiceTest {
         // then
         assertNull(favoriteCommentIdAfterDelete);
     }
+
+
+    @Test
+    public void 족보의_작성자_확인하기() {
+
+        // given
+
+        // 유저 정보 저장
+        User user = new User();
+        user.setEmail("matdori@gmail.com");
+        user.setPassword("1234");
+        user.setNickname("testNickname");
+        user.setDepartment(Department.COMPUTER_ENGINEERING);
+
+        User user2 = new User();
+        user2.setEmail("matdori2@gmail.com");
+        user2.setPassword("1234");
+        user2.setNickname("testNickname2");
+        user2.setDepartment(Department.INFORMATION_AND_COMMUNICATION_ENGINEERING);
+
+        userRepository.save(user);
+        userRepository.save(user2);
+
+
+        // 가게 정보 저장
+        Store store = new Store();
+        store.setName("가게 이름");
+        store.setCategory(StoreCategory.CHICKEN);
+        storeRepository.save(store);
+
+
+        // 족보 정보 저장
+        Jokbo jokbo = new Jokbo();
+        jokbo.setUser(user);
+        jokbo.setStore(store);
+        jokbo.setTitle("족보 제목");
+        jokbo.setContents("족보 내용");
+        jokbo.setFlavorRating(3);
+        jokbo.setUnderPricedRating(3);
+        jokbo.setCleanRating(3);
+        jokboRepository.save(jokbo);
+
+
+        // when
+        boolean userIsWritten = userService.checkIsWritten(jokbo.getUser().getId(), user.getId());
+        boolean user2IsWritten = userService.checkIsWritten(jokbo.getUser().getId(), user2.getId());
+
+
+        // then
+        assertEquals(true, userIsWritten);
+        assertEquals(false, user2IsWritten);
+    }
 }
