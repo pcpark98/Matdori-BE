@@ -1,9 +1,6 @@
 package com.matdori.matdori.repositoy;
 
-import com.matdori.matdori.domain.Category;
-import com.matdori.matdori.domain.Department;
-import com.matdori.matdori.domain.Store;
-import com.matdori.matdori.domain.StoreCategory;
+import com.matdori.matdori.domain.*;
 import com.matdori.matdori.repositoy.Dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -103,22 +100,87 @@ public class StoreRepository {
                 .getResultList();
     }
 
-    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(StoreCategory category, Long cursor){
+    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(StoreCategory category, Double cursor, SortingType sortingType, Long storeIndex){
+
+        if(sortingType.equals(SortingType.MOST_JOKBOS)){
+            return em.createQuery(
+                            "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByCategory(s.id, s.name, s.category, " +
+                                    "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl, s.jokbos.size) " +
+                                    "FROM Store s " +
+                                    "LEFT JOIN s.jokbos j " +
+                                    "WHERE s.category =:category AND (s.jokbos.size < :cursor OR (s.jokbos.size = :cursor AND s.id < : storeIndex)) " +
+                                    "GROUP BY s.name,s.category, s.id, s.imgUrl " +
+                                    "ORDER BY s.jokbos.size DESC, s.id DESC ", StoreListByCategory.class)
+                    .setParameter("category" , category)
+                    .setParameter("cursor", cursor.intValue())
+                    .setParameter("storeIndex", storeIndex)
+                    .setMaxResults(15)
+                    .getResultList();
+        }
+
+        if(sortingType.equals(SortingType.HIGHEST_RATING)){
+            return em.createQuery(
+                            "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByCategory(s.id, s.name, s.category, " +
+                                    "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl, s.jokbos.size) " +
+                                    "FROM Store s " +
+                                    "LEFT JOIN s.jokbos j " +
+                                    "WHERE s.category =:category " +
+                                    "GROUP BY s.name,s.category, s.id, s.imgUrl " +
+                                    "HAVING (AVG(j.flavorRating) + AVG(j.cleanRating) + AVG(j.underPricedRating))/3 < :cursor OR " +
+                                    "((AVG(j.flavorRating) + AVG(j.cleanRating) + AVG(j.underPricedRating))/3 = :cursor AND s.id < : storeIndex) " +
+                                    "ORDER BY AVG(j.flavorRating)+AVG(j.cleanRating)+AVG(j.underPricedRating) DESC, s.id DESC ", StoreListByCategory.class)
+                    .setParameter("category" , category)
+                    .setParameter("cursor", cursor)
+                    .setParameter("storeIndex", storeIndex)
+                    .setMaxResults(15)
+                    .getResultList();
+        }
+
         return em.createQuery(
                         "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByCategory(s.id, s.name, s.category, " +
                                 "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl, s.jokbos.size) " +
                                 "FROM Store s " +
                                 "LEFT JOIN s.jokbos j " +
-                                "WHERE s.category =:category AND s.id < :cursor " +
+                                "WHERE s.category =:category AND s.id < :storeIndex " +
                                 "GROUP BY s.name,s.category, s.id, s.imgUrl " +
                                 "ORDER BY s.id DESC ", StoreListByCategory.class)
                 .setParameter("category" , category)
-                .setParameter("cursor", cursor)
-                .setMaxResults(14)
+                .setParameter("storeIndex", storeIndex)
+                .setMaxResults(15)
                 .getResultList();
     }
 
-    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> getCategoryStoresDescendingById(StoreCategory category){
+    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> getCategoryStoresDescendingById(StoreCategory category, SortingType sortingType){
+
+        if(sortingType.equals(SortingType.HIGHEST_RATING)){
+            return em.createQuery(
+                            "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByCategory(s.id, s.name, s.category, " +
+                                    "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl, s.jokbos.size) " +
+                                    "FROM Store s " +
+                                    "LEFT JOIN s.jokbos j " +
+                                    "WHERE s.category =:category " +
+                                    "GROUP BY s.name,s.category, s.id, s.imgUrl " +
+                                    "ORDER BY AVG(j.flavorRating) + AVG(j.cleanRating) + AVG(j.underPricedRating) DESC, s.id DESC NULLS LAST ", StoreListByCategory.class)
+                    .setParameter("category" , category)
+                    .setMaxResults(15)
+                    .getResultList();
+        }
+
+        if(sortingType.equals(SortingType.MOST_JOKBOS)){
+            return em.createQuery(
+                            "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByCategory(s.id, s.name, s.category, " +
+                                    "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl, s.jokbos.size) " +
+                                    "FROM Store s " +
+                                    "LEFT JOIN s.jokbos j " +
+                                    "WHERE s.category =:category " +
+                                    "GROUP BY s.name,s.category, s.id, s.imgUrl " +
+                                    "ORDER BY s.jokbos.size DESC, s.id DESC NULLS LAST ", StoreListByCategory.class)
+                    .setParameter("category" , category)
+                    .setMaxResults(15)
+                    .getResultList();
+        }
+
+        //if(sortingType.equals(SortingType.LASTEST))
         return em.createQuery(
                         "SELECT new com.matdori.matdori.repositoy.Dto.StoreListByCategory(s.id, s.name, s.category, " +
                                 "AVG(j.flavorRating) , AVG(j.cleanRating) ,AVG(j.underPricedRating), s.imgUrl, s.jokbos.size) " +
@@ -128,7 +190,7 @@ public class StoreRepository {
                                 "GROUP BY s.name,s.category, s.id, s.imgUrl " +
                                 "ORDER BY s.id DESC ", StoreListByCategory.class)
                 .setParameter("category" , category)
-                .setMaxResults(14)
+                .setMaxResults(15)
                 .getResultList();
     }
 
