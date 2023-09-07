@@ -1,6 +1,7 @@
 package com.matdori.matdori.repositoy;
 
 import com.matdori.matdori.domain.Jokbo;
+import com.matdori.matdori.domain.SortingType;
 import com.matdori.matdori.domain.Store;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -82,23 +83,71 @@ public class JokboRepository {
                 .getResultList();
     }
 
-    public List<Jokbo> findByStoreIndex(Long storeId){
+    public List<Jokbo> findByStoreIndex(Long storeId, SortingType sortingType){
+
+        if(sortingType.equals(SortingType.HIGHEST_RATING)){
+            return em.createQuery(
+                            "SELECT j FROM Jokbo j " +
+                                    "WHERE j.store.id =: storeId " +
+                                    "ORDER BY j.underPricedRating + j.cleanRating + j.flavorRating DESC, j.id DESC", Jokbo.class)
+                    .setParameter("storeId", storeId)
+                    .setMaxResults(15)
+                    .getResultList();
+        }
+
+        if(sortingType.equals(SortingType.MOST_FAVORITES)){
+            return em.createQuery(
+                            "SELECT j FROM Jokbo j " +
+                                    "WHERE j.store.id =: storeId " +
+                                    "ORDER BY j.jokboFavorites.size DESC, j.id DESC ", Jokbo.class)
+                    .setParameter("storeId", storeId)
+                    .setMaxResults(15)
+                    .getResultList();
+        }
+
+        //if(sortingType.equals(SortingType.LASTEST))
         return em.createQuery(
                 "SELECT j FROM Jokbo j " +
                         "WHERE j.store.id =: storeId " +
                         "ORDER BY j.id DESC ", Jokbo.class)
                 .setParameter("storeId", storeId)
-                .setMaxResults(14)
+                .setMaxResults(15)
                 .getResultList();
     }
-    public List<Jokbo> findJokbosDescendingById(Long storeId, Long cursor){
+    public List<Jokbo> findJokbosDescendingById(Long storeId, Double cursor, SortingType sortingType, Long jokboId){
+        if(sortingType.equals(SortingType.HIGHEST_RATING)){
+            return em.createQuery(
+                            "SELECT j FROM Jokbo j " +
+                                    "WHERE j.store.id =: storeId AND (1.0 * j.underPricedRating + j.cleanRating + j.flavorRating)/3 < :cursor " +
+                                    "OR ((1.0 * j.underPricedRating + j.cleanRating + j.flavorRating)/3 =:cursor AND j.id <: jokboId) " +
+                                    "ORDER BY j.underPricedRating + j.cleanRating + j.flavorRating DESC, j.id DESC ", Jokbo.class)
+                    .setParameter("storeId", storeId)
+                    .setParameter("cursor", cursor)
+                    .setParameter("jokboId", jokboId)
+                    .setMaxResults(15)
+                    .getResultList();
+        }
+
+        if(sortingType.equals(SortingType.MOST_FAVORITES)){
+            return em.createQuery(
+                            "SELECT j FROM Jokbo j " +
+                                    "WHERE j.store.id =: storeId AND j.jokboFavorites.size < :cursor OR (j.jokboFavorites.size = :cursor AND j.id < :jokboId) " +
+                                    "ORDER BY j.jokboFavorites.size DESC, j.id DESC ", Jokbo.class)
+                    .setParameter("storeId", storeId)
+                    .setParameter("cursor",  cursor.intValue())
+                    .setParameter("jokboId", jokboId)
+                    .setMaxResults(15)
+                    .getResultList();
+        }
+
+        //if(sortingType.equals(SortingType.LASTEST))
         return em.createQuery(
                         "SELECT j FROM Jokbo j " +
-                                "WHERE j.store.id =: storeId AND j.id < :cursor " +
+                                "WHERE j.store.id =: storeId AND j.id < :jokboId " +
                                 "ORDER BY j.id DESC ", Jokbo.class)
                 .setParameter("storeId", storeId)
-                .setParameter("cursor", cursor)
-                .setMaxResults(14)
+                .setParameter("jokboId", jokboId)
+                .setMaxResults(15)
                 .getResultList();
     }
 

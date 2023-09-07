@@ -104,7 +104,8 @@ public class StoreApiController {
     @Parameters({
             @Parameter(name = "storeIndex", description = "가게 id", required = true),
             @Parameter(name = "cursor", description = "첫 요청 시엔 null, 이후 요청 시 마지막 row값의 id", required = false),
-            @Parameter(name = "order", description = "최신순, 별점 높은 순", required = true)
+            @Parameter(name = "sortingType", description = "최신순, 별점 높은 순, 좋아요 많은 순", required = true),
+            @Parameter(name = "jokboIndex", description = "첫 요청 시엔 null, 족보 id", required = false)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -114,26 +115,33 @@ public class StoreApiController {
     })
     @GetMapping("/stores/{storeIndex}/jokbos")
     public ResponseEntity<Response<ReadAllJokboResponse>> readAllJokbo(@PathVariable("storeIndex") Long storeIndex,
-                                                                      @RequestParam(value = "cursor", required = false) Long cursor,
-                                                                       @RequestParam ("order") String order){
-        Boolean hasNext = true;
-        // 총 족보수 api 만들어야 됨
-        List<Jokbo> jokbos = storeService.findAllJokbo(storeIndex, cursor);
+                                                                      @RequestParam(value = "cursor", required = false) Double cursor,
+                                                                       @RequestParam ("sortingType") String sortingType,
+                                                                       @RequestParam (value = "jokboIndex", required = false) Long jokboIndex){
+        Boolean hasNext = false;
+        List<Jokbo> jokbos = storeService.findAllJokbo(storeIndex, cursor, sortingType, jokboIndex);
         List<JokboResponse> jokboList = jokbos.stream()
                 .map(j -> {
-                    Double totalRating = (double) ((j.getCleanRating() + j.getFlavorRating() + j.getUnderPricedRating())/3);
+                    Double totalSum = (double)j.getCleanRating() + (double)j.getFlavorRating() + (double)j.getUnderPricedRating();
+                    Double totalRating;
+                    if(totalSum.equals(null))
+                        totalRating =0.0;
+                    else
+                        totalRating = totalSum/3;
                     return new JokboResponse(
                             j.getId(),
                             j.getTitle(),
                             j.getContents(),
                             j.getJokboImgs(),
-                            j.getJokboFavorites().size() ,
+                            j.getJokboFavorites().size(),
                             j.getJokboComments().size(),
                             totalRating);
                 })
                 .collect(Collectors.toList());
-        if(jokbos.size() != 14)
-            hasNext = false;
+        if(jokbos.size() ==  15) {
+            hasNext = true;
+            jokboList.remove(jokboList.size() -1);
+        }
         return ResponseEntity.ok()
                 .body(
                         Response.success(
@@ -181,7 +189,8 @@ public class StoreApiController {
     @Parameters({
             @Parameter(name = "category", description = "카테고리", required = true),
             @Parameter(name = "cursor", description = "첫 요청 시엔 null, 이후 요청 시 마지막 row값의 id"),
-            @Parameter(name = "order", description = "정렬값 (최신순, 별점 높은 순, 족보 많은 순)", required = true)
+            @Parameter(name = "sortingType", description = "정렬값 (최신순, 별점 높은 순, 족보 많은 순)", required = true),
+            @Parameter(name = "storeIndex", description = "첫 요청 시엔 null, 가게 Id", required = false)
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
@@ -190,11 +199,15 @@ public class StoreApiController {
     })
     @GetMapping("/stores")
     public ResponseEntity<Response<StoreListByCategoryResponse>> readStoresByCategory(@RequestParam("category")String category,
-                                                                                    @RequestParam(value = "cursor", required = false)Long cursor,
-                                                                                      @RequestParam("order")String order){
-        List<StoreListByCategory> stores = storeService.findByCategory(category, cursor);
-        Boolean hasNext = true;
-        if(stores.size() != 14) hasNext = false;
+                                                                                    @RequestParam(value = "cursor", required = false)Double cursor,
+                                                                                      @RequestParam("sortingType") String sortingType,
+                                                                                      @RequestParam(value = "storeIndex", required = false)Long storeIndex){
+        List<StoreListByCategory> stores = storeService.findByCategory(category, cursor, sortingType, storeIndex);
+        Boolean hasNext = false;
+        if(stores.size() == 15) {
+            hasNext = true;
+            stores.remove(stores.size()-1);
+        }
 
         return ResponseEntity.ok().body(Response.success(
                 new StoreListByCategoryResponse(hasNext, stores)

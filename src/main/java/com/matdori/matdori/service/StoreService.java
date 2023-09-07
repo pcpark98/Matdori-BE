@@ -34,11 +34,11 @@ public class StoreService {
 
     public List<Category> findAllCategoryWithMenu (Long id) { return storeRepository.findAllCategoryWithMenu(id);}
 
-    public List<Jokbo> findAllJokbo(Long storeId, Long cursor) {
+    public List<Jokbo> findAllJokbo(Long storeId, Double cursor, String sortingType, Long jokboIndex) {
         if(cursor == null)
-            return jokboRepository.findByStoreIndex(storeId);
+            return jokboRepository.findByStoreIndex(storeId, SortingType.nameOf(sortingType));
 
-        return jokboRepository.findJokbosDescendingById(storeId, cursor);
+        return jokboRepository.findJokbosDescendingById(storeId, cursor, SortingType.nameOf(sortingType) , jokboIndex);
     }
 
     public Long countStoreJokbo(Long storeId) { return storeRepository.countStoreJokbo(storeId);}
@@ -58,11 +58,11 @@ public class StoreService {
         return storeRepository.getTotalRating(store);
     }
 
-    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(String category, Long cursor) {
+    public List<com.matdori.matdori.repositoy.Dto.StoreListByCategory> findByCategory(String category, Double cursor, String sortingType, Long storeIndex) {
         if(cursor == null) // 커서값이 없는 경우 
-            return storeRepository.getCategoryStoresDescendingById(StoreCategory.nameOf(category));
+            return storeRepository.getCategoryStoresDescendingById(StoreCategory.nameOf(category), SortingType.nameOf(sortingType));
         else // 커서값이 있는 경우
-            return storeRepository.findByCategory(StoreCategory.nameOf(category), cursor);
+            return storeRepository.findByCategory(StoreCategory.nameOf(category), cursor, SortingType.nameOf(sortingType), storeIndex);
     }
 
     /**

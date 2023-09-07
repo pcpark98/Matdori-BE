@@ -179,4 +179,9 @@ public class ExceptionManager {
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(Response.error(e.getErrorCode().name()));
     }
+    @ExceptionHandler(NotExistedSortingTypeException.class)
+    public ResponseEntity<?> notExistedSortingTypeException(NotExistedSortingTypeException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
 }
