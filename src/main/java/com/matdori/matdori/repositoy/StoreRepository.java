@@ -126,8 +126,8 @@ public class StoreRepository {
                                     "LEFT JOIN s.jokbos j " +
                                     "WHERE s.category =:category " +
                                     "GROUP BY s.name,s.category, s.id, s.imgUrl " +
-                                    "HAVING (AVG(j.flavorRating) + AVG(j.cleanRating) + AVG(j.underPricedRating))/3 < :cursor OR " +
-                                    "((AVG(j.flavorRating) + AVG(j.cleanRating) + AVG(j.underPricedRating))/3 = :cursor AND s.id < : storeIndex) " +
+                                    "HAVING COALESCE((AVG(j.flavorRating) + AVG(j.cleanRating) + AVG(j.underPricedRating))/3, 0) < :cursor OR " +
+                                    "( COALESCE((AVG(j.flavorRating) + AVG(j.cleanRating) + AVG(j.underPricedRating))/3,0) = :cursor AND s.id < : storeIndex) " +
                                     "ORDER BY AVG(j.flavorRating)+AVG(j.cleanRating)+AVG(j.underPricedRating) DESC, s.id DESC ", StoreListByCategory.class)
                     .setParameter("category" , category)
                     .setParameter("cursor", cursor)
