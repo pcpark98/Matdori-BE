@@ -1,6 +1,7 @@
 package com.matdori.matdori.domain;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
@@ -15,6 +16,7 @@ import static javax.persistence.FetchType.*;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor
 public class JokboImg {
     @Id @GeneratedValue
     @Column(name = "jokbo_img_index")
@@ -28,8 +30,12 @@ public class JokboImg {
     @Column(name = "img_url")
     private String imgUrl;
 
-    @NotNull
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    public JokboImg(Jokbo jokbo, String imgUrl) {
+        this.jokbo = jokbo;
+        this.imgUrl = imgUrl;
+    }
 }

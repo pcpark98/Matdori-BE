@@ -1,35 +1,28 @@
 package com.matdori.matdori.repositoy.Dto;
 
-import com.matdori.matdori.domain.Jokbo;
 import com.matdori.matdori.domain.StoreCategory;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Optional;
-
 @Getter
 @NoArgsConstructor
-public class StoreInformationHeader{
+public class StoreListByCategory {
+    private Long storeId;
     private String name;
     private String category;
     private Double totalRating;
-    private Double flavorRating;
-    private Double underPricedRating;
-    private Double cleanRating;
     private String imgUrl;
+    private Integer jokboCnt;
 
-
-    public StoreInformationHeader(String name, StoreCategory category, Double flavorRating, Double underPricedRating, Double cleanRating, String imgUrl) {
+    public StoreListByCategory(Long storeId, String name, StoreCategory category, Double flavorRating, Double underPricedRating, Double cleanRating, String imgUrl, Integer jokboCnt) {
+        this.storeId =storeId;
         this.name = name;
-        this.category =category.getName();
+        this.category = category.getName();
         Double totalRating = getScore(flavorRating) +getScore(underPricedRating) + getScore(cleanRating);
         if(totalRating != 0.0) this.totalRating = totalRating/3;
         else this.totalRating = 0.0;
-        this.flavorRating = getScore(flavorRating);
-        this.underPricedRating = getScore(underPricedRating);
-        this.cleanRating = getScore(cleanRating);
         this.imgUrl = imgUrl;
+        this.jokboCnt = jokboCnt;
     }
     public Double getScore(Double score){
         if(score == null)
@@ -37,5 +30,3 @@ public class StoreInformationHeader{
         else return score;
     }
 }
-
-

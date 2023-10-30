@@ -6,6 +6,7 @@ import com.matdori.matdori.exception.*;
 import com.matdori.matdori.repositoy.UserRepository;
 import com.matdori.matdori.util.SessionUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -32,7 +33,7 @@ public class AuthorizationService {
         // 로그인 가능 여부 체크
         if (!user.isPresent())
             // 유저가 존재하지 않는 경우.
-            throw new NotExistUserException(ErrorCode.NOT_EXISTED_USER);
+            throw new InvalidCredentialsException(ErrorCode.INVALID_CREDENTIALS);
 
         return user.get();
     }
@@ -57,7 +58,7 @@ public class AuthorizationService {
         else if(SessionUtil.getAttribute(sessionCookie) == null) // 세션이 만료된 경우
             throw new ExpiredSessionException(ErrorCode.EXPIRED_SESSION);
 
-         SessionUtil.getSession().removeAttribute(sessionCookie); // 세션을 날림. 다음에 프론트가 이전의 쿠키를 보내면 인증이 안됨.
+         SessionUtil.deleteAttribute(sessionCookie); // 세션을 날림. 다음에 프론트가 이전의 쿠키를 보내면 인증이 안됨.
     }
 
     /**
@@ -75,13 +76,14 @@ public class AuthorizationService {
         // { email : type } 으로 세션 저장
         String email = SessionUtil.getAttribute(number);
         SessionUtil.setAttribute(email, type.name()); // type은 이메일 인증을 왜 하는지에 대한 케이스.
-        SessionUtil.getSession().removeAttribute(number); // 인증이 되었으면, 더 이상 필요없는 인증 번호이기 때문에 날리기.
+        SessionUtil.deleteAttribute(number); // 인증이 되었으면, 더 이상 필요없는 인증 번호이기 때문에 날리기.
     }
 
     public static void checkEmailVerificationCompletion(String email, EmailAuthorizationType type){
         if (SessionUtil.getAttribute(email) == null || SessionUtil.getAttribute(email) != type.name())
             throw new IncompleteEmailVerificationException(ErrorCode.INCOMPLETE_EMAIL_VERIFICATION);
 
-        SessionUtil.getSession().removeAttribute(email);
+        SessionUtil.deleteAttribute(email);
+
     }
 }

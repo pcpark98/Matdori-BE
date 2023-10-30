@@ -4,8 +4,8 @@ import com.matdori.matdori.domain.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
@@ -116,6 +116,71 @@ public class ExceptionManager {
 
     @ExceptionHandler(NotExistStoreCategoryException.class)
     public ResponseEntity<?> notExistStoreCategoryException(NotExistStoreCategoryException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(NotExistedDepartmentException.class)
+    public ResponseEntity<?> notExistedDepartmentException(NotExistedDepartmentException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<?> missingServletRequestParameterException(MissingServletRequestParameterException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Response.error(ErrorCode.INVALID_REQUIRED_PARAM.name()));
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<?> invalidCredentialsException(InvalidCredentialsException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(NotExisitedJokboFavoriteException.class)
+    public ResponseEntity<?> notExisitedJokboFavorite(NotExisitedJokboFavoriteException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(InvalidStoreListingOrderException.class)
+    public ResponseEntity<?> invalidStoreListingOrderException(InvalidStoreListingOrderException e){
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(UnsupportedFileExtensionException.class)
+    public ResponseEntity<?> unsupportedFileExtensionException(UnsupportedFileExtensionException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(NotExistedFileExtensionException.class)
+    public ResponseEntity<?> notExistedFileExtension(NotExistedFileExtensionException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(NotExistedSelectedJokboException.class)
+    public ResponseEntity<?> notExistedSelectedJokboException(NotExistedSelectedJokboException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(NotExistedSelectedJokboCommentException.class)
+    public ResponseEntity<?> notExistedSelectedJokboCommentException(NotExistedSelectedJokboCommentException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+
+    @ExceptionHandler(NotExistedJokboCommentFavoriteException.class)
+    public ResponseEntity<?> notExistedJokboCommentFavoriteException(NotExistedJokboCommentFavoriteException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(Response.error(e.getErrorCode().name()));
+    }
+    @ExceptionHandler(NotExistedSortingTypeException.class)
+    public ResponseEntity<?> notExistedSortingTypeException(NotExistedSortingTypeException e){
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(Response.error(e.getErrorCode().name()));
     }

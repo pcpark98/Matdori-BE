@@ -44,10 +44,10 @@ public class EtcApiController {
         List<Notice> allNotice = etcService.findAllNotice();
         List<findAllNoticeResponse> responseList = allNotice.stream()
                 .map(n -> new findAllNoticeResponse(
-                       n.getId(),
-                       n.getTitle(),
-                       n.getContents(),
-                       n.getCreatedAt()
+                        n.getId(),
+                        n.getTitle(),
+                        n.getContents(),
+                        n.getCreatedAt()
                 )).collect(Collectors.toList());
 
         return ResponseEntity.ok().body(
@@ -61,10 +61,10 @@ public class EtcApiController {
      * 공지사항 글 조회하기
      */
     @Operation(summary = "공지사항 글 조회 API", description = "단일 공지사항 글을 조회합니다.")
-    @Parameter(name = "noticeIndex", description = "공지사항 id")
+    @Parameter(name = "noticeIndex", description = "공지사항 id", required = true)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 공지사항. noticeIndex 값이 잘못됨.", content = @Content(schema = @Schema(implementation = Error.class))),
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 공지사항(NOT_EXISTED_NOTICE)"),
             @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(schema = @Schema(implementation = Error.class)))
     })
     @GetMapping("/notice/{noticeIndex}")

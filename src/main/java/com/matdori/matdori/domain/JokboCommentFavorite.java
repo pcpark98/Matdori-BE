@@ -1,20 +1,16 @@
 package com.matdori.matdori.domain;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
-import java.time.LocalDateTime;
-
-import static javax.persistence.FetchType.*;
+import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor
 @Table(
         uniqueConstraints = {
                 @UniqueConstraint(
@@ -22,9 +18,10 @@ import static javax.persistence.FetchType.*;
                 )
         }
 )
-public class JokboCommentComplain {
+public class JokboCommentFavorite {
+
     @Id @GeneratedValue
-    @Column(name = "comment_complain_index")
+    @Column(name = "comment_favorite_index")
     private Long id;
 
     @ManyToOne(fetch = LAZY)
@@ -35,11 +32,8 @@ public class JokboCommentComplain {
     @JoinColumn(name = "user_index")
     private User user;
 
-    @NotBlank
-    @Column(columnDefinition = "TEXT")
-    private String contents;
-
-    @CreationTimestamp
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    public JokboCommentFavorite(JokboComment jokboComment, User user) {
+        this.jokboComment = jokboComment;
+        this.user = user;
+    }
 }

@@ -3,6 +3,7 @@ package com.matdori.matdori.service;
 import com.matdori.matdori.domain.*;
 import com.matdori.matdori.exception.*;
 import com.matdori.matdori.repositoy.*;
+import com.matdori.matdori.repositoy.Dto.FavoriteStore;
 import com.matdori.matdori.util.SessionUtil;
 import com.matdori.matdori.util.UserUtil;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class UserService {
     private final JokboFavoriteRepository jokboFavoriteRepository;
     private final TermsAgreementRepository termsAgreementRepository;
     private final TermsOfServiceRepository termsOfServiceRepository;
+    private final JokboCommentFavoriteRepository jokboCommentFavoriteRepository;
 
     public User findOne(Long userId) { return userRepository.findOne(userId); }
 
@@ -66,45 +68,54 @@ public class UserService {
     /**
      * 내가 좋아요 누른 가게 리스트 조회하기.
      */
-    public List<StoreFavorite> findAllFavoriteStore(Long userId, int pageCount) { return storeFavoriteRepository.findAllFavoriteStore(userId, pageCount);}
+    public List<FavoriteStore> findAllFavoriteStore(Long userId, Long cursor) {
+        if(cursor == null)
+            return storeFavoriteRepository.findAllFavoriteStore(userId);
+        return storeFavoriteRepository.getFavoriteStoresDescendingById(userId, cursor);
+    }
 
-    public List<JokboFavorite> findAllFavoriteJokbo(Long userId, int pageCount) { return jokboFavoriteRepository.findAllFavoriteJokbo(userId, pageCount);}
+    public List<JokboFavorite> findAllFavoriteJokbo(Long userId, Long cursor) {
+        if(cursor == null)
+            return jokboFavoriteRepository.findAllFavoriteJokbo(userId);
+        return jokboFavoriteRepository.getFavoriteStoresDescendingById(userId, cursor);
+    }
 
     /**
      * 내가 좋아요 누른 가게 삭제하기.
      */
     @Transactional
-    public void deleteFavoriteStore(Long favoriteStoreId) {
-        if(storeFavoriteRepository.findOne(favoriteStoreId) == null)
-            throw new NotExistStoreException(ErrorCode.NOT_EXISTED_STORE);
-        storeFavoriteRepository.deleteStoreFavorite(favoriteStoreId);
+    public void deleteFavoriteStore(List<Long> favoriteStoresId, Long userId) {
+
+        storeFavoriteRepository.deleteStoreFavorite(favoriteStoresId, userId);
     }
 
     @Transactional
-    public void deleteFavoriteJokbo(Long favoriteJokboId) { jokboFavoriteRepository.delete(favoriteJokboId);}
+    public void deleteFavoriteJokbo(List<Long> favoriteJokboId, Long userId) {
+        jokboFavoriteRepository.delete(favoriteJokboId, userId);
+    }
 
     /**
      * 가게에 좋아요 누르기
      */
     @Transactional
-    public void createFavoriteStore(Long storeId, Long userId) {
+    public Long createFavoriteStore(Long storeId, Long userId) {
         User user = userRepository.findOne(userId);
         Store store = storeRepository.findOne(storeId);
         if(store == null)
             throw new NotExistStoreException(ErrorCode.NOT_EXISTED_STORE);
         StoreFavorite storeFavorite = new StoreFavorite(user, store);
-        storeFavoriteRepository.saveStoreFavorite(storeFavorite);
+        return storeFavoriteRepository.saveStoreFavorite(storeFavorite);
     }
 
     /**
      * 족보에 좋아요 누르기
      */
     @Transactional
-    public void createFavoriteJokbo(Long jokboId, Long userId){
+    public Long createFavoriteJokbo(Long jokboId, Long userId){
         User user = userRepository.findOne(userId);
 
         Optional<Jokbo> jokbo = jokboRepository.findOne(jokboId);
-        if(jokbo.isPresent()) jokboFavoriteRepository.save(new JokboFavorite(jokbo.get(), user));
+        if(jokbo.isPresent()) return jokboFavoriteRepository.save(new JokboFavorite(jokbo.get(), user));
         else throw new NotExistedJokboException(ErrorCode.NOT_EXISTED_JOKBO);
     }
 
@@ -147,13 +158,13 @@ public class UserService {
 
     /**
      * 닉네임 변경
-     *
-     * 고쳐야 할 부분
-     * 1. checkNicknameExistence에서 중복 체크와 업데이트를 한 transaction에 묶기.
      */
     @Transactional
     public void updateNickname(Long userId, String nickname){
 
+        // 닉네임 길이 체크
+        if(nickname.length() > 30)
+            throw new InvalidNicknameFormatExceition(ErrorCode.INVALID_NICKNAME_FORMAT);
         // 변경하려는 닉네임이 이미 존재하는 닉네임인지 확인
         checkNicknameExistence(nickname);
 
@@ -164,16 +175,89 @@ public class UserService {
     /**
      * 내가 쓴 모든 족보 조회하기.
      */
-    public List<Jokbo> readAllMyJokbo(Long userId, int pageCount){ return jokboRepository.findByUserIndex(userId, pageCount);}
+    public List<Jokbo> readAllMyJokbo(Long userId, Long cursor){
+        if(cursor == null)
+            return jokboRepository.findByUserIndex(userId);
+        return jokboRepository.getJokboDescendingById(userId, cursor);
+    }
 
     /**
      * 내가 쓴 모든 족보 댓글 조회하기.
      */
-    public List<JokboComment> readAllMyJokboComment(Long userId, int pageCount){ return jokboCommentRepository.findByUserIndex(userId, pageCount);}
+    public List<JokboComment> readAllMyJokboComment(Long userId, Long cursor){
+        if(cursor == null)
+            return jokboCommentRepository.findByUserIndex(userId);
+        return jokboCommentRepository.findCommentsDescendingById(userId, cursor);
+    }
 
     public void checkNicknameExistence(String nickname) {
         Optional<User> user = userRepository.findByNickname(nickname);
         if(user.isPresent()) throw new DuplicatedNicknameException(ErrorCode.DUPLICATED_NICKNAME);
+    }
+
+    /**
+     * 유저가 족보에 좋아요를 눌렀는지 확인하기.
+     */
+    public Long getFavoriteJokboId(Long userId, Long jokboId) {
+
+        Optional<JokboFavorite> jokboFavorite = jokboFavoriteRepository.findByIds(userId, jokboId);
+        if(!jokboFavorite.isPresent()) return null;
+        else return jokboFavorite.get().getId();
+    }
+
+    /**
+     * 족보에 댓글에 좋아요 누르기
+     */
+    @Transactional
+    public Long createFavoriteComment(Long commentId, Long userId){
+        User user = userRepository.findOne(userId);
+
+        Optional<JokboComment> jokboComment = jokboCommentRepository.findOne(commentId);
+        if(jokboComment.isPresent()) return jokboCommentFavoriteRepository.save(new JokboCommentFavorite(jokboComment.get(), user));
+        else throw new NotExistedJokboCommentException(ErrorCode.NOT_EXISTED_JOKBO_COMMENT);
+    }
+
+    /**
+     * 족보 댓글 좋아요 취소
+     */
+    @Transactional
+    public void deleteFavoriteComment(Long favoriteCommentId, Long userId) {
+
+        Optional<JokboCommentFavorite> jokboCommentFavorite = jokboCommentFavoriteRepository.findOne(favoriteCommentId);
+        if(!jokboCommentFavorite.isPresent()) throw new NotExistedJokboCommentFavoriteException(ErrorCode.NOT_EXISTED_JOKBO_COMMENT_FAVORITE);
+
+        if(!jokboCommentFavorite.get().getUser().getId().equals(userId)) {
+            // 다른 사람의 댓글 좋아요를 취소하려고 하는 경우.
+            throw new InsufficientPrivilegesException(ErrorCode.INSUFFICIENT_PRIVILEGES);
+        }
+
+        jokboCommentFavoriteRepository.delete(favoriteCommentId);
+    }
+
+    /**
+     * 유저가 족보 댓글에 좋아요를 눌렀는지 확인하기.
+     */
+    public Long getFavoriteCommentId(Long userId, Long commentId) {
+
+        Optional<JokboCommentFavorite> jokboCommentFavorite = jokboCommentFavoriteRepository.findByIds(userId, commentId);
+        if(!jokboCommentFavorite.isPresent()) return null;
+        else return jokboCommentFavorite.get().getId();
+    }
+
+    /**
+     * 유저가 작성한 것인지 확인하기
+     */
+    public boolean checkIsWritten(Long authorId, Long readerId) {
+
+        if(!authorId.equals(readerId)) return false;
+        else return true;
+    }
+
+    // 개발 시에 사용할 유저삭제 api
+    @Transactional
+    public void deleteUser(Long userId){
+        termsAgreementRepository.delete(userId);
+        userRepository.delete(userId);
     }
 }
 

@@ -28,24 +28,54 @@ public class JokboCommentRepository {
     public List<JokboComment> findAllJokboComments(Long id) {
         return em.createQuery(
                 "SELECT c FROM JokboComment c "+
-                        "WHERE c.jokbo.id = :id", JokboComment.class)
+                        "WHERE c.jokbo.id = :id AND c.isDeleted = false " +
+                        "ORDER BY c.id DESC", JokboComment.class)
                 .setParameter("id", id)
+                .setMaxResults(14)
                 .getResultList();
     }
 
     /**
      * 내가 쓴 모든 댓글 조회하기.
      */
-    public List<JokboComment> findByUserIndex(Long userId, int pageCount){
+    public List<JokboComment> findByUserIndex(Long userId){
         return em.createQuery(
                         "SELECT c FROM JokboComment c " +
-                                "JOIN c.user u ON u.id =: userId AND u.id = c.user.id " +
                                 "JOIN FETCH c.jokbo j " +
-                                "JOIN FETCH j.store " +
-                                "WHERE c.isDeleted = false ", JokboComment.class)
+                                "WHERE c.user.id = :userId AND c.isDeleted = false " +
+                                "ORDER BY c.id DESC", JokboComment.class)
                 .setParameter("userId", userId)
-                .setFirstResult((pageCount-1)*15)
-                .setMaxResults(15)
+                .setMaxResults(14)
+                .getResultList();
+    }
+
+    /**
+     * 내가 쓴 댓글 조회 페이징 처리하여 조회하기.
+     */
+    public List<JokboComment> findCommentsDescendingById(Long userId, Long cursor) {
+        return em.createQuery(
+                        "SELECT c FROM JokboComment c " +
+                                "JOIN FETCH c.jokbo j " +
+                                "WHERE c.user.id = : userId AND  c.isDeleted = false AND c.id < :cursor " +
+                                "ORDER BY c.id DESC", JokboComment.class)
+                .setParameter("userId", userId)
+                .setParameter("cursor" ,cursor)
+                .setMaxResults(14)
+                .getResultList();
+    }
+
+    /**
+     * 특정 족보에 달린 댓글 조회 페이징 처리하여 조회하기.
+     */
+    public List<JokboComment> findCommentsAtJokboDescendingById(Long jokboId, Long cursor) {
+        return em.createQuery(
+                "SELECT c FROM  JokboComment c " +
+                        "JOIN FETCH c.jokbo j " +
+                        "WHERE c.isDeleted = false AND c.jokbo.id =: jokboId AND c.id < :cursor " +
+                        "ORDER BY  c.id DESC", JokboComment.class)
+                .setParameter("jokboId" ,jokboId)
+                .setParameter("cursor", cursor)
+                .setMaxResults(14)
                 .getResultList();
     }
 
@@ -62,5 +92,16 @@ public class JokboCommentRepository {
      */
     public void delete(Long id) {
         em.remove(em.find(JokboComment.class, id));
+    }
+
+    /**
+     * 족보 삭제시 매핑된 모든 댓글 삭제
+     */
+    public void deleteAllByJokboId(Long jokboId) {
+        em.createQuery(
+                        "DELETE FROM JokboComment c " +
+                                "WHERE c.jokbo.id =: jokboId")
+                .setParameter("jokboId", jokboId)
+                .executeUpdate();
     }
 }

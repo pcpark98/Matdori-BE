@@ -11,7 +11,7 @@ public class JokboRichStore {
     private String imgUrl;
     private Integer jokboCnt;
 
-    public JokboRichStore(Long storeIndex, String name, String imgUrl, int jokboCnt) {
+    public JokboRichStore(Long storeIndex, String name, String imgUrl, Integer jokboCnt) {
         this.storeIndex = storeIndex;
         this.name = name;
         this.imgUrl = imgUrl;

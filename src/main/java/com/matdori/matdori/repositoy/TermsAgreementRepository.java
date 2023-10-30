@@ -14,4 +14,9 @@ public class TermsAgreementRepository {
     private final EntityManager em;
     public void save(TermAgreement term) { em.persist(term);}
 
+    public void delete(Long userId){
+        em.createQuery("DELETE FROM TermAgreement t WHERE t.user.id =: userId").setParameter("userId", userId)
+                .executeUpdate();
+    }
+
 }

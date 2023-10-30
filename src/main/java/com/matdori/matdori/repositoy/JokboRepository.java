@@ -1,6 +1,7 @@
 package com.matdori.matdori.repositoy;
 
 import com.matdori.matdori.domain.Jokbo;
+import com.matdori.matdori.domain.SortingType;
 import com.matdori.matdori.domain.Store;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -55,26 +56,122 @@ public class JokboRepository {
     /**
      * 내가 쓴 모든 족보 조회하기.
      */
-    public List<Jokbo> findByUserIndex(Long userId, int pageCount){
+    public List<Jokbo> findByUserIndex(Long userId){
         return em.createQuery(
                         "SELECT j FROM Jokbo j " +
                                 "JOIN FETCH j.user u " +
                                 "LEFT JOIN j.jokboImgs " +
                                 "LEFT JOIN FETCH j.jokboComments c " +
-                                "WHERE u.id =: userId", Jokbo.class)
+                                "WHERE u.id =: userId " +
+                                "ORDER BY j.id DESC", Jokbo.class)
                 .setParameter("userId", userId)
-                .setFirstResult((pageCount-1)*15)
+                .setMaxResults(14)
+                .getResultList();
+    }
+
+    public List<Jokbo> getJokboDescendingById(Long userId, Long cursor){
+        return em.createQuery(
+                        "SELECT j FROM Jokbo j " +
+                                "JOIN FETCH j.user u " +
+                                "LEFT JOIN j.jokboImgs " +
+                                "LEFT JOIN FETCH j.jokboComments c " +
+                                "WHERE u.id =: userId AND j.id < : cursor " +
+                                "ORDER BY j.id DESC", Jokbo.class)
+                .setParameter("userId", userId)
+                .setParameter("cursor", cursor)
+                .setMaxResults(14)
+                .getResultList();
+    }
+
+    public List<Jokbo> findByStoreIndex(Long storeId, SortingType sortingType){
+
+        if(sortingType.equals(SortingType.HIGHEST_RATING)){
+            return em.createQuery(
+                            "SELECT j FROM Jokbo j " +
+                                    "WHERE j.store.id =: storeId " +
+                                    "ORDER BY j.underPricedRating + j.cleanRating + j.flavorRating DESC, j.id DESC", Jokbo.class)
+                    .setParameter("storeId", storeId)
+                    .setMaxResults(15)
+                    .getResultList();
+        }
+
+        if(sortingType.equals(SortingType.MOST_FAVORITES)){
+            return em.createQuery(
+                            "SELECT j FROM Jokbo j " +
+                                    "WHERE j.store.id =: storeId " +
+                                    "ORDER BY j.jokboFavorites.size DESC, j.id DESC ", Jokbo.class)
+                    .setParameter("storeId", storeId)
+                    .setMaxResults(15)
+                    .getResultList();
+        }
+
+        //if(sortingType.equals(SortingType.LASTEST))
+        return em.createQuery(
+                "SELECT j FROM Jokbo j " +
+                        "WHERE j.store.id =: storeId " +
+                        "ORDER BY j.id DESC ", Jokbo.class)
+                .setParameter("storeId", storeId)
+                .setMaxResults(15)
+                .getResultList();
+    }
+    public List<Jokbo> findJokbosDescendingById(Long storeId, Double cursor, SortingType sortingType, Long jokboId){
+        if(sortingType.equals(SortingType.HIGHEST_RATING)){
+            return em.createQuery(
+                            "SELECT j FROM Jokbo j " +
+                                    "WHERE j.store.id =: storeId AND (1.0 * j.underPricedRating + j.cleanRating + j.flavorRating)/3 < :cursor " +
+                                    "OR ((1.0 * j.underPricedRating + j.cleanRating + j.flavorRating)/3 =:cursor AND j.id <: jokboId) " +
+                                    "ORDER BY j.underPricedRating + j.cleanRating + j.flavorRating DESC, j.id DESC ", Jokbo.class)
+                    .setParameter("storeId", storeId)
+                    .setParameter("cursor", cursor)
+                    .setParameter("jokboId", jokboId)
+                    .setMaxResults(15)
+                    .getResultList();
+        }
+
+        if(sortingType.equals(SortingType.MOST_FAVORITES)){
+            return em.createQuery(
+                            "SELECT j FROM Jokbo j " +
+                                    "WHERE j.store.id =: storeId AND j.jokboFavorites.size < :cursor OR (j.jokboFavorites.size = :cursor AND j.id < :jokboId) " +
+                                    "ORDER BY j.jokboFavorites.size DESC, j.id DESC ", Jokbo.class)
+                    .setParameter("storeId", storeId)
+                    .setParameter("cursor",  cursor.intValue())
+                    .setParameter("jokboId", jokboId)
+                    .setMaxResults(15)
+                    .getResultList();
+        }
+
+        //if(sortingType.equals(SortingType.LASTEST))
+        return em.createQuery(
+                        "SELECT j FROM Jokbo j " +
+                                "WHERE j.store.id =: storeId AND j.id < :jokboId " +
+                                "ORDER BY j.id DESC ", Jokbo.class)
+                .setParameter("storeId", storeId)
+                .setParameter("jokboId", jokboId)
                 .setMaxResults(15)
                 .getResultList();
     }
 
-    public List<Jokbo> findByStoreIndex(Long storeId, int startIndex){
-        return em.createQuery(
-                "SELECT j FROM Jokbo j " +
+    /**
+     * 가게에 매핑된 모든 족보의 개수 구하기.
+     */
+    public int countAllAtStore(Long storeId) {
+        return em.createQuery("SELECT j FROM Jokbo j " +
                         "WHERE j.store.id =: storeId", Jokbo.class)
                 .setParameter("storeId", storeId)
-                .setFirstResult(startIndex)
-                .setMaxResults(15)
-                .getResultList();
+                .getResultList().size();
+    }
+
+    /**
+     * 가게에서 가장 인기 있는 족보
+     */
+    public Optional<Jokbo> readPopularJokboatStore(Long storeId){
+        return em.createQuery(
+                "SELECT j FROM Jokbo j " +
+                "WHERE j.store.id =: storeId " +
+                "ORDER BY j.jokboFavorites.size DESC ", Jokbo.class)
+                .setMaxResults(1)
+                .setParameter("storeId", storeId)
+                .getResultList()
+                .stream().findAny();
     }
 }

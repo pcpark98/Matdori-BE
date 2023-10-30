@@ -22,8 +22,8 @@ public class Menu {
 
 
     @NotBlank
-    @Column(length = 30)
-    @Size(max =30)
+    @Column(length = 50)
+    @Size(max =50)
     private String name;
 
     @NotBlank
@@ -31,7 +31,5 @@ public class Menu {
     @Size(max =20)
     private String price;
 
-
-    @Column(length = 255)
     private String imgUrl;
 }
