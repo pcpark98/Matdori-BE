@@ -61,11 +61,13 @@ public class UserApiController {
     public ResponseEntity<Response<Void>> createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
         // 이메일 인증여부 확인
         AuthorizationService.checkEmailVerificationCompletion(request.email, EmailAuthorizationType.SIGNUP);
-        User user = new User();
-        user.setEmail(request.email);
-        user.setDepartment(Department.nameOf(request.department));
-        user.setPassword(request.password);
-        user.setNickname(UserUtil.getRandomNickname());
+        User user = User.builder()
+                        .email(request.email)
+                        .department(Department.nameOf(request.department))
+                        .password(request.password)
+                        .nickname(UserUtil.getRandomNickname())
+                        .build();
+
         // 약관 동의 추가하는 로직 필요
         userService.signUp(user);
         return ResponseEntity.ok()
