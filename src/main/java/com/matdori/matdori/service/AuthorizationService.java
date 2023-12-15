@@ -28,7 +28,7 @@ public class AuthorizationService {
      */
     public User login(String email, String password) {
         // 존재하는 회원인지 확인.
-        Optional<User> user = userRepository.login(email, password);
+        Optional<User> user = userRepository.findByEmailAndPassword(email, password);
 
         // 로그인 가능 여부 체크
         if (!user.isPresent())
