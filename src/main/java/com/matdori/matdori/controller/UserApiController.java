@@ -350,27 +350,17 @@ public class UserApiController {
             @RequestParam(required = false) Long cursor){
 
         Boolean hasNext = true;
+
         // 세션 체크
         AuthorizationService.checkSession(userId);
         List<JokboFavorite> jokboFavorites = userService.findAllFavoriteJokbo(userId, cursor);
-        if(jokboFavorites.size() != LIST_SIZE)
-            hasNext = false;
 
         List<FavoriteJokbosResponse> favoriteJokbos = jokboFavorites.stream()
-                .map(j -> {
-                    Jokbo jokbo = j.getJokbo();
-                    Double totalRating = (double) ((jokbo.getCleanRating() + jokbo.getFlavorRating() + jokbo.getUnderPricedRating()) / 3);
-                    return new FavoriteJokbosResponse(
-                            j.getId(),
-                            jokbo.getId(),
-                            jokbo.getTitle(),
-                            totalRating,
-                            jokbo.getJokboImgs(),
-                            jokbo.getContents(),
-                            jokbo.getJokboComments().size(),
-                            jokbo.getJokboFavorites().size());
-                })
+                .map(jokboFavorite -> FavoriteJokbosResponse.ofEntity(jokboFavorite))
                 .collect(Collectors.toList());
+
+        if(jokboFavorites.size() != LIST_SIZE)
+            hasNext = false;
 
         return ResponseEntity.ok().body(
                 Response.success(
@@ -697,7 +687,7 @@ public class UserApiController {
     }
 
     @Data
-    @NoArgsConstructor
+    @Builder
     static class FavoriteJokbosResponse{
         private Long favoriteJokboId;
         private Long jokboId;
@@ -708,24 +698,19 @@ public class UserApiController {
         private int commentCnt;
         private int favoriteCnt;
 
-        public FavoriteJokbosResponse(Long favoriteJokboId,
-                                          Long jokboId,
-                                          String title,
-                                          Double totalRating,
-                                          List<JokboImg> imgUrl,
-                                          String contents,
-                                          int commentCnt,
-                                          int favoriteCnt) {
-
-            this.favoriteJokboId = favoriteJokboId;
-            this.jokboId = jokboId;
-            this.title = title;
-            this.totalRating = totalRating;
-            if(imgUrl.size() != 0)
-                this.imgUrl = imgUrl.get(0).getImgUrl();
-            this.contents = contents;
-            this.commentCnt = commentCnt;
-            this.favoriteCnt = favoriteCnt;
+        public static FavoriteJokbosResponse ofEntity(JokboFavorite jokboFavorite){
+            Jokbo jokbo = jokboFavorite.getJokbo();
+            Double totalRating =  (double) ((jokbo.getCleanRating() + jokbo.getFlavorRating() + jokbo.getUnderPricedRating()) / 3);
+            return FavoriteJokbosResponse.builder()
+                    .favoriteJokboId(jokboFavorite.getId())
+                    .jokboId(jokbo.getId())
+                    .title(jokbo.getTitle())
+                    .totalRating(totalRating)
+                    .imgUrl(jokbo.getJokboImgs().isEmpty() ? null : jokbo.getJokboImgs().get(0).getImgUrl())
+                    .contents(jokbo.getContents())
+                    .commentCnt(jokbo.getJokboComments().size())
+                    .favoriteCnt(jokbo.getJokboFavorites().size())
+                    .build();
         }
     }
 
