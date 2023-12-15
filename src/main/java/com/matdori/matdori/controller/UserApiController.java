@@ -41,6 +41,8 @@ public class UserApiController {
     private final AuthorizationService authorizationService;
     private final MailService mailService;
 
+    private static final Integer LIST_SIZE = 14;
+
     /**
      * 회원 가입
      */
@@ -134,7 +136,7 @@ public class UserApiController {
         List<FavoriteStore> favoriteStores = userService.findAllFavoriteStore(userId, cursor);
 
 
-        if(favoriteStores.size() != 14)
+        if(favoriteStores.size() != LIST_SIZE)
             hasNext = false;
 
         return ResponseEntity.ok().body(Response.success(
@@ -351,7 +353,7 @@ public class UserApiController {
         // 세션 체크
         AuthorizationService.checkSession(userId);
         List<JokboFavorite> jokboFavorites = userService.findAllFavoriteJokbo(userId, cursor);
-        if(jokboFavorites.size() != 14)
+        if(jokboFavorites.size() != LIST_SIZE)
             hasNext = false;
 
         List<FavoriteJokbosResponse> favoriteJokbos = jokboFavorites.stream()
@@ -466,7 +468,7 @@ public class UserApiController {
                             j.getJokboFavorites().size());
                 })
                 .collect(Collectors.toList());
-        if(jokbos.size() != 14)
+        if(jokbos.size() != LIST_SIZE)
             hasNext = false;
 
 
@@ -508,7 +510,7 @@ public class UserApiController {
                         c.getCreatedAt()))
                 .collect(Collectors.toList());
 
-        if(jokboComments.size() != 14)
+        if(jokboComments.size() != LIST_SIZE)
             hasNext = false;
 
 
