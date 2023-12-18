@@ -477,23 +477,16 @@ public class UserApiController {
     @GetMapping("/users/{userIndex}/comments")
     public ResponseEntity<Response<UserCommentsResponse>> readAllMyJokboComment(@PathVariable("userIndex") Long userId,
                                                                                            @RequestParam(value = "cursor", required = false) Long cursor){
+        Boolean hasNext = true;
         // 세션 체크
         AuthorizationService.checkSession(userId);
-        Boolean hasNext = true;
         List<JokboComment> jokboComments = userService.readAllMyJokboComment(userId, cursor);
         List<AllMyJokboCommentResponse> comments = jokboComments.stream()
-                .map(c -> new AllMyJokboCommentResponse(
-                        c.getJokbo().getId(),
-                        c.getId(),
-                        c.getJokbo().getTitle(),
-                        c.getContents(),
-                        0,
-                        c.getCreatedAt()))
+                .map(jokboComment -> AllMyJokboCommentResponse.ofEntity(jokboComment))
                 .collect(Collectors.toList());
 
         if(jokboComments.size() != LIST_SIZE)
             hasNext = false;
-
 
         return ResponseEntity.ok().body(Response.success(
                 new UserCommentsResponse(hasNext, comments)
@@ -785,7 +778,7 @@ public class UserApiController {
     }
 
     @Data
-    @AllArgsConstructor
+    @Builder
     static class AllMyJokboCommentResponse{
         private Long jokboId;
         private Long commentId;
@@ -793,6 +786,17 @@ public class UserApiController {
         private String contents;
         private Integer favoriteCnt;
         private LocalDateTime writtenAt;
+        public static AllMyJokboCommentResponse ofEntity(JokboComment jokboComment) {
+            Jokbo jokbo = jokboComment.getJokbo();
+            return AllMyJokboCommentResponse.builder()
+                    .jokboId(jokbo.getId())
+                    .commentId(jokboComment.getId())
+                    .title(jokbo.getTitle())
+                    .contents(jokboComment.getContents())
+                    .favoriteCnt(jokboComment.getJokboCommentFavorites().size())
+                    .writtenAt(jokboComment.getCreatedAt())
+                    .build();
+        }
     }
 
     @Data
