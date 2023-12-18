@@ -441,26 +441,17 @@ public class UserApiController {
     @GetMapping("/users/{userIndex}/jokbos")
     public ResponseEntity<Response<AllMyJokboResponse>> readAllMyJokbo(@PathVariable("userIndex") Long userId,
                                                                              @RequestParam(required = false) Long cursor){
+
+        Boolean hasNext = true;
         // 세션 체크
         AuthorizationService.checkSession(userId);
-        Boolean hasNext = true;
         List<Jokbo> jokbos = userService.readAllMyJokbo(userId, cursor);
         List<JokboResponse> myJokbo = jokbos.stream()
-                .map(j -> {
-                    Double totalRating = (double) (j.getCleanRating() + j.getFlavorRating() + j.getUnderPricedRating()) / 3;
-                    return new JokboResponse(
-                            j.getId(),
-                            j.getTitle(),
-                            j.getContents(),
-                            totalRating,
-                            j.getJokboImgs(),
-                            j.getJokboComments().size(),
-                            j.getJokboFavorites().size());
-                })
+                .map(jokbo -> JokboResponse.ofEntity(jokbo))
                 .collect(Collectors.toList());
+
         if(jokbos.size() != LIST_SIZE)
             hasNext = false;
-
 
         return ResponseEntity.ok().body(Response.success(
                 new AllMyJokboResponse(hasNext, myJokbo)
@@ -769,7 +760,7 @@ public class UserApiController {
     }
 
     @Data
-    @AllArgsConstructor
+    @Builder
     static class JokboResponse{
         private Long jokboId;
         private String title;
@@ -778,22 +769,18 @@ public class UserApiController {
         private String imgUrl;
         private int commentCnt;
         private int favoriteCnt;
+        public static JokboResponse ofEntity(Jokbo jokbo) {
+            Double totalRating =  (double) ((jokbo.getCleanRating() + jokbo.getFlavorRating() + jokbo.getUnderPricedRating()) / 3);
 
-        public JokboResponse(Long jokboId,
-                                  String title,
-                                  String contents,
-                                  Double totalRating,
-                                  List<JokboImg> imgUrl,
-                                  int commentCnt,
-                                  int favoriteCnt) {
-            this.jokboId = jokboId;
-            this.title = title;
-            this.contents = contents;
-            this.totalRating = totalRating;
-            if(imgUrl.size() != 0)
-                this.imgUrl = imgUrl.get(0).getImgUrl();
-            this.commentCnt = commentCnt;
-            this.favoriteCnt = favoriteCnt;
+            return JokboResponse.builder()
+                    .jokboId(jokbo.getId())
+                    .title(jokbo.getTitle())
+                    .contents(jokbo.getContents())
+                    .totalRating(totalRating)
+                    .imgUrl(jokbo.getJokboImgs().isEmpty() ? null : jokbo.getJokboImgs().get(0).getImgUrl())
+                    .commentCnt(jokbo.getJokboComments().size())
+                    .favoriteCnt(jokbo.getJokboFavorites().size())
+                    .build();
         }
     }
 
