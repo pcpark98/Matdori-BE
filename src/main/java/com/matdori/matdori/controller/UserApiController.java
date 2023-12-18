@@ -41,6 +41,8 @@ public class UserApiController {
     private final AuthorizationService authorizationService;
     private final MailService mailService;
 
+    private static final Integer LIST_SIZE = 14;
+
     /**
      * 회원 가입
      */
@@ -61,11 +63,13 @@ public class UserApiController {
     public ResponseEntity<Response<Void>> createUser(@RequestBody @Valid CreateUserRequest request) throws NoSuchAlgorithmException {
         // 이메일 인증여부 확인
         AuthorizationService.checkEmailVerificationCompletion(request.email, EmailAuthorizationType.SIGNUP);
-        User user = new User();
-        user.setEmail(request.email);
-        user.setDepartment(Department.nameOf(request.department));
-        user.setPassword(request.password);
-        user.setNickname(UserUtil.getRandomNickname());
+        User user = User.builder()
+                        .email(request.email)
+                        .department(Department.nameOf(request.department))
+                        .password(request.password)
+                        .nickname(UserUtil.getRandomNickname())
+                        .build();
+
         // 약관 동의 추가하는 로직 필요
         userService.signUp(user);
         return ResponseEntity.ok()
@@ -132,7 +136,7 @@ public class UserApiController {
         List<FavoriteStore> favoriteStores = userService.findAllFavoriteStore(userId, cursor);
 
 
-        if(favoriteStores.size() != 14)
+        if(favoriteStores.size() != LIST_SIZE)
             hasNext = false;
 
         return ResponseEntity.ok().body(Response.success(
@@ -346,27 +350,17 @@ public class UserApiController {
             @RequestParam(required = false) Long cursor){
 
         Boolean hasNext = true;
+
         // 세션 체크
         AuthorizationService.checkSession(userId);
         List<JokboFavorite> jokboFavorites = userService.findAllFavoriteJokbo(userId, cursor);
-        if(jokboFavorites.size() != 14)
-            hasNext = false;
 
         List<FavoriteJokbosResponse> favoriteJokbos = jokboFavorites.stream()
-                .map(j -> {
-                    Jokbo jokbo = j.getJokbo();
-                    Double totalRating = (double) ((jokbo.getCleanRating() + jokbo.getFlavorRating() + jokbo.getUnderPricedRating()) / 3);
-                    return new FavoriteJokbosResponse(
-                            j.getId(),
-                            jokbo.getId(),
-                            jokbo.getTitle(),
-                            totalRating,
-                            jokbo.getJokboImgs(),
-                            jokbo.getContents(),
-                            jokbo.getJokboComments().size(),
-                            jokbo.getJokboFavorites().size());
-                })
+                .map(jokboFavorite -> FavoriteJokbosResponse.ofEntity(jokboFavorite))
                 .collect(Collectors.toList());
+
+        if(jokboFavorites.size() != LIST_SIZE)
+            hasNext = false;
 
         return ResponseEntity.ok().body(
                 Response.success(
@@ -447,26 +441,17 @@ public class UserApiController {
     @GetMapping("/users/{userIndex}/jokbos")
     public ResponseEntity<Response<AllMyJokboResponse>> readAllMyJokbo(@PathVariable("userIndex") Long userId,
                                                                              @RequestParam(required = false) Long cursor){
+
+        Boolean hasNext = true;
         // 세션 체크
         AuthorizationService.checkSession(userId);
-        Boolean hasNext = true;
         List<Jokbo> jokbos = userService.readAllMyJokbo(userId, cursor);
         List<JokboResponse> myJokbo = jokbos.stream()
-                .map(j -> {
-                    Double totalRating = (double) (j.getCleanRating() + j.getFlavorRating() + j.getUnderPricedRating()) / 3;
-                    return new JokboResponse(
-                            j.getId(),
-                            j.getTitle(),
-                            j.getContents(),
-                            totalRating,
-                            j.getJokboImgs(),
-                            j.getJokboComments().size(),
-                            j.getJokboFavorites().size());
-                })
+                .map(jokbo -> JokboResponse.ofEntity(jokbo))
                 .collect(Collectors.toList());
-        if(jokbos.size() != 14)
-            hasNext = false;
 
+        if(jokbos.size() != LIST_SIZE)
+            hasNext = false;
 
         return ResponseEntity.ok().body(Response.success(
                 new AllMyJokboResponse(hasNext, myJokbo)
@@ -492,23 +477,16 @@ public class UserApiController {
     @GetMapping("/users/{userIndex}/comments")
     public ResponseEntity<Response<UserCommentsResponse>> readAllMyJokboComment(@PathVariable("userIndex") Long userId,
                                                                                            @RequestParam(value = "cursor", required = false) Long cursor){
+        Boolean hasNext = true;
         // 세션 체크
         AuthorizationService.checkSession(userId);
-        Boolean hasNext = true;
         List<JokboComment> jokboComments = userService.readAllMyJokboComment(userId, cursor);
         List<AllMyJokboCommentResponse> comments = jokboComments.stream()
-                .map(c -> new AllMyJokboCommentResponse(
-                        c.getJokbo().getId(),
-                        c.getId(),
-                        c.getJokbo().getTitle(),
-                        c.getContents(),
-                        0,
-                        c.getCreatedAt()))
+                .map(jokboComment -> AllMyJokboCommentResponse.ofEntity(jokboComment))
                 .collect(Collectors.toList());
 
-        if(jokboComments.size() != 14)
+        if(jokboComments.size() != LIST_SIZE)
             hasNext = false;
-
 
         return ResponseEntity.ok().body(Response.success(
                 new UserCommentsResponse(hasNext, comments)
@@ -693,7 +671,7 @@ public class UserApiController {
     }
 
     @Data
-    @NoArgsConstructor
+    @Builder
     static class FavoriteJokbosResponse{
         private Long favoriteJokboId;
         private Long jokboId;
@@ -704,24 +682,19 @@ public class UserApiController {
         private int commentCnt;
         private int favoriteCnt;
 
-        public FavoriteJokbosResponse(Long favoriteJokboId,
-                                          Long jokboId,
-                                          String title,
-                                          Double totalRating,
-                                          List<JokboImg> imgUrl,
-                                          String contents,
-                                          int commentCnt,
-                                          int favoriteCnt) {
-
-            this.favoriteJokboId = favoriteJokboId;
-            this.jokboId = jokboId;
-            this.title = title;
-            this.totalRating = totalRating;
-            if(imgUrl.size() != 0)
-                this.imgUrl = imgUrl.get(0).getImgUrl();
-            this.contents = contents;
-            this.commentCnt = commentCnt;
-            this.favoriteCnt = favoriteCnt;
+        public static FavoriteJokbosResponse ofEntity(JokboFavorite jokboFavorite){
+            Jokbo jokbo = jokboFavorite.getJokbo();
+            Double totalRating =  (double) ((jokbo.getCleanRating() + jokbo.getFlavorRating() + jokbo.getUnderPricedRating()) / 3);
+            return FavoriteJokbosResponse.builder()
+                    .favoriteJokboId(jokboFavorite.getId())
+                    .jokboId(jokbo.getId())
+                    .title(jokbo.getTitle())
+                    .totalRating(totalRating)
+                    .imgUrl(jokbo.getJokboImgs().isEmpty() ? null : jokbo.getJokboImgs().get(0).getImgUrl())
+                    .contents(jokbo.getContents())
+                    .commentCnt(jokbo.getJokboComments().size())
+                    .favoriteCnt(jokbo.getJokboFavorites().size())
+                    .build();
         }
     }
 
@@ -780,7 +753,7 @@ public class UserApiController {
     }
 
     @Data
-    @AllArgsConstructor
+    @Builder
     static class JokboResponse{
         private Long jokboId;
         private String title;
@@ -789,27 +762,23 @@ public class UserApiController {
         private String imgUrl;
         private int commentCnt;
         private int favoriteCnt;
+        public static JokboResponse ofEntity(Jokbo jokbo) {
+            Double totalRating =  (double) ((jokbo.getCleanRating() + jokbo.getFlavorRating() + jokbo.getUnderPricedRating()) / 3);
 
-        public JokboResponse(Long jokboId,
-                                  String title,
-                                  String contents,
-                                  Double totalRating,
-                                  List<JokboImg> imgUrl,
-                                  int commentCnt,
-                                  int favoriteCnt) {
-            this.jokboId = jokboId;
-            this.title = title;
-            this.contents = contents;
-            this.totalRating = totalRating;
-            if(imgUrl.size() != 0)
-                this.imgUrl = imgUrl.get(0).getImgUrl();
-            this.commentCnt = commentCnt;
-            this.favoriteCnt = favoriteCnt;
+            return JokboResponse.builder()
+                    .jokboId(jokbo.getId())
+                    .title(jokbo.getTitle())
+                    .contents(jokbo.getContents())
+                    .totalRating(totalRating)
+                    .imgUrl(jokbo.getJokboImgs().isEmpty() ? null : jokbo.getJokboImgs().get(0).getImgUrl())
+                    .commentCnt(jokbo.getJokboComments().size())
+                    .favoriteCnt(jokbo.getJokboFavorites().size())
+                    .build();
         }
     }
 
     @Data
-    @AllArgsConstructor
+    @Builder
     static class AllMyJokboCommentResponse{
         private Long jokboId;
         private Long commentId;
@@ -817,6 +786,17 @@ public class UserApiController {
         private String contents;
         private Integer favoriteCnt;
         private LocalDateTime writtenAt;
+        public static AllMyJokboCommentResponse ofEntity(JokboComment jokboComment) {
+            Jokbo jokbo = jokboComment.getJokbo();
+            return AllMyJokboCommentResponse.builder()
+                    .jokboId(jokbo.getId())
+                    .commentId(jokboComment.getId())
+                    .title(jokbo.getTitle())
+                    .contents(jokboComment.getContents())
+                    .favoriteCnt(jokboComment.getJokboCommentFavorites().size())
+                    .writtenAt(jokboComment.getCreatedAt())
+                    .build();
+        }
     }
 
     @Data

@@ -30,7 +30,12 @@ public class UserService {
     private final TermsOfServiceRepository termsOfServiceRepository;
     private final JokboCommentFavoriteRepository jokboCommentFavoriteRepository;
 
-    public User findOne(Long userId) { return userRepository.findOne(userId); }
+    public User findOne(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if(user.isEmpty())
+            throw new NotExistUserException(ErrorCode.NOT_EXISTED_USER);
+        return user.get();
+    }
 
     /**
      * 회원가입
@@ -99,11 +104,15 @@ public class UserService {
      */
     @Transactional
     public Long createFavoriteStore(Long storeId, Long userId) {
-        User user = userRepository.findOne(userId);
+        Optional<User> user = userRepository.findById(userId);
         Store store = storeRepository.findOne(storeId);
+
+        if(user.isEmpty())
+            throw new NotExistUserException(ErrorCode.NOT_EXISTED_USER);
         if(store == null)
             throw new NotExistStoreException(ErrorCode.NOT_EXISTED_STORE);
-        StoreFavorite storeFavorite = new StoreFavorite(user, store);
+
+        StoreFavorite storeFavorite = new StoreFavorite(user.get(), store);
         return storeFavoriteRepository.saveStoreFavorite(storeFavorite);
     }
 
@@ -112,10 +121,13 @@ public class UserService {
      */
     @Transactional
     public Long createFavoriteJokbo(Long jokboId, Long userId){
-        User user = userRepository.findOne(userId);
+        Optional<User> user = userRepository.findById(userId);
+
+        if(user.isEmpty())
+            throw new NotExistUserException(ErrorCode.NOT_EXISTED_USER);
 
         Optional<Jokbo> jokbo = jokboRepository.findOne(jokboId);
-        if(jokbo.isPresent()) return jokboFavoriteRepository.save(new JokboFavorite(jokbo.get(), user));
+        if(jokbo.isPresent()) return jokboFavoriteRepository.save(new JokboFavorite(jokbo.get(), user.get()));
         else throw new NotExistedJokboException(ErrorCode.NOT_EXISTED_JOKBO);
     }
 
@@ -126,13 +138,17 @@ public class UserService {
     @Transactional
     public void updatePassword(Long userId, String password) throws NoSuchAlgorithmException {
 
+        Optional<User> user = userRepository.findById(userId);
+        if(user.isEmpty())
+            throw new NotExistUserException(ErrorCode.NOT_EXISTED_USER);
+
+
         // 비밀번호 형식이 맞는지 확인
         if(!UserUtil.isValidPasswordFormat(password))
             // 형식이 맞지 않은 경우
             throw new InvalidPasswordException(ErrorCode.INVALID_EMAIL_FORMAT);
 
-        User user = userRepository.findOne(userId);
-        user.setPassword(UserSha256.encrypt(password));
+        user.get().setPassword(UserSha256.encrypt(password));
     }
 
     /**
@@ -161,15 +177,16 @@ public class UserService {
      */
     @Transactional
     public void updateNickname(Long userId, String nickname){
+        Optional<User> user = userRepository.findById(userId);
+        if(user.isEmpty())
+            throw new NotExistUserException(ErrorCode.NOT_EXISTED_USER);
 
         // 닉네임 길이 체크
         if(nickname.length() > 30)
             throw new InvalidNicknameFormatExceition(ErrorCode.INVALID_NICKNAME_FORMAT);
         // 변경하려는 닉네임이 이미 존재하는 닉네임인지 확인
         checkNicknameExistence(nickname);
-
-        User user = userRepository.findOne(userId);
-        user.setNickname(nickname);
+        user.get().setNickname(nickname);
     }
 
     /**
@@ -210,10 +227,12 @@ public class UserService {
      */
     @Transactional
     public Long createFavoriteComment(Long commentId, Long userId){
-        User user = userRepository.findOne(userId);
+        Optional<User> user = userRepository.findById(userId);
+        if(user.isEmpty())
+            throw new NotExistUserException(ErrorCode.NOT_EXISTED_USER);
 
         Optional<JokboComment> jokboComment = jokboCommentRepository.findOne(commentId);
-        if(jokboComment.isPresent()) return jokboCommentFavoriteRepository.save(new JokboCommentFavorite(jokboComment.get(), user));
+        if(jokboComment.isPresent()) return jokboCommentFavoriteRepository.save(new JokboCommentFavorite(jokboComment.get(), user.get()));
         else throw new NotExistedJokboCommentException(ErrorCode.NOT_EXISTED_JOKBO_COMMENT);
     }
 
@@ -257,7 +276,7 @@ public class UserService {
     @Transactional
     public void deleteUser(Long userId){
         termsAgreementRepository.delete(userId);
-        userRepository.delete(userId);
+        userRepository.deleteById(userId);
     }
 }
 
